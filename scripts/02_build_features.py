@@ -18,6 +18,7 @@ def main():
         return
         
     prices = load_parquet(prices_path)
+    prices = prices.dropna(subset=['close'])
     report_memory(prices, "prices")
     
     macro = pd.DataFrame()
@@ -95,6 +96,17 @@ def main():
         if col in ['M_INT_001', 'M_INT_002', 'M_INT_003', 'M_LIQ_002', 'M_INF_001', 'M_INF_002', 'M_ECO_004', 'M_ECO_008', 'M_SNT_001']:
             pass
             
+    # 모든 결측치(NaN/Inf) 정밀 제거 및 보간
+    df = df.replace([np.inf, -np.inf], np.nan)
+    df = df.sort_values(by=['ticker', 'date'])
+    
+    # 수치형 컬럼들에 대해 각 티커별 보간 및 결측치 0.0 채우기 수행
+    num_cols = df.select_dtypes(include=[np.number]).columns
+    for col in num_cols:
+        df[col] = df.groupby('ticker', observed=True)[col].ffill()
+        df[col] = df.groupby('ticker', observed=True)[col].bfill()
+        df[col] = df[col].fillna(0.0)
+
     # parquet 포맷 저장
     save_parquet(df, 'data/processed/features.parquet')
     report_memory(df, "features.parquet")

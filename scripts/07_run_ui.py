@@ -89,12 +89,16 @@ with st.sidebar:
     all_themes = sorted(list(set([t for themes in df['themes'].dropna() for t in themes])))
     selected_themes = st.multiselect("테마 (Naver)", all_themes)
 
-# 필터 적용
-filtered = df[df['country'].isin(selected_countries) & df['sector'].isin(selected_sectors)]
-if selected_themes:
-    filtered = filtered[filtered['themes'].apply(lambda t: any(x in t for x in selected_themes))]
+# 필터 적용 전, 각 종목의 가장 최신 분기 데이터(Latest Date)만 추출하여 중복 티커 배제
+# (이를 통해 Top 랭킹 테이블 내 동일 종목 중복 표시 문제 및 2D 맵 오버랩 해결)
+latest_idx = df.groupby('ticker')['date'].idxmax()
+df_latest = df.loc[latest_idx]
 
-if filtered.empty:
+filtered_latest = df_latest[df_latest['country'].isin(selected_countries) & df_latest['sector'].isin(selected_sectors)]
+if selected_themes:
+    filtered_latest = filtered_latest[filtered_latest['themes'].apply(lambda t: any(x in t for x in selected_themes))]
+
+if filtered_latest.empty:
     st.warning("선택한 필터 조건에 부합하는 종목이 없습니다.")
     st.stop()
 
@@ -106,7 +110,7 @@ with col_chart:
     
     # 2D 산점도 플롯
     fig = px.scatter(
-        filtered,
+        filtered_latest,
         x='R', y='A',
         color='sector',
         size='close',
@@ -131,7 +135,7 @@ with col_chart:
 
 with col_rank:
     st.subheader("🏆 매력도 Top 종목")
-    top_stocks = filtered.sort_values(by='A', ascending=False).head(10)
+    top_stocks = filtered_latest.sort_values(by='A', ascending=False).head(10)
     
     # 세련된 표 표시
     st.dataframe(
@@ -151,8 +155,8 @@ with col_rank:
 st.markdown("---")
 st.subheader("🔍 개별 종목 정밀 진단")
 
-selected_ticker = st.selectbox("종목 선택", sorted(filtered['ticker'].unique()))
-stock = filtered[filtered['ticker'] == selected_ticker].iloc[0]
+selected_ticker = st.selectbox("종목 선택", sorted(filtered_latest['ticker'].unique()))
+stock = filtered_latest[filtered_latest['ticker'] == selected_ticker].iloc[0]
 
 col_detail1, col_detail2, col_detail3 = st.columns(3)
 

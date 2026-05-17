@@ -19,7 +19,7 @@ from src.utils.io import optimize_dtypes
 
 class KoreanPriceFetcher(BaseFetcher):
     
-    def fetch(self, start_date: str, end_date: str) -> pd.DataFrame:
+    def fetch(self, start_date: str, end_date: str, limit: int = None) -> pd.DataFrame:
         """한국 KOSPI 종목 분기 종가 수집 (pykrx + yfinance 이중 장애복구 최적화)."""
         cached = self.load("prices_kr_raw")
         if cached is not None:
@@ -36,6 +36,9 @@ class KoreanPriceFetcher(BaseFetcher):
             # pykrx 자체가 차단되거나 실패한 경우, 대표적인 KOSPI 대형주 20개 리스트를 수동으로 제공
             tickers = ['005930', '000660', '035420', '035720', '051910', '005380', '000270', '005490', '068270', '032830',
                        '006400', '012330', '034730', '015760', '017670', '018260', '003550', '096770', '000810', '086790']
+        
+        if limit:
+            tickers = tickers[:limit]
         
         # 2. pykrx 벌크 쿼리 시도
         all_data = []
@@ -82,7 +85,7 @@ class KoreanPriceFetcher(BaseFetcher):
             print(f"Running yfinance fallback for {len(tickers)} Korean tickers...")
             # 속도 및 안정성을 위해 대형주 위주 150개로 제한하여 yfinance 쿼리 (속도/메모리 극대화)
             # 사용자가 전체를 로드하길 원하더라도, 실시간 동작을 위해 최대 150개로 제한하여 에러 및 병목 방지
-            fallback_tickers = [f"{t}.KS" for t in tickers[:150]]
+            fallback_tickers = [f"{t}.KS" for t in tickers]
             
             chunk_size = 50
             chunks = [fallback_tickers[i:i + chunk_size] for i in range(0, len(fallback_tickers), chunk_size)]

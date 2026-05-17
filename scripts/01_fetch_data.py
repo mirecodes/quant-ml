@@ -15,6 +15,7 @@ from dotenv import load_dotenv
 from src.data_fetchers.prices_kr import KoreanPriceFetcher
 from src.data_fetchers.prices_us import USPriceFetcher
 from src.data_fetchers.macro_us import FredMacroFetcher
+from src.data_fetchers.themes_naver import NaverThemeFetcher
 from src.utils.io import save_parquet, report_memory
 
 # .env 파일 로드
@@ -37,17 +38,32 @@ def get_sp500_tickers() -> list:
         return ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'META', 'NVDA', 'BRK-B', 'JNJ', 'V', 'TSLA']
 
 def main(args):
+    # 캐시 무시 처리
+    if args.no_cache:
+        print("Bypassing cache. Deleting local cache files...")
+        cache_paths = [
+            Path('data/raw/prices/prices_kr_raw.parquet'),
+            Path('data/raw/prices/prices_us_raw.parquet'),
+            Path('data/raw/prices/prices_quarterly.parquet'),
+            Path('data/raw/prices/themes_naver_raw.parquet'),
+            Path('data/processed/themes_naver.parquet')
+        ]
+        for p in cache_paths:
+            if p.exists():
+                p.unlink()
+
     # KR: KOSPI만 벌크 수집
     print("=== Step 1: Fetching Korean Prices ===")
     kr_fetcher = KoreanPriceFetcher(cache_dir='data/raw/prices')
-    kr_prices = kr_fetcher.fetch(args.start, args.end)
+    kr_prices = kr_fetcher.fetch(args.start, args.end, limit=args.limit)
     if not kr_prices.empty:
         report_memory(kr_prices, "KR prices")
     
     # US: S&P 500만 벌크 수집
     print("\n=== Step 2: Fetching US Prices ===")
     us_tickers = get_sp500_tickers()
-    # 속도를 위해 데모 기간이나 티커 제한을 원할 경우 args 인자 이용 가능 (전체는 500개)
+    if args.limit:
+        us_tickers = us_tickers[:args.limit]
     us_fetcher = USPriceFetcher(cache_dir='data/raw/prices')
     us_prices = us_fetcher.fetch(us_tickers, args.start, args.end)
     if not us_prices.empty:
@@ -79,6 +95,17 @@ def main(args):
             report_memory(macro_us, "macro_us.parquet")
     except Exception as e:
         print(f"Error fetching US Macro data: {e}")
+        
+    # KR Themes: 네이버 증권 테마 수집
+    print("\n=== Step 5: Fetching Naver Stock Themes ===")
+    try:
+        theme_fetcher = NaverThemeFetcher(cache_dir='data/raw/prices')
+        themes = theme_fetcher.fetch()
+        if not themes.empty:
+            save_parquet(themes, 'data/processed/themes_naver.parquet')
+            report_memory(themes, "themes_naver.parquet")
+    except Exception as e:
+        print(f"Error fetching Naver stock themes: {e}")
     
     print("\nData fetch complete.")
 
@@ -86,5 +113,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--start', default='2010-01-01')
     parser.add_argument('--end', default='2026-05-01')
+    parser.add_argument('--no-cache', action='store_true', help='Ignore cached data and fetch fresh data')
+    parser.add_argument('--limit', type=int, default=None, help='Limit the number of tickers to fetch per market')
     args = parser.parse_args()
     main(args)
