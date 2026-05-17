@@ -1,0 +1,90 @@
+# scripts/01_fetch_data.py
+import sys
+from pathlib import Path
+sys.path.append(str(Path(__file__).resolve().parents[1]))
+
+import argparse
+import pandas as pd
+import ssl
+import urllib.request
+
+# macOS SSL Certificate verify error 근본적 해결
+ssl._create_default_https_context = ssl._create_unverified_context
+
+from dotenv import load_dotenv
+from src.data_fetchers.prices_kr import KoreanPriceFetcher
+from src.data_fetchers.prices_us import USPriceFetcher
+from src.data_fetchers.macro_us import FredMacroFetcher
+from src.utils.io import save_parquet, report_memory
+
+# .env 파일 로드
+load_dotenv()
+
+def get_sp500_tickers() -> list:
+    """Wikipedia에서 현재 S&P 500 구성종목 목록 (User-Agent 헤더 추가하여 403 방지)."""
+    url = 'https://en.wikipedia.org/wiki/List_of_S%26P_500_companies'
+    try:
+        req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36'})
+        with urllib.request.urlopen(req) as response:
+            html = response.read()
+        tables = pd.read_html(html)
+        sp500 = tables[0]
+        tickers = sp500['Symbol'].str.replace('.', '-', regex=False).tolist()
+        return tickers
+    except Exception as e:
+        print(f"Error fetching S&P 500 tickers from Wikipedia: {e}")
+        # 예외 발생 시 기본 백업 티커 리스트 반환 (yfinance 오프라인/에러 방지)
+        return ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'META', 'NVDA', 'BRK-B', 'JNJ', 'V', 'TSLA']
+
+def main(args):
+    # KR: KOSPI만 벌크 수집
+    print("=== Step 1: Fetching Korean Prices ===")
+    kr_fetcher = KoreanPriceFetcher(cache_dir='data/raw/prices')
+    kr_prices = kr_fetcher.fetch(args.start, args.end)
+    if not kr_prices.empty:
+        report_memory(kr_prices, "KR prices")
+    
+    # US: S&P 500만 벌크 수집
+    print("\n=== Step 2: Fetching US Prices ===")
+    us_tickers = get_sp500_tickers()
+    # 속도를 위해 데모 기간이나 티커 제한을 원할 경우 args 인자 이용 가능 (전체는 500개)
+    us_fetcher = USPriceFetcher(cache_dir='data/raw/prices')
+    us_prices = us_fetcher.fetch(us_tickers, args.start, args.end)
+    if not us_prices.empty:
+        report_memory(us_prices, "US prices")
+    
+    # 통합 저장
+    print("\n=== Step 3: Merging & Saving Price Data ===")
+    merged_prices = pd.DataFrame()
+    if not kr_prices.empty and not us_prices.empty:
+        merged_prices = pd.concat([kr_prices, us_prices], ignore_index=True)
+    elif not kr_prices.empty:
+        merged_prices = kr_prices
+    elif not us_prices.empty:
+        merged_prices = us_prices
+        
+    if not merged_prices.empty:
+        save_parquet(merged_prices, 'data/processed/prices_quarterly.parquet')
+        report_memory(merged_prices, "prices_quarterly.parquet")
+    else:
+        print("Warning: No price data merged.")
+    
+    # 거시 (미국 FRED)
+    print("\n=== Step 4: Fetching Macro Indicators ===")
+    try:
+        fred = FredMacroFetcher(cache_dir='data/raw/macro')
+        macro_us = fred.fetch(args.start, args.end)
+        if not macro_us.empty:
+            save_parquet(macro_us, 'data/processed/macro_us.parquet')
+            report_memory(macro_us, "macro_us.parquet")
+    except Exception as e:
+        print(f"Error fetching US Macro data: {e}")
+    
+    print("\nData fetch complete.")
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--start', default='2010-01-01')
+    parser.add_argument('--end', default='2026-05-01')
+    args = parser.parse_args()
+    main(args)

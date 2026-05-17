@@ -1,0 +1,46 @@
+# Indicator List configuration
+indicators:
+  - id: C_FSCORE
+    name: Piotroski F-Score
+    module: COMPUTED
+    category: financial_health
+  - id: C_QUALITY
+    name: Quality Score (Asness-style)
+    module: COMPUTED
+    category: quality
+  - id: M_INT_001
+    name: Fed Funds Rate
+    module: MACRO
+    category: interest_rate
+  - id: M_INT_002
+    name: 2Y Treasury
+    module: MACRO
+    category: interest_rate
+  - id: M_INT_003
+    name: 10Y Treasury
+    module: MACRO
+    category: interest_rate
+  - id: M_LIQ_002
+    name: M2 Money Stock
+    module: MACRO
+    category: liquidity
+  - id: M_INF_001
+    name: CPI
+    module: MACRO
+    category: inflation
+  - id: M_INF_002
+    name: Core CPI
+    module: MACRO
+    category: inflation
+  - id: M_ECO_004
+    name: ISM Manufacturing PMI
+    module: MACRO
+    category: economic_activity
+  - id: M_ECO_008
+    name: Unemployment
+    module: MACRO
+    category: labor
+  - id: M_SNT_001
+    name: VIX
+    module: MACRO
+    category: sentiment

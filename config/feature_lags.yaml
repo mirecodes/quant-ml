@@ -1,0 +1,17 @@
+# Point-in-Time: 피처가 실제로 알려진 시점
+quarterly_financials:
+  KR: 45                            # 분기 종료 후 45일 (DART 제출 기한)
+  US: 45                            # 10-Q 제출 기한
+
+monthly_macro:
+  CPI: 30                           # 익월 초 발표
+  GDP_advance: 30
+  PMI: 1                            # 익월 1영업일
+  employment: 7
+
+weekly_macro:
+  initial_claims: 7
+
+daily_macro:
+  rates: 1                          # 다음날부터 사용 가능
+  fx: 1

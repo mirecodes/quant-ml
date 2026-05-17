@@ -278,7 +278,7 @@ def report_memory(df: pd.DataFrame, label: str = ""):
 /
 ├── README.md
 ├── requirements.txt
-├── .env.example                  # API 키 템플릿
+├── .env                          # API 키
 ├── config/
 │   ├── settings.yaml             # 전체 설정
 │   ├── feature_lags.yaml         # Point-in-Time lag

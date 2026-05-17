@@ -1,0 +1,56 @@
+project:
+  name: stockml
+  data_dir: ./data
+  random_seed: 42
+
+universe:
+  countries: [KR, US]
+  kr_market: KOSPI                  # KOSDAQ 제외
+  us_index: SP500                   # S&P 500 만
+  exclude_etfs: true
+
+prices:
+  frequency: quarterly              # 분기말 종가
+  source_kr: pykrx
+  source_us: yfinance
+
+targets:
+  attractiveness:
+    max_horizon_years: 5            # 최대 5년 윈도우
+    log_base: 5                     # log_5 고정
+    use_max_in_window: true
+    min_forward_quarters: 4         # 최소 1년 이상의 데이터 필요
+
+  risk:
+    max_horizon_years: 5
+    annualization_factor: 4         # 분기 → 연환산 √4
+    min_forward_quarters: 4
+
+train_split:
+  train_end: '2017-12-31'
+  val_start: '2018-01-01'
+  val_end: '2019-12-31'
+  test_start: '2020-01-01'
+  test_end: '2021-12-31'
+
+model:
+  type: tft
+  hidden_size: 128
+  attention_head_size: 4
+  dropout: 0.2
+  hidden_continuous_size: 64
+  learning_rate: 0.001
+  batch_size: 64
+  max_epochs: 50
+  patience: 8
+  device: mps
+
+  # M1 Pro 추가 옵션
+  num_workers: 2
+  persistent_workers: true
+  pin_memory: false
+  precision: "32-true"
+
+device:
+  prefer: mps
+  fallback: cpu
