@@ -1,14 +1,4 @@
-import sys
-import io
-
-# pykrx 임포트 시 내부 auth 모듈의 로그인 실패 print() 출력 억제
-_original_stdout = sys.stdout
-sys.stdout = io.StringIO()
-try:
-    from pykrx import stock
-finally:
-    sys.stdout = _original_stdout
-
+from pykrx import stock
 import pandas as pd
 import numpy as np
 import yfinance as yf
@@ -28,63 +18,110 @@ class KoreanPriceFetcher(BaseFetcher):
             
         print("Fetching KOSPI quarterly prices...")
         
-        # 1. KOSPI 종목 리스트 수집 시도
-        try:
-            tickers = stock.get_market_ticker_list(market="KOSPI")
-        except Exception as e:
-            print(f"Warning: Failed to get KOSPI tickers from pykrx: {e}")
-            # pykrx 자체가 차단되거나 실패한 경우, 대표적인 KOSPI 대형주 20개 리스트를 수동으로 제공
-            tickers = ['005930', '000660', '035420', '035720', '051910', '005380', '000270', '005490', '068270', '032830',
-                       '006400', '012330', '034730', '015760', '017670', '018260', '003550', '096770', '000810', '086790']
+        # 1. KRX 로그인 환경 변수 검증 및 사용자 알림
+        import os
+        krx_id = os.getenv("KRX_ID")
+        krx_pw = os.getenv("KRX_PW")
+        
+        if not (krx_id and krx_pw):
+            print("\n" + "="*80)
+            print("  [알림] KRX 로그인 계정 정보(KRX_ID, KRX_PW)가 .env 파일에 설정되지 않았습니다.")
+            print("  ")
+            print("  2026년 2월 한국거래소 포털의 보안/회원제 접근 정책 변경으로 인해,")
+            print("  pykrx 라이브러리를 통해 한국 주식 데이터를 100% 온전히 수집하려면 계정이 필수적입니다.")
+            print("  ")
+            print("  [조치 방법]")
+            print("  1. https://data.krx.co.kr 에 접속하여 무료 회원가입을 진행해 주세요.")
+            print("  2. 프로젝트 루트의 `.env` 파일에 아래와 같이 계정을 입력해 주세요:")
+            print("     KRX_ID=본인_아이디")
+            print("     KRX_PW=본인_패스워드")
+            print("  ")
+            print("  * 현재는 계정이 설정되지 않아 yfinance 및 대형주 대표 110개 종목에 대한")
+            print("    제한적 다운그레이드(장애복구) 모드로 동작합니다.")
+            print("="*80 + "\n")
+            
+            # yfinance 폴백 즉시 실행을 위해 pykrx 실패 판정 유도
+            pykrx_failed = True
+            tickers = [
+                '005930', '000660', '207940', '005380', '068270', '000270', '051910', '005490', '035420', '006400',
+                '035720', '105560', '055550', '012330', '028260', '066570', '015760', '003550', '032830', '086790',
+                '096770', '000810', '033780', '003490', '017670', '009150', '010140', '003670', '011200', '018260',
+                '323410', '034730', '000720', '000100', '009540', '024110', '377300', '259960', '138040', '004020',
+                '001040', '010950', '002790', '011170', '028050', '097950', '030200', '078930', '008770', '010130',
+                '088350', '000080', '005830', '005940', '032640', '009830', '071050', '161390', '000120', '267250',
+                '302440', '004990', '009900', '011780', '014680', '128940', '271560', '011070', '180640', '282330',
+                '000150', '016360', '004370', '021240', '007070', '001450', '034220', '052690', '036570', '006360',
+                '001800', '086280', '002380', '001230', '005180', '000880', '006800', '012750', '023530', '079550',
+                '272210', '004800', '298020', '298050', '036460', '010060', '011790', '051900', '000240', '004170',
+                '011210', '035250', '069960', '073240', '090430', '192820', '285130', '336260', '352820', '383220'
+            ]
+        else:
+            print(f"KRX credentials found (ID: {krx_id}). Initiating pykrx full market fetch...")
+            pykrx_failed = False
+            
+            # KOSPI 종목 리스트 수집 시도
+            try:
+                tickers = stock.get_market_ticker_list(market="KOSPI")
+            except Exception as e:
+                print(f"Warning: Failed to get KOSPI tickers from pykrx: {e}")
+                # 대표주 110여 개 리스트 제공
+                tickers = [
+                    '005930', '000660', '207940', '005380', '068270', '000270', '051910', '005490', '035420', '006400',
+                    '035720', '105560', '055550', '012330', '028260', '066570', '015760', '003550', '032830', '086790',
+                    '096770', '000810', '033780', '003490', '017670', '009150', '010140', '003670', '011200', '018260',
+                    '323410', '034730', '000720', '000100', '009540', '024110', '377300', '259960', '138040', '004020',
+                    '001040', '010950', '002790', '011170', '028050', '097950', '030200', '078930', '008770', '010130',
+                    '088350', '000080', '005830', '005940', '032640', '009830', '071050', '161390', '000120', '267250',
+                    '302440', '004990', '009900', '011780', '014680', '128940', '271560', '011070', '180640', '282330',
+                    '000150', '016360', '004370', '021240', '007070', '001450', '034220', '052690', '036570', '006360',
+                    '001800', '086280', '002380', '001230', '005180', '000880', '006800', '012750', '023530', '079550',
+                    '272210', '004800', '298020', '298050', '036460', '010060', '011790', '051900', '000240', '004170',
+                    '011210', '035250', '069960', '073240', '090430', '192820', '285130', '336260', '352820', '383220'
+                ]
         
         if limit:
             tickers = tickers[:limit]
         
-        # 2. pykrx 벌크 쿼리 시도
+        # 2. pykrx 벌크 쿼리 시도 (계정이 등록되어 있을 때만 실행)
         all_data = []
-        pykrx_failed = False
-        
-        date_range = pd.date_range(start=start_date, end=end_date, freq='QE')
-        print(f"Attempting pykrx bulk date queries for {len(date_range)} quarter-ends...")
-        
-        for q_end in tqdm(date_range):
-            df_q = pd.DataFrame()
-            for offset in range(5):
-                target_date = (q_end - timedelta(days=offset)).strftime("%Y%m%d")
-                try:
-                    df_q = stock.get_market_ohlcv_by_ticker(target_date, market="KOSPI")
-                    if not df_q.empty:
-                        df_q = df_q.reset_index()
-                        df_q['date'] = pd.to_datetime(q_end)
-                        break
-                except Exception as e:
-                    # KRX JSON 파싱 오류 등이 지속되면 pykrx 차단 상태로 판정
-                    if "Expecting value" in str(e):
-                        pykrx_failed = True
-                    continue
+        if not pykrx_failed:
+            date_range = pd.date_range(start=start_date, end=end_date, freq='QE')
+            print(f"Attempting pykrx bulk date queries for {len(date_range)} quarter-ends...")
             
-            if pykrx_failed:
-                print("\n[pykrx block detected] KRX server rejected JSON query. Switching to yfinance fallback...")
-                break
+            for q_end in tqdm(date_range):
+                df_q = pd.DataFrame()
+                for offset in range(5):
+                    target_date = (q_end - timedelta(days=offset)).strftime("%Y%m%d")
+                    try:
+                        df_q = stock.get_market_ohlcv_by_ticker(target_date, market="KOSPI")
+                        if not df_q.empty:
+                            df_q = df_q.reset_index()
+                            df_q['date'] = pd.to_datetime(q_end)
+                            break
+                    except Exception as e:
+                        if "Expecting value" in str(e):
+                            pykrx_failed = True
+                        continue
                 
-            if not df_q.empty:
-                df_q['country'] = 'KR'
-                df_q['currency'] = 'KRW'
-                df_q = df_q.rename(columns={
-                    '티커': 'ticker',
-                    '종가': 'close',
-                    '거래량': 'volume',
-                    '시가총액': 'market_cap'
-                })
-                # 필요한 컬럼만 추출
-                df_q = df_q[['ticker', 'country', 'currency', 'date', 'close', 'volume', 'market_cap']]
-                all_data.append(df_q)
-                
-        # 3. pykrx 실패 시 yfinance (.KS 포맷) 폴백 동작
+                if pykrx_failed:
+                    print("\n[pykrx login/query issue detected] Switching to yfinance fallback...")
+                    break
+                    
+                if not df_q.empty:
+                    df_q['country'] = 'KR'
+                    df_q['currency'] = 'KRW'
+                    df_q = df_q.rename(columns={
+                        '티커': 'ticker',
+                        '종가': 'close',
+                        '거래량': 'volume',
+                        '시가총액': 'market_cap'
+                    })
+                    df_q = df_q[['ticker', 'country', 'currency', 'date', 'close', 'volume', 'market_cap']]
+                    all_data.append(df_q)
+                    
+        # 3. pykrx 실패/비로그인 시 yfinance (.KS 포맷) 폴백 동작
         if pykrx_failed or not all_data:
             print(f"Running yfinance fallback for {len(tickers)} Korean tickers...")
-            # 속도 및 안정성을 위해 대형주 위주 150개로 제한하여 yfinance 쿼리 (속도/메모리 극대화)
-            # 사용자가 전체를 로드하길 원하더라도, 실시간 동작을 위해 최대 150개로 제한하여 에러 및 병목 방지
             fallback_tickers = [f"{t}.KS" for t in tickers]
             
             chunk_size = 50
@@ -117,14 +154,12 @@ class KoreanPriceFetcher(BaseFetcher):
                 full_yf = pd.concat(all_yf_dfs, ignore_index=True)
                 full_yf.columns = [c.lower() for c in full_yf.columns]
                 
-                # 티커에서 .KS 제거하여 오리지널 포맷 유지
                 full_yf['ticker'] = full_yf['ticker'].str.replace('.KS', '', regex=False)
                 full_yf['country'] = 'KR'
                 full_yf['currency'] = 'KRW'
                 full_yf['market_cap'] = 0.0
                 full_yf['date'] = pd.to_datetime(full_yf['date'])
                 
-                # 분기 리샘플링
                 full_yf = full_yf.set_index('date')
                 quarterly_yf = (full_yf.groupby('ticker', observed=True)
                                 .resample('QE')

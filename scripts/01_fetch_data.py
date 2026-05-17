@@ -12,14 +12,13 @@ import urllib.request
 ssl._create_default_https_context = ssl._create_unverified_context
 
 from dotenv import load_dotenv
+load_dotenv()
+
 from src.data_fetchers.prices_kr import KoreanPriceFetcher
 from src.data_fetchers.prices_us import USPriceFetcher
 from src.data_fetchers.macro_us import FredMacroFetcher
 from src.data_fetchers.themes_naver import NaverThemeFetcher
 from src.utils.io import save_parquet, report_memory
-
-# .env 파일 로드
-load_dotenv()
 
 def get_sp500_tickers() -> list:
     """Wikipedia에서 현재 S&P 500 구성종목 목록 (User-Agent 헤더 추가하여 403 방지)."""
