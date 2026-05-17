@@ -53,6 +53,15 @@ class TFTStockModel:
             GroupNormalizer(groups=["ticker"], transformation="softplus")  # Target R용
         ])
         
+        # 신규 종목(상장 이전 종목 등) 또는 미등록 카테고리 진입 시 KeyError 방어
+        from pytorch_forecasting.data import NaNLabelEncoder
+        categorical_encoders = {
+            "ticker": NaNLabelEncoder(add_nan=True),
+            "country": NaNLabelEncoder(add_nan=True),
+            "sector": NaNLabelEncoder(add_nan=True),
+            "size_tier": NaNLabelEncoder(add_nan=True)
+        }
+        
         self.dataset = TimeSeriesDataSet(
             df[df['quarter_idx'] <= training_cutoff],
             time_idx="quarter_idx",
@@ -70,6 +79,7 @@ class TFTStockModel:
             time_varying_unknown_reals=feature_cols,
             
             target_normalizer=target_normalizer,
+            categorical_encoders=categorical_encoders,
             
             add_relative_time_idx=True,
             add_target_scales=True,

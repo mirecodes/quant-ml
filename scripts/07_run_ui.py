@@ -91,7 +91,7 @@ with st.sidebar:
 
 # 필터 적용 전, 각 종목의 가장 최신 분기 데이터(Latest Date)만 추출하여 중복 티커 배제
 # (이를 통해 Top 랭킹 테이블 내 동일 종목 중복 표시 문제 및 2D 맵 오버랩 해결)
-latest_idx = df.groupby('ticker')['date'].idxmax()
+latest_idx = df.groupby('ticker', observed=True)['date'].idxmax()
 df_latest = df.loc[latest_idx]
 
 filtered_latest = df_latest[df_latest['country'].isin(selected_countries) & df_latest['sector'].isin(selected_sectors)]
