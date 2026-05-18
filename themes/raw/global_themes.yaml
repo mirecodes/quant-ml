@@ -1,0 +1,1599 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Global Theme Hierarchy (KR-US Cross-Market Mapping)
+# ─────────────────────────────────────────────────────────────────────────────
+#
+# 구조:
+#   Tier 1 (Mega):  최상위 분류 (~10개)
+#   Tier 2 (Group): 중간 분류 (~45개)
+#   Tier 3 (Sub):   세부 분류 (~150개) — 실제 매핑 단위
+#
+# 각 항목 필드:
+#   id           : 고유 ID (snake_case, prefix=GT_)
+#   tier         : 1, 2, 3
+#   parent       : 상위 그룹 ID (Tier 1은 null)
+#   name_en      : 영어 이름
+#   name_ko      : 한국어 이름
+#   description  : 설명
+#   kr_keywords  : 네이버/KRX 테마명 매칭 키워드
+#   us_keywords  : 미국 시장 테마/산업 매칭 키워드
+#   gics_codes   : 관련 GICS Sub-Industry 코드 (선택)
+#
+# ─────────────────────────────────────────────────────────────────────────────
+
+# ============================================================================
+# TIER 1 — Mega Themes (10개)
+# ============================================================================
+
+GT_TECHNOLOGY:
+  tier: 1
+  parent: null
+  name_en: "Technology"
+  name_ko: "기술"
+  description: "정보기술, 소프트웨어, 하드웨어, 반도체 전반"
+
+GT_CLEAN_ENERGY:
+  tier: 1
+  parent: null
+  name_en: "Clean Energy & Transition"
+  name_ko: "클린에너지 및 전환"
+  description: "에너지 전환, 친환경 발전, 전기차, 배터리"
+
+GT_HEALTHCARE:
+  tier: 1
+  parent: null
+  name_en: "Healthcare"
+  name_ko: "헬스케어"
+  description: "제약, 바이오, 의료기기, 디지털헬스"
+
+GT_INDUSTRIAL:
+  tier: 1
+  parent: null
+  name_en: "Industrial"
+  name_ko: "산업재"
+  description: "방산, 우주, 로보틱스, 자동화, 기계, 건설"
+
+GT_CONSUMER:
+  tier: 1
+  parent: null
+  name_en: "Consumer"
+  name_ko: "소비재"
+  description: "자동차, 럭셔리, 식음료, 유통, 미디어, 엔터테인먼트"
+
+GT_FINANCIAL:
+  tier: 1
+  parent: null
+  name_en: "Financial"
+  name_ko: "금융"
+  description: "은행, 보험, 증권, 자산운용, 핀테크"
+
+GT_MATERIALS:
+  tier: 1
+  parent: null
+  name_en: "Materials"
+  name_ko: "소재"
+  description: "화학, 철강, 비철금속, 종이, 건축자재"
+
+GT_COMMUNICATION:
+  tier: 1
+  parent: null
+  name_en: "Communication Services"
+  name_ko: "통신 서비스"
+  description: "통신, 플랫폼, 광고, 게임, 콘텐츠"
+
+GT_ENERGY:
+  tier: 1
+  parent: null
+  name_en: "Energy (Fossil)"
+  name_ko: "전통 에너지"
+  description: "석유, 가스, 정유, 에너지 인프라"
+
+GT_REAL_ESTATE_UTILITIES:
+  tier: 1
+  parent: null
+  name_en: "Real Estate & Utilities"
+  name_ko: "부동산 및 유틸리티"
+  description: "리츠, 부동산, 전력, 가스, 수도"
+
+# ============================================================================
+# TIER 2 — Theme Groups (45개)
+# ============================================================================
+
+# ─── Technology ────────────────────────────────────────────────────────────
+GT_AI:
+  tier: 2
+  parent: GT_TECHNOLOGY
+  name_en: "Artificial Intelligence"
+  name_ko: "인공지능"
+
+GT_SEMICONDUCTOR:
+  tier: 2
+  parent: GT_TECHNOLOGY
+  name_en: "Semiconductor"
+  name_ko: "반도체"
+
+GT_SOFTWARE:
+  tier: 2
+  parent: GT_TECHNOLOGY
+  name_en: "Software"
+  name_ko: "소프트웨어"
+
+GT_CLOUD:
+  tier: 2
+  parent: GT_TECHNOLOGY
+  name_en: "Cloud Computing"
+  name_ko: "클라우드 컴퓨팅"
+
+GT_CYBERSECURITY:
+  tier: 2
+  parent: GT_TECHNOLOGY
+  name_en: "Cybersecurity"
+  name_ko: "사이버보안"
+
+GT_HARDWARE:
+  tier: 2
+  parent: GT_TECHNOLOGY
+  name_en: "Hardware & Devices"
+  name_ko: "하드웨어 및 기기"
+
+GT_INTERNET:
+  tier: 2
+  parent: GT_COMMUNICATION
+  name_en: "Internet & Platforms"
+  name_ko: "인터넷 및 플랫폼"
+
+# ─── Clean Energy ──────────────────────────────────────────────────────────
+GT_EV_BATTERY:
+  tier: 2
+  parent: GT_CLEAN_ENERGY
+  name_en: "EV & Battery"
+  name_ko: "전기차 및 배터리"
+
+GT_RENEWABLE_GENERATION:
+  tier: 2
+  parent: GT_CLEAN_ENERGY
+  name_en: "Renewable Power Generation"
+  name_ko: "재생에너지 발전"
+
+GT_HYDROGEN:
+  tier: 2
+  parent: GT_CLEAN_ENERGY
+  name_en: "Hydrogen Economy"
+  name_ko: "수소 경제"
+
+GT_NUCLEAR:
+  tier: 2
+  parent: GT_CLEAN_ENERGY
+  name_en: "Nuclear Power"
+  name_ko: "원자력"
+
+GT_ENERGY_STORAGE:
+  tier: 2
+  parent: GT_CLEAN_ENERGY
+  name_en: "Energy Storage"
+  name_ko: "에너지 저장"
+
+# ─── Healthcare ────────────────────────────────────────────────────────────
+GT_PHARMACEUTICAL:
+  tier: 2
+  parent: GT_HEALTHCARE
+  name_en: "Pharmaceutical"
+  name_ko: "제약"
+
+GT_BIOTECH:
+  tier: 2
+  parent: GT_HEALTHCARE
+  name_en: "Biotechnology"
+  name_ko: "바이오테크"
+
+GT_MEDICAL_DEVICES:
+  tier: 2
+  parent: GT_HEALTHCARE
+  name_en: "Medical Devices"
+  name_ko: "의료기기"
+
+GT_DIGITAL_HEALTH:
+  tier: 2
+  parent: GT_HEALTHCARE
+  name_en: "Digital Health"
+  name_ko: "디지털 헬스"
+
+GT_HEALTHCARE_SERVICES:
+  tier: 2
+  parent: GT_HEALTHCARE
+  name_en: "Healthcare Services"
+  name_ko: "헬스케어 서비스"
+
+# ─── Industrial ────────────────────────────────────────────────────────────
+GT_DEFENSE_AEROSPACE:
+  tier: 2
+  parent: GT_INDUSTRIAL
+  name_en: "Defense & Aerospace"
+  name_ko: "방산 및 우주항공"
+
+GT_ROBOTICS_AUTOMATION:
+  tier: 2
+  parent: GT_INDUSTRIAL
+  name_en: "Robotics & Automation"
+  name_ko: "로보틱스 및 자동화"
+
+GT_MACHINERY:
+  tier: 2
+  parent: GT_INDUSTRIAL
+  name_en: "Heavy Machinery"
+  name_ko: "중장비 기계"
+
+GT_CONSTRUCTION:
+  tier: 2
+  parent: GT_INDUSTRIAL
+  name_en: "Construction & Engineering"
+  name_ko: "건설 및 엔지니어링"
+
+GT_TRANSPORTATION:
+  tier: 2
+  parent: GT_INDUSTRIAL
+  name_en: "Transportation & Logistics"
+  name_ko: "운송 및 물류"
+
+# ─── Consumer ──────────────────────────────────────────────────────────────
+GT_AUTOMOTIVE:
+  tier: 2
+  parent: GT_CONSUMER
+  name_en: "Automotive (Traditional)"
+  name_ko: "자동차 (전통)"
+
+GT_LUXURY_FASHION:
+  tier: 2
+  parent: GT_CONSUMER
+  name_en: "Luxury & Fashion"
+  name_ko: "럭셔리 및 패션"
+
+GT_FOOD_BEVERAGE:
+  tier: 2
+  parent: GT_CONSUMER
+  name_en: "Food & Beverage"
+  name_ko: "식음료"
+
+GT_RETAIL:
+  tier: 2
+  parent: GT_CONSUMER
+  name_en: "Retail & E-commerce"
+  name_ko: "유통 및 이커머스"
+
+GT_MEDIA_ENTERTAINMENT:
+  tier: 2
+  parent: GT_COMMUNICATION
+  name_en: "Media & Entertainment"
+  name_ko: "미디어 및 엔터테인먼트"
+
+GT_GAMING:
+  tier: 2
+  parent: GT_COMMUNICATION
+  name_en: "Gaming"
+  name_ko: "게임"
+
+GT_TELECOM:
+  tier: 2
+  parent: GT_COMMUNICATION
+  name_en: "Telecommunications"
+  name_ko: "통신서비스"
+
+# ─── Financial ─────────────────────────────────────────────────────────────
+GT_BANKING:
+  tier: 2
+  parent: GT_FINANCIAL
+  name_en: "Banking"
+  name_ko: "은행"
+
+GT_INSURANCE:
+  tier: 2
+  parent: GT_FINANCIAL
+  name_en: "Insurance"
+  name_ko: "보험"
+
+GT_BROKERAGE_ASSET:
+  tier: 2
+  parent: GT_FINANCIAL
+  name_en: "Brokerage & Asset Management"
+  name_ko: "증권 및 자산운용"
+
+GT_FINTECH:
+  tier: 2
+  parent: GT_FINANCIAL
+  name_en: "Fintech"
+  name_ko: "핀테크"
+
+GT_HOLDING:
+  tier: 2
+  parent: GT_FINANCIAL
+  name_en: "Holding Company"
+  name_ko: "지주회사"
+
+# ─── Materials ─────────────────────────────────────────────────────────────
+GT_CHEMICAL:
+  tier: 2
+  parent: GT_MATERIALS
+  name_en: "Chemicals"
+  name_ko: "화학"
+
+GT_STEEL_METAL:
+  tier: 2
+  parent: GT_MATERIALS
+  name_en: "Steel & Base Metals"
+  name_ko: "철강 및 비철금속"
+
+GT_BUILDING_MATERIALS:
+  tier: 2
+  parent: GT_MATERIALS
+  name_en: "Building Materials"
+  name_ko: "건축자재"
+
+GT_PAPER_PACKAGING:
+  tier: 2
+  parent: GT_MATERIALS
+  name_en: "Paper & Packaging"
+  name_ko: "제지 및 포장"
+
+# ─── Energy ────────────────────────────────────────────────────────────────
+GT_OIL_GAS:
+  tier: 2
+  parent: GT_ENERGY
+  name_en: "Oil & Gas"
+  name_ko: "석유 및 가스"
+
+GT_ENERGY_INFRA:
+  tier: 2
+  parent: GT_ENERGY
+  name_en: "Energy Infrastructure"
+  name_ko: "에너지 인프라"
+
+# ─── Real Estate & Utilities ───────────────────────────────────────────────
+GT_REIT:
+  tier: 2
+  parent: GT_REAL_ESTATE_UTILITIES
+  name_en: "REITs & Real Estate"
+  name_ko: "리츠 및 부동산"
+
+GT_UTILITY_POWER:
+  tier: 2
+  parent: GT_REAL_ESTATE_UTILITIES
+  name_en: "Utilities (Power/Gas/Water)"
+  name_ko: "전력/가스/수도"
+
+# ─── Special Categories ────────────────────────────────────────────────────
+GT_BLOCKCHAIN_CRYPTO:
+  tier: 2
+  parent: GT_TECHNOLOGY
+  name_en: "Blockchain & Crypto"
+  name_ko: "블록체인 및 가상자산"
+
+GT_SPACE:
+  tier: 2
+  parent: GT_INDUSTRIAL
+  name_en: "Space Economy"
+  name_ko: "우주 경제"
+
+# ============================================================================
+# TIER 3 — Sub-Themes (150+개, 실제 매핑 단위)
+# ============================================================================
+
+# ─── AI Sub-Themes ─────────────────────────────────────────────────────────
+GT_AI_INFRA:
+  tier: 3
+  parent: GT_AI
+  name_en: "AI Infrastructure (Data Center, GPU)"
+  name_ko: "AI 인프라 (데이터센터, GPU)"
+  description: "AI 학습/추론 데이터센터, GPU 클러스터, AI 가속기"
+  kr_keywords: ["AI인프라", "AI데이터센터", "GPU", "AI가속기"]
+  us_keywords: ["AI Infrastructure", "Data Center", "GPU", "AI Accelerator"]
+  gics_codes: ["45301020", "45102010"]
+
+GT_AI_CHIPS:
+  tier: 3
+  parent: GT_AI
+  name_en: "AI Chips (GPU, NPU, AI ASIC)"
+  name_ko: "AI 반도체 (GPU, NPU, AI ASIC)"
+  description: "AI 전용 반도체 설계 및 제조"
+  kr_keywords: ["AI반도체", "NPU", "HBM"]
+  us_keywords: ["AI Chips", "GPU", "NPU", "AI ASIC", "Nvidia-related"]
+
+GT_AI_SOFTWARE:
+  tier: 3
+  parent: GT_AI
+  name_en: "AI Software & Models"
+  name_ko: "AI 소프트웨어 및 모델"
+  description: "AI 모델 학습/추론 소프트웨어, MLOps"
+  kr_keywords: ["AI소프트웨어", "AI솔루션", "AI플랫폼"]
+  us_keywords: ["AI Software", "MLOps", "AI Platform"]
+
+GT_GENERATIVE_AI:
+  tier: 3
+  parent: GT_AI
+  name_en: "Generative AI"
+  name_ko: "생성형 AI"
+  description: "ChatGPT, LLM, 이미지·영상 생성 AI"
+  kr_keywords: ["생성형AI", "ChatGPT관련주", "LLM", "초거대AI"]
+  us_keywords: ["Generative AI", "ChatGPT", "LLM", "Foundation Models"]
+
+GT_AI_APPLICATIONS:
+  tier: 3
+  parent: GT_AI
+  name_en: "AI Applications (Vertical)"
+  name_ko: "AI 응용 (산업별)"
+  description: "의료 AI, 법률 AI, 교육 AI 등 버티컬 응용"
+  kr_keywords: ["AI의료", "AI교육", "AI솔루션"]
+  us_keywords: ["AI Healthcare", "AI Legal", "Vertical AI"]
+
+GT_AI_ROBOTICS:
+  tier: 3
+  parent: GT_AI
+  name_en: "AI Robotics"
+  name_ko: "AI 로보틱스"
+  description: "AI 기반 휴머노이드, 자율 로봇"
+  kr_keywords: ["AI로봇", "휴머노이드"]
+  us_keywords: ["AI Robotics", "Humanoid Robots", "Embodied AI"]
+
+# ─── Semiconductor Sub-Themes ──────────────────────────────────────────────
+GT_SEMI_FOUNDRY:
+  tier: 3
+  parent: GT_SEMICONDUCTOR
+  name_en: "Semiconductor Foundry"
+  name_ko: "파운드리"
+  description: "반도체 위탁 생산"
+  kr_keywords: ["파운드리", "반도체위탁생산", "TSMC관련주"]
+  us_keywords: ["Foundry", "TSMC", "Wafer Fabrication"]
+  gics_codes: ["45301020"]
+
+GT_SEMI_FABLESS:
+  tier: 3
+  parent: GT_SEMICONDUCTOR
+  name_en: "Semiconductor Fabless (Design)"
+  name_ko: "팹리스 (반도체 설계)"
+  description: "팹리스 반도체 설계 전문"
+  kr_keywords: ["팹리스", "반도체설계", "시스템반도체"]
+  us_keywords: ["Fabless", "Chip Design"]
+
+GT_SEMI_MEMORY:
+  tier: 3
+  parent: GT_SEMICONDUCTOR
+  name_en: "Memory Semiconductors (DRAM, NAND)"
+  name_ko: "메모리 반도체 (DRAM, NAND)"
+  description: "DRAM, NAND Flash 등 메모리 반도체"
+  kr_keywords: ["메모리반도체", "DRAM", "낸드", "NAND", "메모리"]
+  us_keywords: ["Memory", "DRAM", "NAND", "Flash Memory"]
+
+GT_SEMI_HBM:
+  tier: 3
+  parent: GT_SEMICONDUCTOR
+  name_en: "HBM (High Bandwidth Memory)"
+  name_ko: "HBM (고대역폭 메모리)"
+  description: "AI 가속기용 고대역폭 메모리"
+  kr_keywords: ["HBM", "고대역폭메모리", "HBM3"]
+  us_keywords: ["HBM", "High Bandwidth Memory"]
+
+GT_SEMI_EQUIPMENT:
+  tier: 3
+  parent: GT_SEMICONDUCTOR
+  name_en: "Semiconductor Equipment"
+  name_ko: "반도체 장비"
+  description: "리소그래피, 식각, 증착 등 반도체 제조 장비"
+  kr_keywords: ["반도체장비", "장비주", "전공정장비", "후공정장비"]
+  us_keywords: ["Semiconductor Equipment", "Lithography", "Etch", "Deposition"]
+
+GT_SEMI_MATERIALS:
+  tier: 3
+  parent: GT_SEMICONDUCTOR
+  name_en: "Semiconductor Materials"
+  name_ko: "반도체 소재"
+  description: "포토레지스트, CMP 슬러리, 가스 등 반도체 소재"
+  kr_keywords: ["반도체소재", "포토레지스트", "CMP"]
+  us_keywords: ["Semiconductor Materials", "Photoresist", "Specialty Chemicals"]
+
+GT_SEMI_PACKAGING:
+  tier: 3
+  parent: GT_SEMICONDUCTOR
+  name_en: "Semiconductor Packaging & Test (OSAT)"
+  name_ko: "반도체 패키징/테스트 (OSAT)"
+  description: "반도체 후공정 패키징 및 테스트"
+  kr_keywords: ["반도체패키징", "OSAT", "후공정", "테스트"]
+  us_keywords: ["OSAT", "Packaging", "Advanced Packaging"]
+
+GT_SEMI_AUTOMOTIVE:
+  tier: 3
+  parent: GT_SEMICONDUCTOR
+  name_en: "Automotive Semiconductors"
+  name_ko: "차량용 반도체"
+  description: "자동차 전용 반도체"
+  kr_keywords: ["차량용반도체", "자동차반도체"]
+  us_keywords: ["Automotive Semiconductors", "Auto Chips"]
+
+GT_SEMI_POWER:
+  tier: 3
+  parent: GT_SEMICONDUCTOR
+  name_en: "Power Semiconductors (SiC, GaN)"
+  name_ko: "전력 반도체 (SiC, GaN)"
+  description: "고전압·고전력용 반도체"
+  kr_keywords: ["전력반도체", "SiC", "GaN"]
+  us_keywords: ["Power Semiconductors", "SiC", "GaN", "Silicon Carbide"]
+
+# ─── Software / Cloud / Cybersecurity ──────────────────────────────────────
+GT_SAAS:
+  tier: 3
+  parent: GT_SOFTWARE
+  name_en: "SaaS (Software as a Service)"
+  name_ko: "SaaS"
+  description: "구독형 소프트웨어 서비스"
+  kr_keywords: ["SaaS", "구독소프트웨어", "클라우드소프트웨어"]
+  us_keywords: ["SaaS", "Subscription Software"]
+
+GT_ENTERPRISE_SOFTWARE:
+  tier: 3
+  parent: GT_SOFTWARE
+  name_en: "Enterprise Software (ERP, CRM)"
+  name_ko: "엔터프라이즈 소프트웨어 (ERP, CRM)"
+  description: "기업용 핵심 운영 소프트웨어"
+  kr_keywords: ["ERP", "CRM", "기업용SW"]
+  us_keywords: ["Enterprise Software", "ERP", "CRM"]
+
+GT_DEVTOOLS:
+  tier: 3
+  parent: GT_SOFTWARE
+  name_en: "Developer Tools & DevOps"
+  name_ko: "개발자 도구 및 DevOps"
+  description: "개발 도구, 협업, DevOps"
+  kr_keywords: ["개발툴", "DevOps"]
+  us_keywords: ["DevOps", "Developer Tools"]
+
+GT_CLOUD_INFRA:
+  tier: 3
+  parent: GT_CLOUD
+  name_en: "Cloud Infrastructure (IaaS)"
+  name_ko: "클라우드 인프라 (IaaS)"
+  description: "AWS, Azure, GCP 등 클라우드 인프라"
+  kr_keywords: ["클라우드", "IaaS", "퍼블릭클라우드"]
+  us_keywords: ["Cloud Infrastructure", "IaaS", "Hyperscaler"]
+
+GT_EDGE_COMPUTING:
+  tier: 3
+  parent: GT_CLOUD
+  name_en: "Edge Computing"
+  name_ko: "엣지 컴퓨팅"
+  description: "분산 엣지 컴퓨팅"
+  kr_keywords: ["엣지컴퓨팅"]
+  us_keywords: ["Edge Computing"]
+
+GT_CYBER_ENDPOINT:
+  tier: 3
+  parent: GT_CYBERSECURITY
+  name_en: "Endpoint & Network Security"
+  name_ko: "엔드포인트/네트워크 보안"
+  description: "엔드포인트 보안, 방화벽, 침입탐지"
+  kr_keywords: ["사이버보안", "정보보안", "보안주"]
+  us_keywords: ["Cybersecurity", "Endpoint Security", "Firewall"]
+
+GT_CYBER_CLOUD:
+  tier: 3
+  parent: GT_CYBERSECURITY
+  name_en: "Cloud Security & Identity"
+  name_ko: "클라우드 보안 및 인증"
+  description: "클라우드 보안, IAM"
+  kr_keywords: ["클라우드보안", "인증보안"]
+  us_keywords: ["Cloud Security", "Zero Trust", "Identity Security"]
+
+GT_QUANTUM:
+  tier: 3
+  parent: GT_TECHNOLOGY
+  name_en: "Quantum Computing"
+  name_ko: "양자컴퓨팅"
+  description: "양자 컴퓨팅 기술 및 응용"
+  kr_keywords: ["양자컴퓨팅", "양자", "퀀텀"]
+  us_keywords: ["Quantum Computing", "Quantum"]
+
+# ─── Hardware ──────────────────────────────────────────────────────────────
+GT_SMARTPHONE:
+  tier: 3
+  parent: GT_HARDWARE
+  name_en: "Smartphone & Mobile Devices"
+  name_ko: "스마트폰 및 모바일 기기"
+  kr_keywords: ["스마트폰", "스마트폰부품", "모바일"]
+  us_keywords: ["Smartphone", "Apple supply chain", "Mobile Devices"]
+
+GT_PC_PERIPHERAL:
+  tier: 3
+  parent: GT_HARDWARE
+  name_en: "PC & Peripherals"
+  name_ko: "PC 및 주변기기"
+  kr_keywords: ["PC", "노트북", "주변기기"]
+  us_keywords: ["PC", "Peripherals"]
+
+GT_DISPLAY:
+  tier: 3
+  parent: GT_HARDWARE
+  name_en: "Display (OLED, LCD)"
+  name_ko: "디스플레이 (OLED, LCD)"
+  kr_keywords: ["디스플레이", "OLED", "LCD", "디스플레이부품"]
+  us_keywords: ["Display", "OLED"]
+
+GT_NETWORKING:
+  tier: 3
+  parent: GT_HARDWARE
+  name_en: "Networking Equipment (5G, etc.)"
+  name_ko: "네트워크 장비 (5G 등)"
+  kr_keywords: ["5G", "통신장비", "네트워크장비"]
+  us_keywords: ["Networking", "5G Equipment"]
+
+GT_IOT:
+  tier: 3
+  parent: GT_HARDWARE
+  name_en: "IoT (Internet of Things)"
+  name_ko: "사물인터넷 (IoT)"
+  kr_keywords: ["IoT", "사물인터넷"]
+  us_keywords: ["IoT", "Internet of Things"]
+
+GT_VR_AR:
+  tier: 3
+  parent: GT_HARDWARE
+  name_en: "VR/AR & Metaverse Hardware"
+  name_ko: "VR/AR 및 메타버스 하드웨어"
+  kr_keywords: ["메타버스", "VR", "AR", "확장현실"]
+  us_keywords: ["VR", "AR", "Metaverse", "XR"]
+
+# ─── Internet & Platforms ──────────────────────────────────────────────────
+GT_SEARCH_PORTAL:
+  tier: 3
+  parent: GT_INTERNET
+  name_en: "Search & Portal"
+  name_ko: "검색 및 포털"
+  kr_keywords: ["인터넷포털", "검색"]
+  us_keywords: ["Search", "Internet Portal"]
+
+GT_SOCIAL_MEDIA:
+  tier: 3
+  parent: GT_INTERNET
+  name_en: "Social Media"
+  name_ko: "소셜미디어"
+  kr_keywords: ["SNS", "소셜미디어"]
+  us_keywords: ["Social Media", "Social Network"]
+
+GT_ECOMMERCE_PLATFORM:
+  tier: 3
+  parent: GT_INTERNET
+  name_en: "E-commerce Platforms"
+  name_ko: "이커머스 플랫폼"
+  kr_keywords: ["이커머스", "온라인쇼핑", "이커머스플랫폼"]
+  us_keywords: ["E-commerce", "Online Retail Platform"]
+
+GT_DIGITAL_AD:
+  tier: 3
+  parent: GT_INTERNET
+  name_en: "Digital Advertising"
+  name_ko: "디지털 광고"
+  kr_keywords: ["디지털광고", "온라인광고"]
+  us_keywords: ["Digital Advertising", "Ad Tech"]
+
+# ─── EV & Battery Sub-Themes ───────────────────────────────────────────────
+GT_BATTERY_CELL:
+  tier: 3
+  parent: GT_EV_BATTERY
+  name_en: "Battery Cell Manufacturers"
+  name_ko: "배터리 셀 제조"
+  description: "리튬이온 배터리 셀 생산"
+  kr_keywords: ["배터리", "2차전지", "이차전지", "리튬이온"]
+  us_keywords: ["Battery Cell", "Lithium-ion Battery"]
+
+GT_BATTERY_CATHODE:
+  tier: 3
+  parent: GT_EV_BATTERY
+  name_en: "Battery Materials - Cathode"
+  name_ko: "배터리 소재 - 양극재"
+  description: "양극재, 전구체"
+  kr_keywords: ["양극재", "전구체"]
+  us_keywords: ["Cathode Materials", "Precursor"]
+
+GT_BATTERY_ANODE:
+  tier: 3
+  parent: GT_EV_BATTERY
+  name_en: "Battery Materials - Anode"
+  name_ko: "배터리 소재 - 음극재"
+  kr_keywords: ["음극재"]
+  us_keywords: ["Anode Materials", "Graphite Anode"]
+
+GT_BATTERY_ELECTROLYTE:
+  tier: 3
+  parent: GT_EV_BATTERY
+  name_en: "Battery Materials - Electrolyte"
+  name_ko: "배터리 소재 - 전해질"
+  kr_keywords: ["전해질", "전해액"]
+  us_keywords: ["Electrolyte"]
+
+GT_BATTERY_SEPARATOR:
+  tier: 3
+  parent: GT_EV_BATTERY
+  name_en: "Battery Materials - Separator"
+  name_ko: "배터리 소재 - 분리막"
+  kr_keywords: ["분리막"]
+  us_keywords: ["Separator"]
+
+GT_BATTERY_EQUIPMENT:
+  tier: 3
+  parent: GT_EV_BATTERY
+  name_en: "Battery Equipment"
+  name_ko: "배터리 장비"
+  kr_keywords: ["2차전지장비", "배터리장비"]
+  us_keywords: ["Battery Equipment", "Battery Manufacturing Equipment"]
+
+GT_EV_OEM:
+  tier: 3
+  parent: GT_EV_BATTERY
+  name_en: "EV OEM Manufacturers"
+  name_ko: "전기차 완성차 제조사"
+  kr_keywords: ["전기차", "EV"]
+  us_keywords: ["Electric Vehicles", "EV", "Tesla-related"]
+
+GT_EV_COMPONENTS:
+  tier: 3
+  parent: GT_EV_BATTERY
+  name_en: "EV Components"
+  name_ko: "전기차 부품"
+  kr_keywords: ["전기차부품", "EV부품"]
+  us_keywords: ["EV Components", "EV Parts"]
+
+GT_EV_CHARGING:
+  tier: 3
+  parent: GT_EV_BATTERY
+  name_en: "EV Charging Infrastructure"
+  name_ko: "전기차 충전 인프라"
+  kr_keywords: ["충전인프라", "전기차충전"]
+  us_keywords: ["EV Charging", "Charging Station"]
+
+GT_AUTONOMOUS_DRIVING:
+  tier: 3
+  parent: GT_EV_BATTERY
+  name_en: "Autonomous Driving"
+  name_ko: "자율주행"
+  kr_keywords: ["자율주행", "ADAS"]
+  us_keywords: ["Autonomous Driving", "ADAS", "Self-Driving"]
+
+# ─── Renewable / Hydrogen / Nuclear / ESS ──────────────────────────────────
+GT_SOLAR:
+  tier: 3
+  parent: GT_RENEWABLE_GENERATION
+  name_en: "Solar Power"
+  name_ko: "태양광"
+  kr_keywords: ["태양광", "태양광에너지", "솔라"]
+  us_keywords: ["Solar", "Solar Power", "Photovoltaic"]
+
+GT_WIND:
+  tier: 3
+  parent: GT_RENEWABLE_GENERATION
+  name_en: "Wind Power"
+  name_ko: "풍력"
+  kr_keywords: ["풍력", "해상풍력"]
+  us_keywords: ["Wind Power", "Offshore Wind"]
+
+GT_BIOENERGY:
+  tier: 3
+  parent: GT_RENEWABLE_GENERATION
+  name_en: "Bioenergy"
+  name_ko: "바이오에너지"
+  kr_keywords: ["바이오에너지", "바이오연료"]
+  us_keywords: ["Bioenergy", "Biofuel"]
+
+GT_HYDROGEN_FUEL:
+  tier: 3
+  parent: GT_HYDROGEN
+  name_en: "Hydrogen Fuel Cell"
+  name_ko: "수소 연료전지"
+  kr_keywords: ["수소", "수소연료전지", "수소차"]
+  us_keywords: ["Hydrogen", "Fuel Cell", "Hydrogen Vehicle"]
+
+GT_NUCLEAR_LARGE:
+  tier: 3
+  parent: GT_NUCLEAR
+  name_en: "Large Nuclear Power"
+  name_ko: "대형 원자력"
+  kr_keywords: ["원자력", "원전"]
+  us_keywords: ["Nuclear Power", "Nuclear Energy"]
+
+GT_NUCLEAR_SMR:
+  tier: 3
+  parent: GT_NUCLEAR
+  name_en: "Small Modular Reactor (SMR)"
+  name_ko: "소형모듈원자로 (SMR)"
+  kr_keywords: ["SMR", "소형원전", "소형모듈원자로"]
+  us_keywords: ["SMR", "Small Modular Reactor"]
+
+GT_NUCLEAR_FUSION:
+  tier: 3
+  parent: GT_NUCLEAR
+  name_en: "Nuclear Fusion"
+  name_ko: "핵융합"
+  kr_keywords: ["핵융합"]
+  us_keywords: ["Nuclear Fusion", "Fusion"]
+
+GT_ESS:
+  tier: 3
+  parent: GT_ENERGY_STORAGE
+  name_en: "ESS (Energy Storage System)"
+  name_ko: "에너지 저장 시스템 (ESS)"
+  kr_keywords: ["ESS", "에너지저장장치"]
+  us_keywords: ["ESS", "Energy Storage System", "Grid Storage"]
+
+# ─── Pharmaceutical / Biotech ──────────────────────────────────────────────
+GT_PHARMA_LARGE:
+  tier: 3
+  parent: GT_PHARMACEUTICAL
+  name_en: "Large Pharmaceutical"
+  name_ko: "대형 제약"
+  kr_keywords: ["제약", "대형제약"]
+  us_keywords: ["Pharmaceutical", "Big Pharma"]
+
+GT_PHARMA_GENERIC:
+  tier: 3
+  parent: GT_PHARMACEUTICAL
+  name_en: "Generic Pharmaceutical"
+  name_ko: "복제약 (제네릭)"
+  kr_keywords: ["제네릭", "복제약"]
+  us_keywords: ["Generic Drug"]
+
+GT_BIO_ONCOLOGY:
+  tier: 3
+  parent: GT_BIOTECH
+  name_en: "Oncology Biotech"
+  name_ko: "항암 바이오"
+  kr_keywords: ["항암", "항암제"]
+  us_keywords: ["Oncology", "Cancer Therapeutics"]
+
+GT_BIO_GENE_CELL:
+  tier: 3
+  parent: GT_BIOTECH
+  name_en: "Gene & Cell Therapy"
+  name_ko: "유전자 및 세포 치료"
+  kr_keywords: ["유전자치료", "세포치료", "면역치료"]
+  us_keywords: ["Gene Therapy", "Cell Therapy", "Immunotherapy"]
+
+GT_BIO_MRNA:
+  tier: 3
+  parent: GT_BIOTECH
+  name_en: "mRNA & Vaccine Tech"
+  name_ko: "mRNA 및 백신 기술"
+  kr_keywords: ["mRNA", "백신"]
+  us_keywords: ["mRNA", "Vaccine"]
+
+GT_BIO_OBESITY:
+  tier: 3
+  parent: GT_BIOTECH
+  name_en: "Obesity / GLP-1 Drugs"
+  name_ko: "비만치료제 (GLP-1)"
+  kr_keywords: ["비만치료제", "GLP-1"]
+  us_keywords: ["GLP-1", "Obesity Drug", "Weight Loss Drug"]
+
+GT_BIO_CDMO:
+  tier: 3
+  parent: GT_BIOTECH
+  name_en: "CDMO / CMO"
+  name_ko: "위탁개발생산 (CDMO/CMO)"
+  kr_keywords: ["CDMO", "CMO", "위탁생산"]
+  us_keywords: ["CDMO", "CMO", "Contract Manufacturing"]
+
+GT_BIO_CRO:
+  tier: 3
+  parent: GT_BIOTECH
+  name_en: "CRO (Contract Research)"
+  name_ko: "임상시험수탁기관 (CRO)"
+  kr_keywords: ["CRO", "임상시험"]
+  us_keywords: ["CRO", "Contract Research"]
+
+GT_BIO_BIOSIMILAR:
+  tier: 3
+  parent: GT_BIOTECH
+  name_en: "Biosimilar"
+  name_ko: "바이오시밀러"
+  kr_keywords: ["바이오시밀러"]
+  us_keywords: ["Biosimilar"]
+
+GT_MED_DIAGNOSTIC:
+  tier: 3
+  parent: GT_MEDICAL_DEVICES
+  name_en: "Diagnostics & Imaging"
+  name_ko: "진단 및 영상"
+  kr_keywords: ["진단", "체외진단", "의료영상"]
+  us_keywords: ["Diagnostics", "Medical Imaging"]
+
+GT_MED_DEVICE_DENTAL:
+  tier: 3
+  parent: GT_MEDICAL_DEVICES
+  name_en: "Dental Devices"
+  name_ko: "치과 의료기기"
+  kr_keywords: ["치과", "치과기기", "임플란트"]
+  us_keywords: ["Dental Devices", "Dental Implants"]
+
+GT_MED_DEVICE_AESTHETIC:
+  tier: 3
+  parent: GT_MEDICAL_DEVICES
+  name_en: "Aesthetic Medical Devices"
+  name_ko: "미용 의료기기"
+  kr_keywords: ["미용의료", "보톡스", "필러"]
+  us_keywords: ["Aesthetic Medical", "Botox", "Aesthetic Devices"]
+
+GT_MED_DEVICE_SURGICAL:
+  tier: 3
+  parent: GT_MEDICAL_DEVICES
+  name_en: "Surgical & Robotic Surgery"
+  name_ko: "수술 및 수술로봇"
+  kr_keywords: ["수술로봇", "수술기기"]
+  us_keywords: ["Surgical Robotics", "Da Vinci", "Surgical Devices"]
+
+GT_DIGITAL_HEALTH_PLATFORM:
+  tier: 3
+  parent: GT_DIGITAL_HEALTH
+  name_en: "Digital Health Platform & Telehealth"
+  name_ko: "디지털 헬스 플랫폼/원격의료"
+  kr_keywords: ["원격의료", "디지털헬스"]
+  us_keywords: ["Telehealth", "Digital Health Platform"]
+
+GT_HEALTHCARE_INSURANCE:
+  tier: 3
+  parent: GT_HEALTHCARE_SERVICES
+  name_en: "Healthcare Insurance & PBM"
+  name_ko: "의료 보험 및 PBM"
+  kr_keywords: ["의료보험"]
+  us_keywords: ["Health Insurance", "PBM", "Managed Care"]
+
+GT_HEALTHCARE_DISTRIBUTION:
+  tier: 3
+  parent: GT_HEALTHCARE_SERVICES
+  name_en: "Healthcare Distribution"
+  name_ko: "의약품 유통"
+  kr_keywords: ["의약품유통"]
+  us_keywords: ["Healthcare Distribution", "Pharmacy"]
+
+# ─── Defense / Aerospace / Space ───────────────────────────────────────────
+GT_DEFENSE_GROUND:
+  tier: 3
+  parent: GT_DEFENSE_AEROSPACE
+  name_en: "Ground Defense (Tanks, Artillery)"
+  name_ko: "지상 방산 (전차, 화포)"
+  kr_keywords: ["방산", "K9", "전차", "K-방산"]
+  us_keywords: ["Ground Defense", "Tanks", "Artillery"]
+
+GT_DEFENSE_AIR:
+  tier: 3
+  parent: GT_DEFENSE_AEROSPACE
+  name_en: "Aerospace & Air Defense"
+  name_ko: "항공 방산"
+  kr_keywords: ["항공방산", "전투기", "항공기"]
+  us_keywords: ["Aerospace Defense", "Fighter Aircraft", "Military Aviation"]
+
+GT_DEFENSE_MISSILE:
+  tier: 3
+  parent: GT_DEFENSE_AEROSPACE
+  name_en: "Missiles & Munitions"
+  name_ko: "미사일 및 탄약"
+  kr_keywords: ["미사일", "유도무기"]
+  us_keywords: ["Missiles", "Munitions"]
+
+GT_DEFENSE_NAVAL:
+  tier: 3
+  parent: GT_DEFENSE_AEROSPACE
+  name_en: "Naval Defense (Warships, Submarines)"
+  name_ko: "해상 방산 (함정, 잠수함)"
+  kr_keywords: ["함정", "잠수함", "해군"]
+  us_keywords: ["Naval Defense", "Warships", "Submarines"]
+
+GT_DEFENSE_CYBER:
+  tier: 3
+  parent: GT_DEFENSE_AEROSPACE
+  name_en: "Defense Cyber & Electronics"
+  name_ko: "방산 사이버 및 전자전"
+  kr_keywords: ["전자전", "방산사이버"]
+  us_keywords: ["Defense Cyber", "Electronic Warfare"]
+
+GT_SPACE_LAUNCH:
+  tier: 3
+  parent: GT_SPACE
+  name_en: "Space Launch Vehicles"
+  name_ko: "우주 발사체"
+  kr_keywords: ["발사체", "누리호", "우주발사체"]
+  us_keywords: ["Space Launch", "Rocket", "SpaceX-related"]
+
+GT_SPACE_SATELLITE:
+  tier: 3
+  parent: GT_SPACE
+  name_en: "Satellites & Space Infrastructure"
+  name_ko: "위성 및 우주 인프라"
+  kr_keywords: ["위성", "인공위성", "우주산업"]
+  us_keywords: ["Satellite", "Space Infrastructure"]
+
+# ─── Robotics / Automation / Machinery ─────────────────────────────────────
+GT_INDUSTRIAL_ROBOT:
+  tier: 3
+  parent: GT_ROBOTICS_AUTOMATION
+  name_en: "Industrial Robotics"
+  name_ko: "산업용 로봇"
+  kr_keywords: ["산업용로봇", "로봇", "스마트팩토리"]
+  us_keywords: ["Industrial Robotics", "Factory Automation"]
+
+GT_SERVICE_ROBOT:
+  tier: 3
+  parent: GT_ROBOTICS_AUTOMATION
+  name_en: "Service & Consumer Robots"
+  name_ko: "서비스/소비자 로봇"
+  kr_keywords: ["서비스로봇", "협동로봇"]
+  us_keywords: ["Service Robot", "Collaborative Robot", "Cobot"]
+
+GT_FACTORY_AUTOMATION:
+  tier: 3
+  parent: GT_ROBOTICS_AUTOMATION
+  name_en: "Factory Automation Equipment"
+  name_ko: "공장 자동화 설비"
+  kr_keywords: ["스마트팩토리", "공장자동화", "FA"]
+  us_keywords: ["Factory Automation", "Industrial Automation"]
+
+GT_MACHINERY_HEAVY:
+  tier: 3
+  parent: GT_MACHINERY
+  name_en: "Heavy Construction Machinery"
+  name_ko: "건설중장비"
+  kr_keywords: ["건설기계", "중장비", "굴삭기"]
+  us_keywords: ["Heavy Machinery", "Construction Equipment"]
+
+GT_MACHINERY_GENERAL:
+  tier: 3
+  parent: GT_MACHINERY
+  name_en: "General Industrial Machinery"
+  name_ko: "일반 산업기계"
+  kr_keywords: ["산업기계", "기계"]
+  us_keywords: ["Industrial Machinery"]
+
+# ─── Construction / Transportation ─────────────────────────────────────────
+GT_CONSTRUCTION_BUILDING:
+  tier: 3
+  parent: GT_CONSTRUCTION
+  name_en: "Building Construction"
+  name_ko: "건축 건설"
+  kr_keywords: ["건설", "건축", "주택건설"]
+  us_keywords: ["Construction", "Homebuilding"]
+
+GT_CONSTRUCTION_INFRA:
+  tier: 3
+  parent: GT_CONSTRUCTION
+  name_en: "Civil Infrastructure"
+  name_ko: "토목 인프라"
+  kr_keywords: ["토목", "인프라건설"]
+  us_keywords: ["Infrastructure Construction", "Civil Engineering"]
+
+GT_CONSTRUCTION_PLANT:
+  tier: 3
+  parent: GT_CONSTRUCTION
+  name_en: "Plant Engineering"
+  name_ko: "플랜트 엔지니어링"
+  kr_keywords: ["플랜트", "EPC"]
+  us_keywords: ["Plant Engineering", "EPC"]
+
+GT_LOGISTICS:
+  tier: 3
+  parent: GT_TRANSPORTATION
+  name_en: "Logistics & Freight"
+  name_ko: "물류"
+  kr_keywords: ["물류", "택배"]
+  us_keywords: ["Logistics", "Freight"]
+
+GT_SHIPPING:
+  tier: 3
+  parent: GT_TRANSPORTATION
+  name_en: "Shipping & Maritime"
+  name_ko: "해운"
+  kr_keywords: ["해운", "조선"]
+  us_keywords: ["Shipping", "Maritime"]
+
+GT_AIRLINE:
+  tier: 3
+  parent: GT_TRANSPORTATION
+  name_en: "Airlines"
+  name_ko: "항공운송"
+  kr_keywords: ["항공운송", "항공사"]
+  us_keywords: ["Airlines"]
+
+GT_SHIPBUILDING:
+  tier: 3
+  parent: GT_TRANSPORTATION
+  name_en: "Shipbuilding"
+  name_ko: "조선"
+  kr_keywords: ["조선", "조선업"]
+  us_keywords: ["Shipbuilding"]
+
+GT_RAILWAY:
+  tier: 3
+  parent: GT_TRANSPORTATION
+  name_en: "Railways"
+  name_ko: "철도"
+  kr_keywords: ["철도"]
+  us_keywords: ["Railways", "Rail Transport"]
+
+# ─── Automotive (Traditional) ──────────────────────────────────────────────
+GT_AUTO_OEM:
+  tier: 3
+  parent: GT_AUTOMOTIVE
+  name_en: "Auto OEM (Traditional ICE)"
+  name_ko: "자동차 완성차 (내연기관)"
+  kr_keywords: ["자동차", "완성차"]
+  us_keywords: ["Auto OEM", "Auto Manufacturer"]
+
+GT_AUTO_PARTS:
+  tier: 3
+  parent: GT_AUTOMOTIVE
+  name_en: "Auto Parts & Components"
+  name_ko: "자동차 부품"
+  kr_keywords: ["자동차부품"]
+  us_keywords: ["Auto Parts", "Auto Components"]
+
+GT_AUTO_TIRE:
+  tier: 3
+  parent: GT_AUTOMOTIVE
+  name_en: "Tires"
+  name_ko: "타이어"
+  kr_keywords: ["타이어"]
+  us_keywords: ["Tires"]
+
+# ─── Consumer (Luxury, Food, Retail) ───────────────────────────────────────
+GT_LUXURY:
+  tier: 3
+  parent: GT_LUXURY_FASHION
+  name_en: "Luxury Goods"
+  name_ko: "럭셔리"
+  kr_keywords: ["명품", "럭셔리"]
+  us_keywords: ["Luxury Goods", "Luxury Brands"]
+
+GT_FASHION_APPAREL:
+  tier: 3
+  parent: GT_LUXURY_FASHION
+  name_en: "Fashion & Apparel"
+  name_ko: "패션 의류"
+  kr_keywords: ["의류", "패션"]
+  us_keywords: ["Apparel", "Fashion"]
+
+GT_COSMETICS:
+  tier: 3
+  parent: GT_LUXURY_FASHION
+  name_en: "Cosmetics & Beauty"
+  name_ko: "화장품 (K-뷰티)"
+  kr_keywords: ["화장품", "K-뷰티"]
+  us_keywords: ["Cosmetics", "Beauty"]
+
+GT_FOOD:
+  tier: 3
+  parent: GT_FOOD_BEVERAGE
+  name_en: "Packaged Food"
+  name_ko: "가공식품"
+  kr_keywords: ["식품", "가공식품"]
+  us_keywords: ["Packaged Food"]
+
+GT_BEVERAGE_ALCOHOL:
+  tier: 3
+  parent: GT_FOOD_BEVERAGE
+  name_en: "Beverages & Alcohol"
+  name_ko: "음료 및 주류"
+  kr_keywords: ["음료", "주류"]
+  us_keywords: ["Beverages", "Alcohol"]
+
+GT_TOBACCO:
+  tier: 3
+  parent: GT_FOOD_BEVERAGE
+  name_en: "Tobacco"
+  name_ko: "담배"
+  kr_keywords: ["담배"]
+  us_keywords: ["Tobacco"]
+
+GT_RESTAURANT:
+  tier: 3
+  parent: GT_FOOD_BEVERAGE
+  name_en: "Restaurants"
+  name_ko: "외식업"
+  kr_keywords: ["외식", "프랜차이즈"]
+  us_keywords: ["Restaurants", "Fast Food"]
+
+GT_RETAIL_OFFLINE:
+  tier: 3
+  parent: GT_RETAIL
+  name_en: "Offline Retail"
+  name_ko: "오프라인 유통"
+  kr_keywords: ["유통", "백화점", "마트"]
+  us_keywords: ["Retail", "Department Store", "Big Box"]
+
+GT_HOUSEHOLD_PRODUCTS:
+  tier: 3
+  parent: GT_CONSUMER
+  name_en: "Household Products"
+  name_ko: "생활용품"
+  kr_keywords: ["생활용품"]
+  us_keywords: ["Household Products"]
+
+# ─── Media / Entertainment / Gaming ────────────────────────────────────────
+GT_KCONTENT:
+  tier: 3
+  parent: GT_MEDIA_ENTERTAINMENT
+  name_en: "Korean Content (Drama/Music/Webtoon)"
+  name_ko: "K-콘텐츠 (드라마/음악/웹툰)"
+  kr_keywords: ["K-콘텐츠", "엔터테인먼트", "엔터", "K팝", "웹툰", "드라마"]
+  us_keywords: ["Korean Content", "K-pop", "K-Drama"]
+
+GT_STREAMING:
+  tier: 3
+  parent: GT_MEDIA_ENTERTAINMENT
+  name_en: "Streaming Services"
+  name_ko: "스트리밍 서비스"
+  kr_keywords: ["OTT", "스트리밍"]
+  us_keywords: ["Streaming", "OTT", "Netflix-related"]
+
+GT_FILM_TV:
+  tier: 3
+  parent: GT_MEDIA_ENTERTAINMENT
+  name_en: "Film & TV Production"
+  name_ko: "영화 및 TV 제작"
+  kr_keywords: ["영화", "방송"]
+  us_keywords: ["Film", "TV Production"]
+
+GT_GAMING_MOBILE:
+  tier: 3
+  parent: GT_GAMING
+  name_en: "Mobile Gaming"
+  name_ko: "모바일 게임"
+  kr_keywords: ["모바일게임"]
+  us_keywords: ["Mobile Gaming"]
+
+GT_GAMING_PC_CONSOLE:
+  tier: 3
+  parent: GT_GAMING
+  name_en: "PC & Console Gaming"
+  name_ko: "PC/콘솔 게임"
+  kr_keywords: ["PC게임", "콘솔게임"]
+  us_keywords: ["Console Gaming", "PC Gaming"]
+
+GT_GAMING_PUBLISHER:
+  tier: 3
+  parent: GT_GAMING
+  name_en: "Game Publishers"
+  name_ko: "게임 퍼블리셔"
+  kr_keywords: ["게임", "게임주"]
+  us_keywords: ["Video Games", "Game Publisher"]
+
+GT_TELECOM_WIRELESS:
+  tier: 3
+  parent: GT_TELECOM
+  name_en: "Wireless Telecom"
+  name_ko: "무선통신"
+  kr_keywords: ["통신", "이동통신"]
+  us_keywords: ["Wireless Telecom"]
+
+GT_TELECOM_INFRA:
+  tier: 3
+  parent: GT_TELECOM
+  name_en: "Telecom Infrastructure"
+  name_ko: "통신 인프라"
+  kr_keywords: ["통신장비", "통신인프라"]
+  us_keywords: ["Telecom Infrastructure"]
+
+# ─── Financial Sub-Themes ──────────────────────────────────────────────────
+GT_BANK_COMMERCIAL:
+  tier: 3
+  parent: GT_BANKING
+  name_en: "Commercial Banking"
+  name_ko: "상업은행"
+  kr_keywords: ["은행", "시중은행"]
+  us_keywords: ["Commercial Bank", "Banking"]
+
+GT_BANK_REGIONAL:
+  tier: 3
+  parent: GT_BANKING
+  name_en: "Regional / Investment Banking"
+  name_ko: "지방/투자은행"
+  kr_keywords: ["지방은행"]
+  us_keywords: ["Regional Bank", "Investment Bank"]
+
+GT_INSURANCE_LIFE:
+  tier: 3
+  parent: GT_INSURANCE
+  name_en: "Life Insurance"
+  name_ko: "생명보험"
+  kr_keywords: ["생명보험", "보험"]
+  us_keywords: ["Life Insurance"]
+
+GT_INSURANCE_PROPERTY:
+  tier: 3
+  parent: GT_INSURANCE
+  name_en: "Property & Casualty Insurance"
+  name_ko: "손해보험"
+  kr_keywords: ["손해보험"]
+  us_keywords: ["P&C Insurance", "Property Casualty"]
+
+GT_BROKERAGE:
+  tier: 3
+  parent: GT_BROKERAGE_ASSET
+  name_en: "Brokerage Firms"
+  name_ko: "증권회사"
+  kr_keywords: ["증권"]
+  us_keywords: ["Brokerage", "Securities"]
+
+GT_ASSET_MANAGEMENT:
+  tier: 3
+  parent: GT_BROKERAGE_ASSET
+  name_en: "Asset Management"
+  name_ko: "자산운용"
+  kr_keywords: ["자산운용"]
+  us_keywords: ["Asset Management"]
+
+GT_FINTECH_PAYMENT:
+  tier: 3
+  parent: GT_FINTECH
+  name_en: "Payment & Digital Banking"
+  name_ko: "결제 및 디지털뱅킹"
+  kr_keywords: ["핀테크", "간편결제", "디지털뱅킹"]
+  us_keywords: ["Payment", "Digital Banking", "Fintech"]
+
+GT_HOLDING_CO:
+  tier: 3
+  parent: GT_HOLDING
+  name_en: "Holding Company"
+  name_ko: "지주회사"
+  kr_keywords: ["지주사", "지주회사"]
+  us_keywords: ["Holding Company", "Diversified Holding"]
+
+GT_BLOCKCHAIN:
+  tier: 3
+  parent: GT_BLOCKCHAIN_CRYPTO
+  name_en: "Blockchain & Crypto Infrastructure"
+  name_ko: "블록체인 및 가상자산 인프라"
+  kr_keywords: ["블록체인", "가상화폐", "암호화폐"]
+  us_keywords: ["Blockchain", "Crypto", "Bitcoin-related"]
+
+# ─── Materials Sub-Themes ──────────────────────────────────────────────────
+GT_CHEM_COMMODITY:
+  tier: 3
+  parent: GT_CHEMICAL
+  name_en: "Commodity Chemicals"
+  name_ko: "범용 화학"
+  kr_keywords: ["석유화학", "화학"]
+  us_keywords: ["Commodity Chemicals", "Petrochemicals"]
+
+GT_CHEM_SPECIALTY:
+  tier: 3
+  parent: GT_CHEMICAL
+  name_en: "Specialty Chemicals"
+  name_ko: "정밀화학"
+  kr_keywords: ["정밀화학", "특수화학"]
+  us_keywords: ["Specialty Chemicals"]
+
+GT_STEEL:
+  tier: 3
+  parent: GT_STEEL_METAL
+  name_en: "Steel"
+  name_ko: "철강"
+  kr_keywords: ["철강"]
+  us_keywords: ["Steel"]
+
+GT_NONFERROUS:
+  tier: 3
+  parent: GT_STEEL_METAL
+  name_en: "Non-ferrous Metals (Copper, Aluminum, Zinc)"
+  name_ko: "비철금속 (구리/알루미늄/아연)"
+  kr_keywords: ["비철금속", "구리", "아연", "알루미늄"]
+  us_keywords: ["Non-ferrous Metals", "Copper", "Aluminum"]
+
+GT_LITHIUM_RARE:
+  tier: 3
+  parent: GT_STEEL_METAL
+  name_en: "Lithium & Rare Earth Mining"
+  name_ko: "리튬 및 희토류"
+  kr_keywords: ["리튬", "희토류"]
+  us_keywords: ["Lithium Mining", "Rare Earth"]
+
+GT_GOLD_MINING:
+  tier: 3
+  parent: GT_STEEL_METAL
+  name_en: "Gold & Precious Metals Mining"
+  name_ko: "금/귀금속 채굴"
+  kr_keywords: ["금광", "금"]
+  us_keywords: ["Gold Mining", "Precious Metals"]
+
+GT_CEMENT:
+  tier: 3
+  parent: GT_BUILDING_MATERIALS
+  name_en: "Cement"
+  name_ko: "시멘트"
+  kr_keywords: ["시멘트"]
+  us_keywords: ["Cement"]
+
+GT_BUILDING_MAT:
+  tier: 3
+  parent: GT_BUILDING_MATERIALS
+  name_en: "Building Materials"
+  name_ko: "건축자재"
+  kr_keywords: ["건자재", "건축자재"]
+  us_keywords: ["Building Materials"]
+
+GT_PAPER:
+  tier: 3
+  parent: GT_PAPER_PACKAGING
+  name_en: "Paper Products"
+  name_ko: "제지"
+  kr_keywords: ["제지", "종이"]
+  us_keywords: ["Paper Products"]
+
+GT_PACKAGING:
+  tier: 3
+  parent: GT_PAPER_PACKAGING
+  name_en: "Containers & Packaging"
+  name_ko: "포장 용기"
+  kr_keywords: ["포장재"]
+  us_keywords: ["Packaging", "Containers"]
+
+# ─── Energy (Fossil) ───────────────────────────────────────────────────────
+GT_OIL_INTEGRATED:
+  tier: 3
+  parent: GT_OIL_GAS
+  name_en: "Integrated Oil & Gas"
+  name_ko: "통합 석유가스"
+  kr_keywords: ["정유"]
+  us_keywords: ["Integrated Oil & Gas"]
+
+GT_OIL_EP:
+  tier: 3
+  parent: GT_OIL_GAS
+  name_en: "Oil & Gas E&P"
+  name_ko: "석유가스 탐사/생산"
+  kr_keywords: ["자원개발"]
+  us_keywords: ["Oil & Gas E&P", "Exploration & Production"]
+
+GT_OIL_REFINING:
+  tier: 3
+  parent: GT_OIL_GAS
+  name_en: "Refining & Marketing"
+  name_ko: "정유 및 마케팅"
+  kr_keywords: ["정유", "주유소"]
+  us_keywords: ["Refining", "Marketing"]
+
+GT_OIL_SERVICES:
+  tier: 3
+  parent: GT_OIL_GAS
+  name_en: "Oil & Gas Services & Drilling"
+  name_ko: "석유가스 서비스 및 시추"
+  kr_keywords: ["해양플랜트"]
+  us_keywords: ["Oilfield Services", "Drilling"]
+
+GT_PIPELINE:
+  tier: 3
+  parent: GT_ENERGY_INFRA
+  name_en: "Pipeline & Midstream"
+  name_ko: "파이프라인 및 미드스트림"
+  kr_keywords: ["가스공급"]
+  us_keywords: ["Pipeline", "Midstream Energy"]
+
+GT_LNG:
+  tier: 3
+  parent: GT_ENERGY_INFRA
+  name_en: "LNG"
+  name_ko: "LNG"
+  kr_keywords: ["LNG"]
+  us_keywords: ["LNG", "Liquefied Natural Gas"]
+
+# ─── REITs / Utilities ─────────────────────────────────────────────────────
+GT_REIT_RESIDENTIAL:
+  tier: 3
+  parent: GT_REIT
+  name_en: "Residential REITs"
+  name_ko: "주거용 리츠"
+  kr_keywords: ["리츠", "주거리츠"]
+  us_keywords: ["Residential REITs"]
+
+GT_REIT_COMMERCIAL:
+  tier: 3
+  parent: GT_REIT
+  name_en: "Commercial / Office REITs"
+  name_ko: "상업용/오피스 리츠"
+  kr_keywords: ["오피스리츠", "상업리츠"]
+  us_keywords: ["Office REITs", "Commercial REITs"]
+
+GT_REIT_INDUSTRIAL_LOGISTICS:
+  tier: 3
+  parent: GT_REIT
+  name_en: "Industrial & Logistics REITs"
+  name_ko: "산업/물류 리츠"
+  kr_keywords: ["물류리츠"]
+  us_keywords: ["Industrial REITs", "Logistics REITs"]
+
+GT_REIT_DATACENTER:
+  tier: 3
+  parent: GT_REIT
+  name_en: "Data Center REITs"
+  name_ko: "데이터센터 리츠"
+  kr_keywords: ["데이터센터리츠"]
+  us_keywords: ["Data Center REITs"]
+
+GT_REIT_HEALTHCARE:
+  tier: 3
+  parent: GT_REIT
+  name_en: "Healthcare REITs"
+  name_ko: "헬스케어 리츠"
+  kr_keywords: ["헬스케어리츠"]
+  us_keywords: ["Healthcare REITs"]
+
+GT_REAL_ESTATE_DEV:
+  tier: 3
+  parent: GT_REIT
+  name_en: "Real Estate Development"
+  name_ko: "부동산 개발"
+  kr_keywords: ["부동산", "부동산개발"]
+  us_keywords: ["Real Estate Development"]
+
+GT_UTILITY_ELECTRIC:
+  tier: 3
+  parent: GT_UTILITY_POWER
+  name_en: "Electric Utility"
+  name_ko: "전력 유틸리티"
+  kr_keywords: ["전력", "한국전력"]
+  us_keywords: ["Electric Utility"]
+
+GT_UTILITY_GAS:
+  tier: 3
+  parent: GT_UTILITY_POWER
+  name_en: "Gas Utility"
+  name_ko: "가스 유틸리티"
+  kr_keywords: ["가스", "도시가스"]
+  us_keywords: ["Gas Utility"]
+
+GT_UTILITY_WATER:
+  tier: 3
+  parent: GT_UTILITY_POWER
+  name_en: "Water Utility & Treatment"
+  name_ko: "수도 및 수처리"
+  kr_keywords: ["수처리"]
+  us_keywords: ["Water Utility", "Water Treatment"]
+
+GT_UTILITY_WASTE:
+  tier: 3
+  parent: GT_UTILITY_POWER
+  name_en: "Waste Management"
+  name_ko: "폐기물 관리"
+  kr_keywords: ["폐기물", "환경"]
+  us_keywords: ["Waste Management"]
+
+# ─── Special / Cross-cutting Themes ────────────────────────────────────────
+GT_SUPER_CONDUCTOR:
+  tier: 3
+  parent: GT_TECHNOLOGY
+  name_en: "Superconductor"
+  name_ko: "초전도체"
+  kr_keywords: ["초전도체", "상온초전도체"]
+  us_keywords: ["Superconductor"]
+
+GT_3D_PRINTING:
+  tier: 3
+  parent: GT_INDUSTRIAL
+  name_en: "3D Printing / Additive Manufacturing"
+  name_ko: "3D 프린팅"
+  kr_keywords: ["3D프린팅", "3D프린터"]
+  us_keywords: ["3D Printing", "Additive Manufacturing"]
+
+GT_AGRICULTURE:
+  tier: 3
+  parent: GT_FOOD_BEVERAGE
+  name_en: "Agriculture & Agritech"
+  name_ko: "농업 및 농업기술"
+  kr_keywords: ["농업", "비료", "농약"]
+  us_keywords: ["Agriculture", "Agritech", "Fertilizer"]
+
+GT_PET:
+  tier: 3
+  parent: GT_CONSUMER
+  name_en: "Pet Economy"
+  name_ko: "반려동물"
+  kr_keywords: ["반려동물", "펫"]
+  us_keywords: ["Pet", "Pet Care"]
+
+GT_TRAVEL_LEISURE:
+  tier: 3
+  parent: GT_CONSUMER
+  name_en: "Travel & Leisure"
+  name_ko: "여행 및 레저"
+  kr_keywords: ["여행", "관광", "호텔", "카지노"]
+  us_keywords: ["Travel", "Leisure", "Hotels", "Casino"]

@@ -35,14 +35,25 @@ def compute_attractiveness(
             if max_price <= 0:
                 continue
             
-            # log_5(max_price / p_t)
+            # 가용 기간(분기) 기반 N년 계산
+            n_quarters = len(forward)
+            n_years = n_quarters / 4.0
+            
+            # 최대 horizon_years(5년) 이내에서, N년 기간을 기준으로 log base 설정
+            base_years = min(n_years, max_horizon_years)
+            # log(1)=0 이므로 수학적 안정성을 위해 최소 1.1 적용
+            base_years = max(base_years, 1.1)
+            
+            log_base_value = np.log(base_years)
+            
+            # log_N(max_price / p_t)
             A = np.log(max_price / p_t) / log_base_value
             
             results.append({
                 'ticker': ticker,
                 'date': dates[i],
                 'A': np.float32(A),
-                'A_quarters_used': np.int8(len(forward)),
+                'A_quarters_used': np.int8(n_quarters),
             })
     
     return pd.DataFrame(results)

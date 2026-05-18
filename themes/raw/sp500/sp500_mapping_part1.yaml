@@ -1,0 +1,499 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# S&P 500 Stock → Global Theme Mapping
+# ─────────────────────────────────────────────────────────────────────────────
+#
+# 각 종목당 1~4개의 Tier 3 테마 ID를 할당.
+# 첫 번째 테마가 primary (가장 핵심), 나머지는 secondary.
+#
+# 기준일: 2025년 말 S&P 500 구성종목
+# 누락 또는 변경 가능한 종목은 별도 표시.
+# ─────────────────────────────────────────────────────────────────────────────
+
+# ============================================================================
+# TECHNOLOGY — Semiconductors
+# ============================================================================
+NVDA:
+  name: "NVIDIA"
+  themes: [GT_AI_CHIPS, GT_SEMI_FABLESS, GT_AI_INFRA, GT_GENERATIVE_AI]
+AMD:
+  name: "Advanced Micro Devices"
+  themes: [GT_AI_CHIPS, GT_SEMI_FABLESS, GT_AI_INFRA]
+INTC:
+  name: "Intel"
+  themes: [GT_SEMI_FOUNDRY, GT_SEMI_FABLESS, GT_AI_CHIPS]
+AVGO:
+  name: "Broadcom"
+  themes: [GT_SEMI_FABLESS, GT_NETWORKING, GT_AI_CHIPS]
+QCOM:
+  name: "Qualcomm"
+  themes: [GT_SEMI_FABLESS, GT_SMARTPHONE, GT_AI_CHIPS]
+TXN:
+  name: "Texas Instruments"
+  themes: [GT_SEMI_AUTOMOTIVE, GT_SEMI_POWER]
+MU:
+  name: "Micron Technology"
+  themes: [GT_SEMI_MEMORY, GT_SEMI_HBM]
+AMAT:
+  name: "Applied Materials"
+  themes: [GT_SEMI_EQUIPMENT]
+LRCX:
+  name: "Lam Research"
+  themes: [GT_SEMI_EQUIPMENT]
+KLAC:
+  name: "KLA Corp"
+  themes: [GT_SEMI_EQUIPMENT]
+ADI:
+  name: "Analog Devices"
+  themes: [GT_SEMI_FABLESS, GT_SEMI_AUTOMOTIVE]
+MCHP:
+  name: "Microchip Technology"
+  themes: [GT_SEMI_FABLESS, GT_SEMI_AUTOMOTIVE]
+NXPI:
+  name: "NXP Semiconductors"
+  themes: [GT_SEMI_AUTOMOTIVE, GT_SEMI_FABLESS]
+ON:
+  name: "ON Semiconductor"
+  themes: [GT_SEMI_POWER, GT_SEMI_AUTOMOTIVE]
+MPWR:
+  name: "Monolithic Power Systems"
+  themes: [GT_SEMI_POWER]
+ENPH:
+  name: "Enphase Energy"
+  themes: [GT_SOLAR, GT_SEMI_POWER]
+SWKS:
+  name: "Skyworks Solutions"
+  themes: [GT_SEMI_FABLESS, GT_SMARTPHONE]
+QRVO:
+  name: "Qorvo"
+  themes: [GT_SEMI_FABLESS, GT_SMARTPHONE]
+FSLR:
+  name: "First Solar"
+  themes: [GT_SOLAR]
+TER:
+  name: "Teradyne"
+  themes: [GT_SEMI_EQUIPMENT]
+ARM:
+  name: "ARM Holdings"
+  themes: [GT_SEMI_FABLESS, GT_AI_CHIPS]
+SMCI:
+  name: "Super Micro Computer"
+  themes: [GT_AI_INFRA, GT_AI_CHIPS]
+
+# ============================================================================
+# TECHNOLOGY — Software, Cloud, AI
+# ============================================================================
+MSFT:
+  name: "Microsoft"
+  themes: [GT_CLOUD_INFRA, GT_AI_SOFTWARE, GT_SAAS, GT_GENERATIVE_AI]
+ORCL:
+  name: "Oracle"
+  themes: [GT_ENTERPRISE_SOFTWARE, GT_CLOUD_INFRA, GT_AI_INFRA]
+CRM:
+  name: "Salesforce"
+  themes: [GT_SAAS, GT_ENTERPRISE_SOFTWARE, GT_AI_SOFTWARE]
+ADBE:
+  name: "Adobe"
+  themes: [GT_SAAS, GT_GENERATIVE_AI]
+NOW:
+  name: "ServiceNow"
+  themes: [GT_SAAS, GT_ENTERPRISE_SOFTWARE]
+INTU:
+  name: "Intuit"
+  themes: [GT_SAAS, GT_FINTECH_PAYMENT]
+PANW:
+  name: "Palo Alto Networks"
+  themes: [GT_CYBER_ENDPOINT, GT_CYBER_CLOUD]
+CRWD:
+  name: "CrowdStrike"
+  themes: [GT_CYBER_ENDPOINT, GT_CYBER_CLOUD]
+FTNT:
+  name: "Fortinet"
+  themes: [GT_CYBER_ENDPOINT]
+WDAY:
+  name: "Workday"
+  themes: [GT_SAAS, GT_ENTERPRISE_SOFTWARE]
+SNPS:
+  name: "Synopsys"
+  themes: [GT_DEVTOOLS, GT_SEMI_FABLESS]
+CDNS:
+  name: "Cadence Design Systems"
+  themes: [GT_DEVTOOLS, GT_SEMI_FABLESS]
+ANSS:
+  name: "Ansys"
+  themes: [GT_DEVTOOLS]
+GEN:
+  name: "Gen Digital"
+  themes: [GT_CYBER_ENDPOINT]
+PAYC:
+  name: "Paycom Software"
+  themes: [GT_SAAS]
+PAYX:
+  name: "Paychex"
+  themes: [GT_SAAS, GT_FINTECH_PAYMENT]
+ADSK:
+  name: "Autodesk"
+  themes: [GT_DEVTOOLS, GT_SAAS]
+PTC:
+  name: "PTC"
+  themes: [GT_DEVTOOLS, GT_ENTERPRISE_SOFTWARE]
+PLTR:
+  name: "Palantir"
+  themes: [GT_AI_SOFTWARE, GT_AI_APPLICATIONS, GT_DEFENSE_CYBER]
+TYL:
+  name: "Tyler Technologies"
+  themes: [GT_ENTERPRISE_SOFTWARE]
+ROP:
+  name: "Roper Technologies"
+  themes: [GT_ENTERPRISE_SOFTWARE]
+EPAM:
+  name: "EPAM Systems"
+  themes: [GT_SAAS, GT_AI_SOFTWARE]
+AKAM:
+  name: "Akamai Technologies"
+  themes: [GT_EDGE_COMPUTING, GT_CYBER_CLOUD]
+
+# ============================================================================
+# TECHNOLOGY — Hardware / Devices
+# ============================================================================
+AAPL:
+  name: "Apple"
+  themes: [GT_SMARTPHONE, GT_PC_PERIPHERAL, GT_HARDWARE, GT_SAAS]
+DELL:
+  name: "Dell Technologies"
+  themes: [GT_PC_PERIPHERAL, GT_AI_INFRA]
+HPQ:
+  name: "HP Inc"
+  themes: [GT_PC_PERIPHERAL]
+HPE:
+  name: "Hewlett Packard Enterprise"
+  themes: [GT_AI_INFRA, GT_CLOUD_INFRA]
+NTAP:
+  name: "NetApp"
+  themes: [GT_CLOUD_INFRA, GT_AI_INFRA]
+STX:
+  name: "Seagate Technology"
+  themes: [GT_PC_PERIPHERAL, GT_AI_INFRA]
+WDC:
+  name: "Western Digital"
+  themes: [GT_PC_PERIPHERAL, GT_AI_INFRA]
+CSCO:
+  name: "Cisco Systems"
+  themes: [GT_NETWORKING, GT_CYBER_ENDPOINT]
+JNPR:
+  name: "Juniper Networks"
+  themes: [GT_NETWORKING]
+GLW:
+  name: "Corning"
+  themes: [GT_DISPLAY, GT_NETWORKING]
+APH:
+  name: "Amphenol"
+  themes: [GT_NETWORKING, GT_HARDWARE]
+TEL:
+  name: "TE Connectivity"
+  themes: [GT_HARDWARE, GT_SEMI_AUTOMOTIVE]
+KEYS:
+  name: "Keysight Technologies"
+  themes: [GT_SEMI_EQUIPMENT, GT_NETWORKING]
+ZBRA:
+  name: "Zebra Technologies"
+  themes: [GT_IOT, GT_HARDWARE]
+TRMB:
+  name: "Trimble"
+  themes: [GT_IOT, GT_HARDWARE]
+GRMN:
+  name: "Garmin"
+  themes: [GT_HARDWARE, GT_TRAVEL_LEISURE]
+
+# ============================================================================
+# IBM / Services / Misc Tech
+# ============================================================================
+IBM:
+  name: "IBM"
+  themes: [GT_AI_SOFTWARE, GT_CLOUD_INFRA, GT_QUANTUM]
+ACN:
+  name: "Accenture"
+  themes: [GT_AI_SOFTWARE, GT_ENTERPRISE_SOFTWARE]
+CTSH:
+  name: "Cognizant"
+  themes: [GT_AI_SOFTWARE]
+FIS:
+  name: "FIS"
+  themes: [GT_FINTECH_PAYMENT]
+FISV:
+  name: "Fiserv"
+  themes: [GT_FINTECH_PAYMENT]
+JKHY:
+  name: "Jack Henry & Associates"
+  themes: [GT_FINTECH_PAYMENT]
+GDDY:
+  name: "GoDaddy"
+  themes: [GT_SEARCH_PORTAL, GT_SAAS]
+VRSN:
+  name: "VeriSign"
+  themes: [GT_CYBER_CLOUD]
+ANET:
+  name: "Arista Networks"
+  themes: [GT_NETWORKING, GT_AI_INFRA, GT_CLOUD_INFRA]
+FFIV:
+  name: "F5"
+  themes: [GT_CYBER_ENDPOINT, GT_NETWORKING]
+LDOS:
+  name: "Leidos Holdings"
+  themes: [GT_DEFENSE_CYBER, GT_AI_APPLICATIONS]
+
+# ============================================================================
+# COMMUNICATION SERVICES — Internet / Platforms / Media
+# ============================================================================
+GOOGL:
+  name: "Alphabet Class A"
+  themes: [GT_SEARCH_PORTAL, GT_DIGITAL_AD, GT_CLOUD_INFRA, GT_GENERATIVE_AI]
+GOOG:
+  name: "Alphabet Class C"
+  themes: [GT_SEARCH_PORTAL, GT_DIGITAL_AD, GT_CLOUD_INFRA, GT_GENERATIVE_AI]
+META:
+  name: "Meta Platforms"
+  themes: [GT_SOCIAL_MEDIA, GT_DIGITAL_AD, GT_VR_AR, GT_GENERATIVE_AI]
+NFLX:
+  name: "Netflix"
+  themes: [GT_STREAMING, GT_FILM_TV]
+DIS:
+  name: "Walt Disney"
+  themes: [GT_FILM_TV, GT_STREAMING, GT_TRAVEL_LEISURE]
+WBD:
+  name: "Warner Bros Discovery"
+  themes: [GT_FILM_TV, GT_STREAMING]
+PARA:
+  name: "Paramount Global"
+  themes: [GT_FILM_TV, GT_STREAMING]
+CMCSA:
+  name: "Comcast"
+  themes: [GT_STREAMING, GT_TELECOM_INFRA, GT_FILM_TV]
+CHTR:
+  name: "Charter Communications"
+  themes: [GT_TELECOM_INFRA]
+T:
+  name: "AT&T"
+  themes: [GT_TELECOM_WIRELESS, GT_TELECOM_INFRA]
+VZ:
+  name: "Verizon"
+  themes: [GT_TELECOM_WIRELESS, GT_TELECOM_INFRA]
+TMUS:
+  name: "T-Mobile US"
+  themes: [GT_TELECOM_WIRELESS]
+LYV:
+  name: "Live Nation Entertainment"
+  themes: [GT_MEDIA_ENTERTAINMENT, GT_TRAVEL_LEISURE]
+NWS:
+  name: "News Corp Class B"
+  themes: [GT_MEDIA_ENTERTAINMENT, GT_DIGITAL_AD]
+NWSA:
+  name: "News Corp Class A"
+  themes: [GT_MEDIA_ENTERTAINMENT, GT_DIGITAL_AD]
+FOX:
+  name: "Fox Corp Class B"
+  themes: [GT_MEDIA_ENTERTAINMENT, GT_FILM_TV]
+FOXA:
+  name: "Fox Corp Class A"
+  themes: [GT_MEDIA_ENTERTAINMENT, GT_FILM_TV]
+OMC:
+  name: "Omnicom Group"
+  themes: [GT_DIGITAL_AD]
+IPG:
+  name: "Interpublic Group"
+  themes: [GT_DIGITAL_AD]
+TTWO:
+  name: "Take-Two Interactive"
+  themes: [GT_GAMING_PC_CONSOLE, GT_GAMING_PUBLISHER]
+EA:
+  name: "Electronic Arts"
+  themes: [GT_GAMING_PC_CONSOLE, GT_GAMING_PUBLISHER]
+MTCH:
+  name: "Match Group"
+  themes: [GT_SOCIAL_MEDIA]
+PINS:
+  name: "Pinterest"
+  themes: [GT_SOCIAL_MEDIA, GT_DIGITAL_AD]
+NDAQ:
+  name: "Nasdaq"
+  themes: [GT_BROKERAGE_ASSET]   # placeholder, may also belong to financials
+
+# ============================================================================
+# CONSUMER DISCRETIONARY — Auto, Retail, Travel
+# ============================================================================
+TSLA:
+  name: "Tesla"
+  themes: [GT_EV_OEM, GT_BATTERY_CELL, GT_AUTONOMOUS_DRIVING, GT_ESS]
+F:
+  name: "Ford Motor"
+  themes: [GT_AUTO_OEM, GT_EV_OEM]
+GM:
+  name: "General Motors"
+  themes: [GT_AUTO_OEM, GT_EV_OEM, GT_AUTONOMOUS_DRIVING]
+APTV:
+  name: "Aptiv"
+  themes: [GT_AUTO_PARTS, GT_EV_COMPONENTS, GT_AUTONOMOUS_DRIVING]
+BWA:
+  name: "BorgWarner"
+  themes: [GT_AUTO_PARTS, GT_EV_COMPONENTS]
+LKQ:
+  name: "LKQ Corp"
+  themes: [GT_AUTO_PARTS]
+GPC:
+  name: "Genuine Parts"
+  themes: [GT_AUTO_PARTS]
+AZO:
+  name: "AutoZone"
+  themes: [GT_AUTO_PARTS, GT_RETAIL_OFFLINE]
+ORLY:
+  name: "O'Reilly Automotive"
+  themes: [GT_AUTO_PARTS, GT_RETAIL_OFFLINE]
+AMZN:
+  name: "Amazon"
+  themes: [GT_ECOMMERCE_PLATFORM, GT_CLOUD_INFRA, GT_DIGITAL_AD, GT_LOGISTICS]
+EBAY:
+  name: "eBay"
+  themes: [GT_ECOMMERCE_PLATFORM]
+ETSY:
+  name: "Etsy"
+  themes: [GT_ECOMMERCE_PLATFORM]
+HD:
+  name: "Home Depot"
+  themes: [GT_RETAIL_OFFLINE, GT_BUILDING_MAT]
+LOW:
+  name: "Lowe's"
+  themes: [GT_RETAIL_OFFLINE, GT_BUILDING_MAT]
+TGT:
+  name: "Target"
+  themes: [GT_RETAIL_OFFLINE]
+WMT:
+  name: "Walmart"
+  themes: [GT_RETAIL_OFFLINE, GT_ECOMMERCE_PLATFORM]   # actually staples but retail-cross
+COST:
+  name: "Costco Wholesale"
+  themes: [GT_RETAIL_OFFLINE]
+DG:
+  name: "Dollar General"
+  themes: [GT_RETAIL_OFFLINE]
+DLTR:
+  name: "Dollar Tree"
+  themes: [GT_RETAIL_OFFLINE]
+BBY:
+  name: "Best Buy"
+  themes: [GT_RETAIL_OFFLINE]
+ROST:
+  name: "Ross Stores"
+  themes: [GT_RETAIL_OFFLINE, GT_FASHION_APPAREL]
+TJX:
+  name: "TJX Companies"
+  themes: [GT_RETAIL_OFFLINE, GT_FASHION_APPAREL]
+DECK:
+  name: "Deckers Outdoor"
+  themes: [GT_FASHION_APPAREL]
+NKE:
+  name: "Nike"
+  themes: [GT_FASHION_APPAREL]
+LULU:
+  name: "Lululemon Athletica"
+  themes: [GT_FASHION_APPAREL]
+RL:
+  name: "Ralph Lauren"
+  themes: [GT_FASHION_APPAREL, GT_LUXURY]
+TPR:
+  name: "Tapestry"
+  themes: [GT_LUXURY, GT_FASHION_APPAREL]
+PVH:
+  name: "PVH Corp"
+  themes: [GT_FASHION_APPAREL]
+HAS:
+  name: "Hasbro"
+  themes: [GT_MEDIA_ENTERTAINMENT, GT_GAMING_PUBLISHER]
+MAT:
+  name: "Mattel"
+  themes: [GT_MEDIA_ENTERTAINMENT]
+SBUX:
+  name: "Starbucks"
+  themes: [GT_RESTAURANT, GT_BEVERAGE_ALCOHOL]
+MCD:
+  name: "McDonald's"
+  themes: [GT_RESTAURANT]
+CMG:
+  name: "Chipotle Mexican Grill"
+  themes: [GT_RESTAURANT]
+YUM:
+  name: "Yum Brands"
+  themes: [GT_RESTAURANT]
+DPZ:
+  name: "Domino's Pizza"
+  themes: [GT_RESTAURANT]
+DRI:
+  name: "Darden Restaurants"
+  themes: [GT_RESTAURANT]
+MAR:
+  name: "Marriott International"
+  themes: [GT_TRAVEL_LEISURE]
+HLT:
+  name: "Hilton Worldwide"
+  themes: [GT_TRAVEL_LEISURE]
+BKNG:
+  name: "Booking Holdings"
+  themes: [GT_TRAVEL_LEISURE, GT_SEARCH_PORTAL]
+EXPE:
+  name: "Expedia Group"
+  themes: [GT_TRAVEL_LEISURE]
+ABNB:
+  name: "Airbnb"
+  themes: [GT_TRAVEL_LEISURE, GT_ECOMMERCE_PLATFORM]
+CCL:
+  name: "Carnival"
+  themes: [GT_TRAVEL_LEISURE]
+RCL:
+  name: "Royal Caribbean Cruises"
+  themes: [GT_TRAVEL_LEISURE]
+NCLH:
+  name: "Norwegian Cruise Line"
+  themes: [GT_TRAVEL_LEISURE]
+LVS:
+  name: "Las Vegas Sands"
+  themes: [GT_TRAVEL_LEISURE]
+MGM:
+  name: "MGM Resorts"
+  themes: [GT_TRAVEL_LEISURE]
+WYNN:
+  name: "Wynn Resorts"
+  themes: [GT_TRAVEL_LEISURE]
+CZR:
+  name: "Caesars Entertainment"
+  themes: [GT_TRAVEL_LEISURE]
+POOL:
+  name: "Pool Corp"
+  themes: [GT_TRAVEL_LEISURE, GT_RETAIL_OFFLINE]
+LEN:
+  name: "Lennar"
+  themes: [GT_CONSTRUCTION_BUILDING]
+DHI:
+  name: "D.R. Horton"
+  themes: [GT_CONSTRUCTION_BUILDING]
+NVR:
+  name: "NVR"
+  themes: [GT_CONSTRUCTION_BUILDING]
+PHM:
+  name: "PulteGroup"
+  themes: [GT_CONSTRUCTION_BUILDING]
+KB:
+  name: "KB Home"
+  themes: [GT_CONSTRUCTION_BUILDING]
+TOL:
+  name: "Toll Brothers"
+  themes: [GT_CONSTRUCTION_BUILDING]
+WHR:
+  name: "Whirlpool"
+  themes: [GT_HOUSEHOLD_PRODUCTS]
+NWL:
+  name: "Newell Brands"
+  themes: [GT_HOUSEHOLD_PRODUCTS]
+HRL:
+  name: "Hormel Foods"
+  themes: [GT_FOOD]
+MHK:
+  name: "Mohawk Industries"
+  themes: [GT_BUILDING_MAT]

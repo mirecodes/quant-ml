@@ -1,0 +1,418 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# S&P 500 Mapping — Part 3
+# Energy / Materials / Utilities / Real Estate / Misc
+# ─────────────────────────────────────────────────────────────────────────────
+
+# ============================================================================
+# ENERGY — Oil, Gas, Renewables (some), Services
+# ============================================================================
+XOM:
+  name: "ExxonMobil"
+  themes: [GT_OIL_INTEGRATED, GT_OIL_EP, GT_OIL_REFINING]
+CVX:
+  name: "Chevron"
+  themes: [GT_OIL_INTEGRATED, GT_OIL_EP]
+COP:
+  name: "ConocoPhillips"
+  themes: [GT_OIL_EP]
+EOG:
+  name: "EOG Resources"
+  themes: [GT_OIL_EP]
+SLB:
+  name: "Schlumberger"
+  themes: [GT_OIL_SERVICES]
+HAL:
+  name: "Halliburton"
+  themes: [GT_OIL_SERVICES]
+BKR:
+  name: "Baker Hughes"
+  themes: [GT_OIL_SERVICES]
+OXY:
+  name: "Occidental Petroleum"
+  themes: [GT_OIL_EP, GT_OIL_INTEGRATED]
+PXD:
+  name: "Pioneer Natural Resources"
+  themes: [GT_OIL_EP]
+HES:
+  name: "Hess"
+  themes: [GT_OIL_EP]
+DVN:
+  name: "Devon Energy"
+  themes: [GT_OIL_EP]
+FANG:
+  name: "Diamondback Energy"
+  themes: [GT_OIL_EP]
+APA:
+  name: "APA Corp"
+  themes: [GT_OIL_EP]
+MRO:
+  name: "Marathon Oil"
+  themes: [GT_OIL_EP]
+MPC:
+  name: "Marathon Petroleum"
+  themes: [GT_OIL_REFINING]
+PSX:
+  name: "Phillips 66"
+  themes: [GT_OIL_REFINING]
+VLO:
+  name: "Valero Energy"
+  themes: [GT_OIL_REFINING]
+WMB:
+  name: "Williams Companies"
+  themes: [GT_PIPELINE, GT_LNG]
+KMI:
+  name: "Kinder Morgan"
+  themes: [GT_PIPELINE, GT_LNG]
+OKE:
+  name: "ONEOK"
+  themes: [GT_PIPELINE]
+TRGP:
+  name: "Targa Resources"
+  themes: [GT_PIPELINE]
+EQT:
+  name: "EQT Corp"
+  themes: [GT_OIL_EP, GT_LNG]
+CTRA:
+  name: "Coterra Energy"
+  themes: [GT_OIL_EP]
+TPL:
+  name: "Texas Pacific Land"
+  themes: [GT_OIL_EP, GT_REAL_ESTATE_DEV]
+
+# ============================================================================
+# MATERIALS — Chemicals, Mining, Construction Materials
+# ============================================================================
+LIN:
+  name: "Linde"
+  themes: [GT_CHEM_COMMODITY, GT_HYDROGEN_FUEL]
+APD:
+  name: "Air Products and Chemicals"
+  themes: [GT_CHEM_COMMODITY, GT_HYDROGEN_FUEL]
+ECL:
+  name: "Ecolab"
+  themes: [GT_CHEM_SPECIALTY]
+SHW:
+  name: "Sherwin-Williams"
+  themes: [GT_CHEM_SPECIALTY, GT_BUILDING_MAT]
+PPG:
+  name: "PPG Industries"
+  themes: [GT_CHEM_SPECIALTY, GT_BUILDING_MAT]
+DD:
+  name: "DuPont de Nemours"
+  themes: [GT_CHEM_SPECIALTY, GT_SEMI_MATERIALS]
+DOW:
+  name: "Dow Inc"
+  themes: [GT_CHEM_COMMODITY]
+LYB:
+  name: "LyondellBasell Industries"
+  themes: [GT_CHEM_COMMODITY]
+EMN:
+  name: "Eastman Chemical"
+  themes: [GT_CHEM_SPECIALTY]
+ALB:
+  name: "Albemarle"
+  themes: [GT_LITHIUM_RARE, GT_CHEM_SPECIALTY]
+CE:
+  name: "Celanese"
+  themes: [GT_CHEM_SPECIALTY]
+IFF:
+  name: "International Flavors & Fragrances"
+  themes: [GT_CHEM_SPECIALTY, GT_FOOD]
+FMC:
+  name: "FMC Corp"
+  themes: [GT_CHEM_SPECIALTY, GT_AGRICULTURE]
+CTVA:
+  name: "Corteva"
+  themes: [GT_AGRICULTURE, GT_CHEM_SPECIALTY]
+MOS:
+  name: "Mosaic"
+  themes: [GT_AGRICULTURE]
+CF:
+  name: "CF Industries Holdings"
+  themes: [GT_AGRICULTURE, GT_CHEM_COMMODITY]
+NUE:
+  name: "Nucor"
+  themes: [GT_STEEL]
+STLD:
+  name: "Steel Dynamics"
+  themes: [GT_STEEL]
+X:
+  name: "United States Steel"
+  themes: [GT_STEEL]
+CLF:
+  name: "Cleveland-Cliffs"
+  themes: [GT_STEEL]
+FCX:
+  name: "Freeport-McMoRan"
+  themes: [GT_NONFERROUS, GT_GOLD_MINING]
+NEM:
+  name: "Newmont"
+  themes: [GT_GOLD_MINING]
+AA:
+  name: "Alcoa"
+  themes: [GT_NONFERROUS]
+RS:
+  name: "Reliance Steel & Aluminum"
+  themes: [GT_STEEL, GT_NONFERROUS]
+VMC:
+  name: "Vulcan Materials"
+  themes: [GT_CEMENT, GT_BUILDING_MAT]
+MLM:
+  name: "Martin Marietta Materials"
+  themes: [GT_CEMENT, GT_BUILDING_MAT]
+EXP:
+  name: "Eagle Materials"
+  themes: [GT_CEMENT, GT_BUILDING_MAT]
+PKG:
+  name: "Packaging Corp of America"
+  themes: [GT_PACKAGING, GT_PAPER]
+WRK:
+  name: "WestRock"
+  themes: [GT_PACKAGING, GT_PAPER]
+IP:
+  name: "International Paper"
+  themes: [GT_PAPER, GT_PACKAGING]
+BALL:
+  name: "Ball Corp"
+  themes: [GT_PACKAGING]
+SEE:
+  name: "Sealed Air"
+  themes: [GT_PACKAGING]
+AVY:
+  name: "Avery Dennison"
+  themes: [GT_PACKAGING]
+AMCR:
+  name: "Amcor"
+  themes: [GT_PACKAGING]
+WY:
+  name: "Weyerhaeuser"
+  themes: [GT_PAPER, GT_REIT_INDUSTRIAL_LOGISTICS]
+
+# ============================================================================
+# UTILITIES — Electric, Gas, Water, Renewable
+# ============================================================================
+NEE:
+  name: "NextEra Energy"
+  themes: [GT_UTILITY_ELECTRIC, GT_SOLAR, GT_WIND]
+DUK:
+  name: "Duke Energy"
+  themes: [GT_UTILITY_ELECTRIC]
+SO:
+  name: "Southern Co"
+  themes: [GT_UTILITY_ELECTRIC, GT_NUCLEAR_LARGE]
+D:
+  name: "Dominion Energy"
+  themes: [GT_UTILITY_ELECTRIC]
+AEP:
+  name: "American Electric Power"
+  themes: [GT_UTILITY_ELECTRIC]
+EXC:
+  name: "Exelon"
+  themes: [GT_UTILITY_ELECTRIC, GT_NUCLEAR_LARGE]
+SRE:
+  name: "Sempra"
+  themes: [GT_UTILITY_GAS, GT_LNG]
+PEG:
+  name: "Public Service Enterprise Group"
+  themes: [GT_UTILITY_ELECTRIC, GT_NUCLEAR_LARGE]
+ED:
+  name: "Consolidated Edison"
+  themes: [GT_UTILITY_ELECTRIC, GT_UTILITY_GAS]
+XEL:
+  name: "Xcel Energy"
+  themes: [GT_UTILITY_ELECTRIC, GT_WIND]
+WEC:
+  name: "WEC Energy Group"
+  themes: [GT_UTILITY_ELECTRIC, GT_UTILITY_GAS]
+ETR:
+  name: "Entergy"
+  themes: [GT_UTILITY_ELECTRIC, GT_NUCLEAR_LARGE]
+ES:
+  name: "Eversource Energy"
+  themes: [GT_UTILITY_ELECTRIC]
+AEE:
+  name: "Ameren"
+  themes: [GT_UTILITY_ELECTRIC]
+FE:
+  name: "FirstEnergy"
+  themes: [GT_UTILITY_ELECTRIC]
+DTE:
+  name: "DTE Energy"
+  themes: [GT_UTILITY_ELECTRIC, GT_UTILITY_GAS]
+CMS:
+  name: "CMS Energy"
+  themes: [GT_UTILITY_ELECTRIC]
+EIX:
+  name: "Edison International"
+  themes: [GT_UTILITY_ELECTRIC]
+CNP:
+  name: "CenterPoint Energy"
+  themes: [GT_UTILITY_ELECTRIC, GT_UTILITY_GAS]
+LNT:
+  name: "Alliant Energy"
+  themes: [GT_UTILITY_ELECTRIC]
+EVRG:
+  name: "Evergy"
+  themes: [GT_UTILITY_ELECTRIC]
+AES:
+  name: "AES Corp"
+  themes: [GT_UTILITY_ELECTRIC, GT_SOLAR]
+NRG:
+  name: "NRG Energy"
+  themes: [GT_UTILITY_ELECTRIC]
+ATO:
+  name: "Atmos Energy"
+  themes: [GT_UTILITY_GAS]
+NI:
+  name: "NiSource"
+  themes: [GT_UTILITY_GAS, GT_UTILITY_ELECTRIC]
+AWK:
+  name: "American Water Works"
+  themes: [GT_UTILITY_WATER]
+
+# ============================================================================
+# REAL ESTATE — REITs
+# ============================================================================
+PLD:
+  name: "Prologis"
+  themes: [GT_REIT_INDUSTRIAL_LOGISTICS]
+AMT:
+  name: "American Tower"
+  themes: [GT_TELECOM_INFRA, GT_REIT_DATACENTER]
+CCI:
+  name: "Crown Castle"
+  themes: [GT_TELECOM_INFRA, GT_REIT_DATACENTER]
+EQIX:
+  name: "Equinix"
+  themes: [GT_REIT_DATACENTER, GT_AI_INFRA]
+DLR:
+  name: "Digital Realty Trust"
+  themes: [GT_REIT_DATACENTER, GT_AI_INFRA]
+PSA:
+  name: "Public Storage"
+  themes: [GT_REIT_INDUSTRIAL_LOGISTICS]
+EXR:
+  name: "Extra Space Storage"
+  themes: [GT_REIT_INDUSTRIAL_LOGISTICS]
+WELL:
+  name: "Welltower"
+  themes: [GT_REIT_HEALTHCARE]
+VTR:
+  name: "Ventas"
+  themes: [GT_REIT_HEALTHCARE]
+HCP:
+  name: "Healthpeak Properties"
+  themes: [GT_REIT_HEALTHCARE]
+PEAK:
+  name: "Healthpeak"
+  themes: [GT_REIT_HEALTHCARE]
+ARE:
+  name: "Alexandria Real Estate Equities"
+  themes: [GT_REIT_HEALTHCARE, GT_REIT_COMMERCIAL]
+AVB:
+  name: "AvalonBay Communities"
+  themes: [GT_REIT_RESIDENTIAL]
+EQR:
+  name: "Equity Residential"
+  themes: [GT_REIT_RESIDENTIAL]
+INVH:
+  name: "Invitation Homes"
+  themes: [GT_REIT_RESIDENTIAL]
+ESS:
+  name: "Essex Property Trust"
+  themes: [GT_REIT_RESIDENTIAL]
+MAA:
+  name: "Mid-America Apartment Communities"
+  themes: [GT_REIT_RESIDENTIAL]
+UDR:
+  name: "UDR"
+  themes: [GT_REIT_RESIDENTIAL]
+CPT:
+  name: "Camden Property Trust"
+  themes: [GT_REIT_RESIDENTIAL]
+SPG:
+  name: "Simon Property Group"
+  themes: [GT_REIT_COMMERCIAL, GT_RETAIL_OFFLINE]
+KIM:
+  name: "Kimco Realty"
+  themes: [GT_REIT_COMMERCIAL]
+REG:
+  name: "Regency Centers"
+  themes: [GT_REIT_COMMERCIAL]
+FRT:
+  name: "Federal Realty Investment Trust"
+  themes: [GT_REIT_COMMERCIAL]
+BXP:
+  name: "Boston Properties"
+  themes: [GT_REIT_COMMERCIAL]
+HST:
+  name: "Host Hotels & Resorts"
+  themes: [GT_REIT_COMMERCIAL, GT_TRAVEL_LEISURE]
+VICI:
+  name: "VICI Properties"
+  themes: [GT_REIT_COMMERCIAL, GT_TRAVEL_LEISURE]
+O:
+  name: "Realty Income"
+  themes: [GT_REIT_COMMERCIAL]
+WPC:
+  name: "W. P. Carey"
+  themes: [GT_REIT_COMMERCIAL, GT_REIT_INDUSTRIAL_LOGISTICS]
+SBAC:
+  name: "SBA Communications"
+  themes: [GT_TELECOM_INFRA]
+IRM:
+  name: "Iron Mountain"
+  themes: [GT_REIT_INDUSTRIAL_LOGISTICS, GT_REIT_DATACENTER]
+DOC:
+  name: "Healthpeak Properties (DOC)"
+  themes: [GT_REIT_HEALTHCARE]
+CSGP:
+  name: "CoStar Group"
+  themes: [GT_REAL_ESTATE_DEV, GT_AI_SOFTWARE]
+EXR_DUP:
+  name: "Extra Space Storage"
+  themes: [GT_REIT_INDUSTRIAL_LOGISTICS]
+
+# ============================================================================
+# 추가 / 최근 편입 종목 (S&P 500 보조)
+# ============================================================================
+UBER:
+  name: "Uber Technologies"
+  themes: [GT_AUTONOMOUS_DRIVING, GT_TRAVEL_LEISURE, GT_LOGISTICS]
+LYFT_NOTINSP:
+  name: "Lyft"
+  themes: [GT_AUTONOMOUS_DRIVING, GT_TRAVEL_LEISURE]
+ABNB_DUP:
+  name: "Airbnb"
+  themes: [GT_TRAVEL_LEISURE]
+DASH:
+  name: "DoorDash"
+  themes: [GT_ECOMMERCE_PLATFORM, GT_LOGISTICS]
+MELI_NOTINSP:
+  name: "MercadoLibre"
+  themes: [GT_ECOMMERCE_PLATFORM, GT_FINTECH_PAYMENT]
+GEHC:
+  name: "GE HealthCare Technologies"
+  themes: [GT_MED_DIAGNOSTIC, GT_MED_DEVICE_SURGICAL]
+KVUE:
+  name: "Kenvue"
+  themes: [GT_HOUSEHOLD_PRODUCTS, GT_PHARMA_LARGE]
+VLTO:
+  name: "Veralto"
+  themes: [GT_UTILITY_WATER, GT_MED_DIAGNOSTIC]
+SOLV:
+  name: "Solventum"
+  themes: [GT_MED_DEVICE_SURGICAL]
+GEV:
+  name: "GE Vernova"
+  themes: [GT_UTILITY_ELECTRIC, GT_WIND, GT_NUCLEAR_LARGE]
+PLTR_DUP:
+  name: "Palantir Technologies"
+  themes: [GT_AI_SOFTWARE, GT_DEFENSE_CYBER]
+
+# ============================================================================
+# NOTE
+# ============================================================================
+# S&P 500 구성종목은 분기별로 일부 변동. 이 문서는 2025년 말 기준 약 500개.
+# 자동 수집 시 Wikipedia 등에서 최신 목록 fetch 후 본 매핑과 join.
+# 매핑되지 않은 신규 종목은 GICS Sub-Industry 코드 → Tier 3 자동 추론.

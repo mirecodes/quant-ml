@@ -1,0 +1,585 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# KOSPI Stock → Global Theme Mapping (Part 1: 대형주 약 200종목)
+# ─────────────────────────────────────────────────────────────────────────────
+#
+# 한국 종목코드 (6자리) → 글로벌 테마 매핑
+# 데이터 소스: KRX WICS 산업분류 + 네이버 증권 테마 + 시장 통념
+# 시가총액 상위 200종목 (KOSPI200 핵심)
+# ─────────────────────────────────────────────────────────────────────────────
+
+# ============================================================================
+# 반도체 (Semiconductor)
+# ============================================================================
+"005930":
+  name: "삼성전자"
+  themes: [GT_SEMI_MEMORY, GT_SEMI_HBM, GT_SEMI_FOUNDRY, GT_SMARTPHONE, GT_DISPLAY]
+"000660":
+  name: "SK하이닉스"
+  themes: [GT_SEMI_MEMORY, GT_SEMI_HBM, GT_AI_CHIPS]
+"042700":
+  name: "한미반도체"
+  themes: [GT_SEMI_EQUIPMENT, GT_SEMI_PACKAGING, GT_SEMI_HBM]
+"000990":
+  name: "DB하이텍"
+  themes: [GT_SEMI_FOUNDRY, GT_SEMI_POWER]
+"240810":
+  name: "원익IPS"
+  themes: [GT_SEMI_EQUIPMENT]
+"036930":
+  name: "주성엔지니어링"
+  themes: [GT_SEMI_EQUIPMENT, GT_SOLAR]
+"039030":
+  name: "이오테크닉스"
+  themes: [GT_SEMI_EQUIPMENT]
+"294870":
+  name: "HD현대일렉트릭"
+  themes: [GT_UTILITY_ELECTRIC, GT_EV_CHARGING]
+"272210":
+  name: "한화시스템"
+  themes: [GT_DEFENSE_CYBER, GT_SPACE_SATELLITE, GT_DEFENSE_AIR]
+
+# ============================================================================
+# 배터리 / 2차전지 / 전기차
+# ============================================================================
+"373220":
+  name: "LG에너지솔루션"
+  themes: [GT_BATTERY_CELL, GT_EV_OEM, GT_ESS]
+"006400":
+  name: "삼성SDI"
+  themes: [GT_BATTERY_CELL, GT_ESS, GT_DISPLAY]
+"096770":
+  name: "SK이노베이션"
+  themes: [GT_OIL_REFINING, GT_BATTERY_CELL]
+"051910":
+  name: "LG화학"
+  themes: [GT_CHEM_COMMODITY, GT_BATTERY_CATHODE, GT_CHEM_SPECIALTY]
+"003670":
+  name: "포스코퓨처엠"
+  themes: [GT_BATTERY_CATHODE, GT_BATTERY_ANODE, GT_CHEM_SPECIALTY]
+"086520":
+  name: "에코프로"
+  themes: [GT_BATTERY_CATHODE, GT_CHEM_SPECIALTY]
+"247540":
+  name: "에코프로비엠"
+  themes: [GT_BATTERY_CATHODE]
+"450080":
+  name: "에코프로머티"
+  themes: [GT_BATTERY_CATHODE, GT_LITHIUM_RARE]
+"066970":
+  name: "엘앤에프"
+  themes: [GT_BATTERY_CATHODE]
+"121600":
+  name: "나노신소재"
+  themes: [GT_BATTERY_ANODE, GT_DISPLAY, GT_SEMI_MATERIALS]
+"131970":
+  name: "테스나"
+  themes: [GT_SEMI_PACKAGING]
+"112610":
+  name: "씨에스윈드"
+  themes: [GT_WIND]
+"267260":
+  name: "HD현대일렉트릭"
+  themes: [GT_UTILITY_ELECTRIC]
+"006360":
+  name: "GS건설"
+  themes: [GT_CONSTRUCTION_BUILDING, GT_CONSTRUCTION_PLANT]
+"376300":
+  name: "디어유"
+  themes: [GT_KCONTENT, GT_SOCIAL_MEDIA]
+
+# ============================================================================
+# 자동차 (전통+EV)
+# ============================================================================
+"005380":
+  name: "현대차"
+  themes: [GT_AUTO_OEM, GT_EV_OEM, GT_AUTONOMOUS_DRIVING]
+"000270":
+  name: "기아"
+  themes: [GT_AUTO_OEM, GT_EV_OEM]
+"012330":
+  name: "현대모비스"
+  themes: [GT_AUTO_PARTS, GT_EV_COMPONENTS, GT_AUTONOMOUS_DRIVING]
+"161890":
+  name: "한국콜마"
+  themes: [GT_COSMETICS]
+"161390":
+  name: "한국타이어앤테크놀로지"
+  themes: [GT_AUTO_TIRE]
+"011210":
+  name: "현대위아"
+  themes: [GT_AUTO_PARTS, GT_MACHINERY_GENERAL]
+"018880":
+  name: "한온시스템"
+  themes: [GT_AUTO_PARTS, GT_EV_COMPONENTS]
+"204320":
+  name: "HL만도"
+  themes: [GT_AUTO_PARTS, GT_AUTONOMOUS_DRIVING]
+"010140":
+  name: "삼성중공업"
+  themes: [GT_SHIPBUILDING, GT_DEFENSE_NAVAL]
+"009540":
+  name: "HD한국조선해양"
+  themes: [GT_SHIPBUILDING, GT_DEFENSE_NAVAL]
+"329180":
+  name: "HD현대중공업"
+  themes: [GT_SHIPBUILDING, GT_DEFENSE_NAVAL, GT_LNG]
+"010620":
+  name: "HD현대미포"
+  themes: [GT_SHIPBUILDING]
+"042660":
+  name: "한화오션"
+  themes: [GT_SHIPBUILDING, GT_DEFENSE_NAVAL]
+
+# ============================================================================
+# 화학 / 소재
+# ============================================================================
+"011170":
+  name: "롯데케미칼"
+  themes: [GT_CHEM_COMMODITY]
+"298050":
+  name: "효성첨단소재"
+  themes: [GT_CHEM_SPECIALTY, GT_HYDROGEN_FUEL]
+"298000":
+  name: "효성화학"
+  themes: [GT_CHEM_SPECIALTY]
+"285130":
+  name: "SK케미칼"
+  themes: [GT_CHEM_SPECIALTY, GT_PHARMA_LARGE]
+"012630":
+  name: "HDC"
+  themes: [GT_HOLDING_CO, GT_CONSTRUCTION_BUILDING]
+"001230":
+  name: "동국제강"
+  themes: [GT_STEEL]
+"004020":
+  name: "현대제철"
+  themes: [GT_STEEL]
+"005490":
+  name: "POSCO홀딩스"
+  themes: [GT_STEEL, GT_HOLDING_CO, GT_LITHIUM_RARE]
+"010120":
+  name: "LS ELECTRIC"
+  themes: [GT_UTILITY_ELECTRIC, GT_EV_CHARGING, GT_FACTORY_AUTOMATION]
+"006260":
+  name: "LS"
+  themes: [GT_HOLDING_CO, GT_UTILITY_ELECTRIC]
+"010130":
+  name: "고려아연"
+  themes: [GT_NONFERROUS]
+"014820":
+  name: "동원시스템즈"
+  themes: [GT_PACKAGING]
+"005830":
+  name: "DB손해보험"
+  themes: [GT_INSURANCE_PROPERTY]
+"002380":
+  name: "KCC"
+  themes: [GT_BUILDING_MAT, GT_CHEM_SPECIALTY]
+"036460":
+  name: "한국가스공사"
+  themes: [GT_UTILITY_GAS, GT_LNG]
+"267250":
+  name: "HD현대"
+  themes: [GT_HOLDING_CO, GT_OIL_REFINING, GT_SHIPBUILDING]
+
+# ============================================================================
+# 정유 / 에너지
+# ============================================================================
+"010950":
+  name: "S-Oil"
+  themes: [GT_OIL_REFINING]
+"267290":
+  name: "GS"
+  themes: [GT_HOLDING_CO, GT_OIL_REFINING]
+"017670":
+  name: "SK텔레콤"
+  themes: [GT_TELECOM_WIRELESS, GT_AI_INFRA]
+"030200":
+  name: "KT"
+  themes: [GT_TELECOM_WIRELESS, GT_CLOUD_INFRA]
+"032640":
+  name: "LG유플러스"
+  themes: [GT_TELECOM_WIRELESS]
+"015760":
+  name: "한국전력"
+  themes: [GT_UTILITY_ELECTRIC, GT_NUCLEAR_LARGE]
+
+# ============================================================================
+# 금융 (은행, 증권, 보험)
+# ============================================================================
+"055550":
+  name: "신한지주"
+  themes: [GT_BANK_COMMERCIAL, GT_HOLDING_CO]
+"105560":
+  name: "KB금융"
+  themes: [GT_BANK_COMMERCIAL, GT_HOLDING_CO]
+"086790":
+  name: "하나금융지주"
+  themes: [GT_BANK_COMMERCIAL, GT_HOLDING_CO]
+"316140":
+  name: "우리금융지주"
+  themes: [GT_BANK_COMMERCIAL, GT_HOLDING_CO]
+"138930":
+  name: "BNK금융지주"
+  themes: [GT_BANK_REGIONAL, GT_HOLDING_CO]
+"175330":
+  name: "JB금융지주"
+  themes: [GT_BANK_REGIONAL, GT_HOLDING_CO]
+"139130":
+  name: "DGB금융지주"
+  themes: [GT_BANK_REGIONAL, GT_HOLDING_CO]
+"024110":
+  name: "기업은행"
+  themes: [GT_BANK_COMMERCIAL]
+"071050":
+  name: "한국금융지주"
+  themes: [GT_BROKERAGE, GT_HOLDING_CO]
+"006800":
+  name: "미래에셋증권"
+  themes: [GT_BROKERAGE, GT_ASSET_MANAGEMENT]
+"016360":
+  name: "삼성증권"
+  themes: [GT_BROKERAGE]
+"030610":
+  name: "교보증권"
+  themes: [GT_BROKERAGE]
+"039490":
+  name: "키움증권"
+  themes: [GT_BROKERAGE]
+"008560":
+  name: "메리츠증권"
+  themes: [GT_BROKERAGE]
+"032830":
+  name: "삼성생명"
+  themes: [GT_INSURANCE_LIFE]
+"088350":
+  name: "한화생명"
+  themes: [GT_INSURANCE_LIFE]
+"000810":
+  name: "삼성화재"
+  themes: [GT_INSURANCE_PROPERTY]
+"001450":
+  name: "현대해상"
+  themes: [GT_INSURANCE_PROPERTY]
+"000400":
+  name: "롯데손해보험"
+  themes: [GT_INSURANCE_PROPERTY]
+
+# ============================================================================
+# 지주회사 / 대형 그룹
+# ============================================================================
+"003550":
+  name: "LG"
+  themes: [GT_HOLDING_CO]
+"034730":
+  name: "SK"
+  themes: [GT_HOLDING_CO, GT_TELECOM_WIRELESS]
+"180640":
+  name: "한진칼"
+  themes: [GT_HOLDING_CO, GT_AIRLINE]
+"000080":
+  name: "하이트진로"
+  themes: [GT_BEVERAGE_ALCOHOL]
+"097950":
+  name: "CJ제일제당"
+  themes: [GT_FOOD, GT_BIO_CDMO]
+"001040":
+  name: "CJ"
+  themes: [GT_HOLDING_CO, GT_FOOD, GT_KCONTENT]
+"035250":
+  name: "강원랜드"
+  themes: [GT_TRAVEL_LEISURE]
+"023530":
+  name: "롯데쇼핑"
+  themes: [GT_RETAIL_OFFLINE]
+"004990":
+  name: "롯데지주"
+  themes: [GT_HOLDING_CO]
+"282330":
+  name: "BGF리테일"
+  themes: [GT_RETAIL_OFFLINE]
+"007310":
+  name: "오뚜기"
+  themes: [GT_FOOD]
+"004370":
+  name: "농심"
+  themes: [GT_FOOD]
+"097230":
+  name: "한진중공업"
+  themes: [GT_SHIPBUILDING, GT_CONSTRUCTION_INFRA]
+"000720":
+  name: "현대건설"
+  themes: [GT_CONSTRUCTION_BUILDING, GT_CONSTRUCTION_PLANT, GT_NUCLEAR_LARGE]
+"047040":
+  name: "대우건설"
+  themes: [GT_CONSTRUCTION_BUILDING, GT_CONSTRUCTION_PLANT]
+"028260":
+  name: "삼성물산"
+  themes: [GT_CONSTRUCTION_BUILDING, GT_HOLDING_CO]
+"088980":
+  name: "맥쿼리인프라"
+  themes: [GT_CONSTRUCTION_INFRA, GT_REIT_INDUSTRIAL_LOGISTICS]
+"272550":
+  name: "삼성E&A"
+  themes: [GT_CONSTRUCTION_PLANT, GT_HYDROGEN_FUEL]
+"009830":
+  name: "한화솔루션"
+  themes: [GT_SOLAR, GT_CHEM_SPECIALTY]
+"000880":
+  name: "한화"
+  themes: [GT_HOLDING_CO, GT_DEFENSE_GROUND, GT_DEFENSE_MISSILE]
+"012450":
+  name: "한화에어로스페이스"
+  themes: [GT_DEFENSE_AIR, GT_DEFENSE_GROUND, GT_SPACE_LAUNCH]
+"000150":
+  name: "두산"
+  themes: [GT_HOLDING_CO, GT_NUCLEAR_LARGE, GT_NUCLEAR_SMR]
+"034020":
+  name: "두산에너빌리티"
+  themes: [GT_NUCLEAR_LARGE, GT_NUCLEAR_SMR, GT_MACHINERY_HEAVY, GT_HYDROGEN_FUEL]
+"241560":
+  name: "두산밥캣"
+  themes: [GT_MACHINERY_HEAVY]
+"267260":
+  name: "HD현대일렉트릭"
+  themes: [GT_UTILITY_ELECTRIC, GT_FACTORY_AUTOMATION]
+"010060":
+  name: "OCI홀딩스"
+  themes: [GT_SOLAR, GT_CHEM_SPECIALTY, GT_HOLDING_CO]
+"383220":
+  name: "F&F"
+  themes: [GT_FASHION_APPAREL]
+"105840":
+  name: "유한양행"
+  themes: [GT_PHARMA_LARGE, GT_BIO_ONCOLOGY]
+"068270":
+  name: "셀트리온"
+  themes: [GT_BIO_BIOSIMILAR, GT_BIO_ONCOLOGY, GT_BIO_CDMO]
+"207940":
+  name: "삼성바이오로직스"
+  themes: [GT_BIO_CDMO]
+"196170":
+  name: "알테오젠"
+  themes: [GT_BIOTECH, GT_BIO_CDMO]
+"326030":
+  name: "SK바이오팜"
+  themes: [GT_PHARMA_LARGE, GT_BIOTECH]
+"302440":
+  name: "SK바이오사이언스"
+  themes: [GT_BIO_MRNA]
+"302550":
+  name: "엘비루셈"
+  themes: [GT_SEMI_PACKAGING]
+"185750":
+  name: "종근당"
+  themes: [GT_PHARMA_LARGE]
+"000100":
+  name: "유한양행"
+  themes: [GT_PHARMA_LARGE]
+"009420":
+  name: "한올바이오파마"
+  themes: [GT_PHARMA_LARGE, GT_BIOTECH]
+"000060":
+  name: "메리츠화재"
+  themes: [GT_INSURANCE_PROPERTY]
+
+# ============================================================================
+# 화장품 / 패션
+# ============================================================================
+"090430":
+  name: "아모레퍼시픽"
+  themes: [GT_COSMETICS, GT_LUXURY]
+"002790":
+  name: "아모레G"
+  themes: [GT_HOLDING_CO, GT_COSMETICS]
+"051900":
+  name: "LG생활건강"
+  themes: [GT_COSMETICS, GT_HOUSEHOLD_PRODUCTS, GT_BEVERAGE_ALCOHOL]
+"011150":
+  name: "CJ씨푸드"
+  themes: [GT_FOOD]
+"097950_DUP":
+  name: "CJ제일제당"
+  themes: [GT_FOOD]
+"079160":
+  name: "CJ CGV"
+  themes: [GT_FILM_TV, GT_TRAVEL_LEISURE]
+"071840":
+  name: "롯데하이마트"
+  themes: [GT_RETAIL_OFFLINE]
+"023590":
+  name: "다우기술"
+  themes: [GT_SAAS, GT_FINTECH_PAYMENT]
+"041510":
+  name: "에스엠"
+  themes: [GT_KCONTENT, GT_MEDIA_ENTERTAINMENT]
+"352820":
+  name: "하이브"
+  themes: [GT_KCONTENT, GT_MEDIA_ENTERTAINMENT]
+"122870":
+  name: "와이지엔터테인먼트"
+  themes: [GT_KCONTENT]
+"035900":
+  name: "JYP Ent."
+  themes: [GT_KCONTENT]
+
+# ============================================================================
+# 통신 / 인터넷 / 콘텐츠 / 게임
+# ============================================================================
+"035420":
+  name: "NAVER"
+  themes: [GT_SEARCH_PORTAL, GT_DIGITAL_AD, GT_CLOUD_INFRA, GT_GENERATIVE_AI]
+"035720":
+  name: "카카오"
+  themes: [GT_SOCIAL_MEDIA, GT_FINTECH_PAYMENT, GT_KCONTENT]
+"323410":
+  name: "카카오뱅크"
+  themes: [GT_FINTECH_PAYMENT, GT_BANK_COMMERCIAL]
+"377300":
+  name: "카카오페이"
+  themes: [GT_FINTECH_PAYMENT]
+"259960":
+  name: "크래프톤"
+  themes: [GT_GAMING_PUBLISHER, GT_GAMING_MOBILE]
+"036570":
+  name: "엔씨소프트"
+  themes: [GT_GAMING_PC_CONSOLE, GT_GAMING_MOBILE]
+"251270":
+  name: "넷마블"
+  themes: [GT_GAMING_MOBILE, GT_GAMING_PUBLISHER]
+"112040":
+  name: "위메이드"
+  themes: [GT_GAMING_MOBILE, GT_BLOCKCHAIN]
+"194480":
+  name: "데브시스터즈"
+  themes: [GT_GAMING_MOBILE]
+"095660":
+  name: "네오위즈"
+  themes: [GT_GAMING_PUBLISHER]
+"293490":
+  name: "카카오게임즈"
+  themes: [GT_GAMING_PUBLISHER, GT_GAMING_MOBILE]
+"263750":
+  name: "펄어비스"
+  themes: [GT_GAMING_PC_CONSOLE]
+"181710":
+  name: "NHN"
+  themes: [GT_GAMING_PUBLISHER, GT_SEARCH_PORTAL]
+
+# ============================================================================
+# 운송 / 항공 / 해운
+# ============================================================================
+"003490":
+  name: "대한항공"
+  themes: [GT_AIRLINE, GT_LOGISTICS]
+"020560":
+  name: "아시아나항공"
+  themes: [GT_AIRLINE]
+"180640_DUP":
+  name: "한진칼"
+  themes: [GT_HOLDING_CO, GT_AIRLINE]
+"011200":
+  name: "HMM"
+  themes: [GT_SHIPPING]
+"000120":
+  name: "CJ대한통운"
+  themes: [GT_LOGISTICS]
+"086280":
+  name: "현대글로비스"
+  themes: [GT_LOGISTICS, GT_SHIPPING]
+"028050":
+  name: "삼성E&A"
+  themes: [GT_CONSTRUCTION_PLANT]
+
+# ============================================================================
+# 식음료 / 유통
+# ============================================================================
+"008930":
+  name: "한미사이언스"
+  themes: [GT_HOLDING_CO, GT_PHARMA_LARGE]
+"128940":
+  name: "한미약품"
+  themes: [GT_PHARMA_LARGE, GT_BIO_ONCOLOGY, GT_BIO_OBESITY]
+"139480":
+  name: "이마트"
+  themes: [GT_RETAIL_OFFLINE]
+"007070":
+  name: "GS리테일"
+  themes: [GT_RETAIL_OFFLINE]
+"282330_DUP":
+  name: "BGF리테일"
+  themes: [GT_RETAIL_OFFLINE]
+"006040":
+  name: "동원산업"
+  themes: [GT_FOOD, GT_AGRICULTURE]
+"027410":
+  name: "BGF"
+  themes: [GT_HOLDING_CO, GT_RETAIL_OFFLINE]
+"071950":
+  name: "코아스템켐온"
+  themes: [GT_BIO_GENE_CELL, GT_BIO_CRO]
+"145720":
+  name: "덴티움"
+  themes: [GT_MED_DEVICE_DENTAL]
+"048260":
+  name: "오스템임플란트"
+  themes: [GT_MED_DEVICE_DENTAL]
+
+# ============================================================================
+# 디스플레이 / 가전
+# ============================================================================
+"066570":
+  name: "LG전자"
+  themes: [GT_PC_PERIPHERAL, GT_HARDWARE, GT_HOUSEHOLD_PRODUCTS, GT_EV_COMPONENTS]
+"034220":
+  name: "LG디스플레이"
+  themes: [GT_DISPLAY]
+"009150":
+  name: "삼성전기"
+  themes: [GT_SEMI_PACKAGING, GT_HARDWARE, GT_SEMI_AUTOMOTIVE]
+"011070":
+  name: "LG이노텍"
+  themes: [GT_DISPLAY, GT_SMARTPHONE, GT_SEMI_AUTOMOTIVE]
+"006345":
+  name: "GS우"
+  themes: [GT_HOLDING_CO]
+"036570_DUP":
+  name: "엔씨소프트"
+  themes: [GT_GAMING_PC_CONSOLE]
+"267260_DUP":
+  name: "HD현대일렉트릭"
+  themes: [GT_UTILITY_ELECTRIC]
+"033780":
+  name: "KT&G"
+  themes: [GT_TOBACCO, GT_PHARMA_LARGE]
+
+# ============================================================================
+# 건설 / 부동산
+# ============================================================================
+"375500":
+  name: "DL이앤씨"
+  themes: [GT_CONSTRUCTION_BUILDING, GT_CONSTRUCTION_PLANT]
+"000210":
+  name: "DL"
+  themes: [GT_HOLDING_CO, GT_CONSTRUCTION_BUILDING, GT_CHEM_COMMODITY]
+"006360_DUP":
+  name: "GS건설"
+  themes: [GT_CONSTRUCTION_BUILDING]
+"294870_DUP":
+  name: "HD현대일렉트릭"
+  themes: [GT_UTILITY_ELECTRIC]
+"330590":
+  name: "롯데리츠"
+  themes: [GT_REIT_COMMERCIAL]
+"088260":
+  name: "이리츠코크렙"
+  themes: [GT_REIT_COMMERCIAL]
+"395400":
+  name: "SK리츠"
+  themes: [GT_REIT_COMMERCIAL]
+"432320":
+  name: "KB스타리츠"
+  themes: [GT_REIT_COMMERCIAL]
+"357250":
+  name: "미래에셋글로벌리츠"
+  themes: [GT_REIT_INDUSTRIAL_LOGISTICS, GT_REIT_COMMERCIAL]

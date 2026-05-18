@@ -28,6 +28,10 @@ def main():
     # 두 데이터프레임 병합
     data = features.merge(labels, on=['ticker', 'date'], how='inner')
     
+    # TFT 모델은 PyTorch Forecasting Dataset 생성 시 타겟 라벨(A, R)의 결측치를 허용하지 않습니다.
+    # 미래 수익률(최대 5년)을 알 수 없는 최근 데이터들의 결측치 로우를 학습 대상에서 안전하게 제거합니다.
+    data = data.dropna(subset=['A', 'R']).copy()
+    
     if data.empty:
         print("Error: Merged features and labels dataset is empty.")
         return

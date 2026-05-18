@@ -29,8 +29,8 @@ class TFTStockModel:
         df['quarter_idx'] = (df['date'].dt.year * 4 + df['date'].dt.quarter).astype(int)
         df['quarter_idx'] -= df['quarter_idx'].min()
         
-        # NaN 라벨이 있는 행 제거 (A, R 둘 다 NaN인 행 제거)
-        df = df.dropna(subset=targets, how='all')
+        # NaN 라벨이 있는 행 제거 (A나 R 중 하나라도 NaN이면 PyTorch Forecasting 에러 발생)
+        df = df.dropna(subset=targets, how='any')
         
         # static categoricals
         static_cats = ['country', 'sector', 'size_tier']
@@ -40,6 +40,11 @@ class TFTStockModel:
         # 모든 거시·재무·계산 피처 자동 인식
         feature_cols = [c for c in df.columns 
                         if c.startswith(('M_', 'F_', 'C_'))]
+        
+        # 피처 컬럼에 결측치가 있으면 에러가 나므로 0.0으로 안전하게 채움
+        for col in feature_cols:
+            if df[col].isnull().any():
+                df[col] = df[col].fillna(0.0)
         
         # 데모/소규모 데이터셋에서의 정상 동작을 위해 인코더 길이 축소 최적화
         max_encoder = 2   # 과거 2분기

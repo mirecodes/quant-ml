@@ -1,0 +1,1337 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# KOSPI Stock → Global Theme Mapping (Part 3: 잔여 종목 완결)
+# Part 1+2에서 미포함된 KOSPI 전 종목 커버 (약 400종목)
+# ─────────────────────────────────────────────────────────────────────────────
+
+# ============================================================================
+# 반도체 / 디스플레이 / 전자부품 소형
+# ============================================================================
+"009300":
+  name: "삼아알미늄"
+  themes: [GT_NONFERROUS, GT_BATTERY_CELL]
+"009620":
+  name: "삼보모터스"
+  themes: [GT_AUTO_PARTS, GT_EV_COMPONENTS]
+"010820_DUP":
+  name: "퍼스텍"
+  themes: [GT_DEFENSE_MISSILE]
+"011300":
+  name: "성안"
+  themes: [GT_STEEL, GT_NONFERROUS]
+"011330":
+  name: "유니켐"
+  themes: [GT_CHEM_SPECIALTY]
+"011420":
+  name: "경인전자"
+  themes: [GT_SEMI_PACKAGING]
+"011500":
+  name: "한농화성"
+  themes: [GT_CHEM_SPECIALTY, GT_AGRICULTURE]
+"011560":
+  name: "세보엠이씨"
+  themes: [GT_CONSTRUCTION_INFRA, GT_UTILITY_ELECTRIC]
+"011700":
+  name: "한일시멘트"
+  themes: [GT_CEMENT]
+"011760":
+  name: "현대코퍼레이션홀딩스"
+  themes: [GT_HOLDING_CO, GT_OIL_EP]
+"011810":
+  name: "STX"
+  themes: [GT_HOLDING_CO, GT_SHIPBUILDING, GT_MACHINERY_HEAVY]
+"012280":
+  name: "영화금속"
+  themes: [GT_NONFERROUS, GT_AUTO_PARTS]
+"013570":
+  name: "디와이"
+  themes: [GT_AUTO_PARTS, GT_CONSTRUCTION_INFRA]
+"013580":
+  name: "계룡건설산업"
+  themes: [GT_CONSTRUCTION_BUILDING]
+"013600":
+  name: "동방아그로우"
+  themes: [GT_AGRICULTURE]
+"013810":
+  name: "스카이문스테크놀로지"
+  themes: [GT_HARDWARE, GT_DEFENSE_CYBER]
+"014190":
+  name: "한국애강"
+  themes: [GT_BUILDING_MAT]
+"014600":
+  name: "성보화학"
+  themes: [GT_CHEM_SPECIALTY]
+"015230":
+  name: "대창단조"
+  themes: [GT_AUTO_PARTS, GT_STEEL]
+"015360":
+  name: "예스코홀딩스"
+  themes: [GT_HOLDING_CO, GT_UTILITY_GAS]
+"015590":
+  name: "뉴지랩파마"
+  themes: [GT_PHARMA_LARGE, GT_BIOTECH]
+"016080":
+  name: "고려비엔피"
+  themes: [GT_CHEM_SPECIALTY]
+"016090":
+  name: "대현"
+  themes: [GT_FASHION_APPAREL]
+"016380":
+  name: "LS네트웍스"
+  themes: [GT_RETAIL_OFFLINE, GT_FASHION_APPAREL]
+"016710":
+  name: "대성홀딩스"
+  themes: [GT_HOLDING_CO, GT_UTILITY_GAS, GT_UTILITY_ELECTRIC]
+"017040":
+  name: "광명전기"
+  themes: [GT_UTILITY_ELECTRIC]
+"017170":
+  name: "넥스트BT"
+  themes: [GT_BIOTECH, GT_FOOD]
+"017180":
+  name: "사조해표"
+  themes: [GT_FOOD, GT_AGRICULTURE]
+"017810":
+  name: "풀무원"
+  themes: [GT_FOOD]
+"018670":
+  name: "SK가스"
+  themes: [GT_UTILITY_GAS, GT_LNG]
+"018880_DUP":
+  name: "한온시스템"
+  themes: [GT_AUTO_PARTS, GT_EV_COMPONENTS]
+"019175":
+  name: "신풍제약우"
+  themes: [GT_PHARMA_LARGE]
+"019540":
+  name: "일지테크"
+  themes: [GT_AUTO_PARTS]
+"019580":
+  name: "알루미늄박"
+  themes: [GT_NONFERROUS, GT_PACKAGING]
+"019870":
+  name: "신화실업"
+  themes: [GT_AUTO_PARTS, GT_EV_COMPONENTS]
+"020000":
+  name: "한섬"
+  themes: [GT_FASHION_APPAREL, GT_LUXURY]
+"020150":
+  name: "일진전기우"
+  themes: [GT_UTILITY_ELECTRIC]
+"020400":
+  name: "한국전자인증"
+  themes: [GT_CYBER_CLOUD, GT_FINTECH_PAYMENT]
+"020560_DUP":
+  name: "아시아나항공"
+  themes: [GT_AIRLINE]
+"020760":
+  name: "한국항공우주"
+  themes: [GT_DEFENSE_AIR, GT_SPACE_LAUNCH]
+"021040":
+  name: "위메이드맥스"
+  themes: [GT_GAMING_MOBILE, GT_BLOCKCHAIN]
+"021080":
+  name: "에이엔피"
+  themes: [GT_PACKAGING, GT_CHEM_SPECIALTY]
+"021240":
+  name: "코웨이"
+  themes: [GT_HOUSEHOLD_PRODUCTS, GT_UTILITY_WATER]
+"021530":
+  name: "금화피에스시"
+  themes: [GT_CONSTRUCTION_INFRA, GT_UTILITY_ELECTRIC]
+"022100":
+  name: "포스코DX"
+  themes: [GT_FACTORY_AUTOMATION, GT_AI_SOFTWARE]
+"022220":
+  name: "포스코엠텍"
+  themes: [GT_LITHIUM_RARE, GT_NONFERROUS]
+"022380":
+  name: "KCC글라스"
+  themes: [GT_BUILDING_MAT, GT_DISPLAY]
+"022790":
+  name: "결전"
+  themes: [GT_CHEM_SPECIALTY]
+"023160":
+  name: "대한가스"
+  themes: [GT_UTILITY_GAS]
+"023400":
+  name: "원일특강"
+  themes: [GT_STEEL]
+"023760":
+  name: "한국가스기술공사"
+  themes: [GT_UTILITY_GAS, GT_HYDROGEN_FUEL]
+"024070":
+  name: "와이씨켐"
+  themes: [GT_CHEM_SPECIALTY, GT_SEMI_MATERIALS]
+"024890":
+  name: "한국베르겐홀딩스"
+  themes: [GT_HOLDING_CO]
+"025560":
+  name: "미래산업"
+  themes: [GT_SEMI_EQUIPMENT]
+"025820":
+  name: "이구산업"
+  themes: [GT_NONFERROUS, GT_STEEL]
+"025890":
+  name: "한일홀딩스"
+  themes: [GT_HOLDING_CO, GT_CEMENT]
+"026150":
+  name: "특수건설"
+  themes: [GT_CONSTRUCTION_INFRA]
+"026490":
+  name: "코스텍시스템"
+  themes: [GT_SEMI_PACKAGING, GT_HARDWARE]
+"026960":
+  name: "동서"
+  themes: [GT_HOLDING_CO, GT_FOOD, GT_BEVERAGE_ALCOHOL]
+"027970":
+  name: "세아제강지주우"
+  themes: [GT_HOLDING_CO, GT_STEEL]
+"028150":
+  name: "GS홈쇼핑"
+  themes: [GT_RETAIL_OFFLINE, GT_ECOMMERCE_PLATFORM]
+"028300":
+  name: "HLB"
+  themes: [GT_BIOTECH, GT_BIO_ONCOLOGY]
+"029460_DUP":
+  name: "케이씨"
+  themes: [GT_SEMI_EQUIPMENT]
+"029530":
+  name: "신도리코"
+  themes: [GT_PC_PERIPHERAL, GT_HARDWARE]
+"029660":
+  name: "동부건설"
+  themes: [GT_CONSTRUCTION_BUILDING]
+"030000_DUP":
+  name: "제일기획"
+  themes: [GT_DIGITAL_AD]
+"030190":
+  name: "NHN KCP"
+  themes: [GT_FINTECH_PAYMENT]
+"030350":
+  name: "에프에스티"
+  themes: [GT_SEMI_MATERIALS, GT_SEMI_EQUIPMENT]
+"030720":
+  name: "동원개발"
+  themes: [GT_CONSTRUCTION_BUILDING]
+"031430":
+  name: "신세계인터내셔날"
+  themes: [GT_FASHION_APPAREL, GT_LUXURY]
+"031820":
+  name: "포스코엠씨머티리얼즈"
+  themes: [GT_SEMI_MATERIALS, GT_CHEM_SPECIALTY]
+"032560_DUP":
+  name: "황금에스티"
+  themes: [GT_STEEL]
+"033200":
+  name: "모아이"
+  themes: [GT_BUILDING_MAT]
+"033530":
+  name: "세종공업"
+  themes: [GT_AUTO_PARTS, GT_EV_COMPONENTS]
+"033940":
+  name: "스카이이앤엠"
+  themes: [GT_MEDIA_ENTERTAINMENT, GT_KCONTENT]
+"034060":
+  name: "엔카닷컴"
+  themes: [GT_ECOMMERCE_PLATFORM, GT_AUTO_OEM]
+"034120":
+  name: "SBS미디어홀딩스"
+  themes: [GT_HOLDING_CO, GT_MEDIA_ENTERTAINMENT]
+"034590":
+  name: "인천도시가스"
+  themes: [GT_UTILITY_GAS]
+"035000":
+  name: "조광피혁"
+  themes: [GT_FASHION_APPAREL]
+"035080":
+  name: "인터파크홀딩스"
+  themes: [GT_HOLDING_CO, GT_ECOMMERCE_PLATFORM, GT_TRAVEL_LEISURE]
+"035510":
+  name: "신세계아이앤씨"
+  themes: [GT_AI_SOFTWARE, GT_RETAIL_OFFLINE]
+"036090":
+  name: "에코바이오홀딩스"
+  themes: [GT_HOLDING_CO, GT_BIOENERGY, GT_UTILITY_WASTE]
+"036520":
+  name: "미창석유공업"
+  themes: [GT_OIL_REFINING, GT_CHEM_SPECIALTY]
+"037070":
+  name: "파세코"
+  themes: [GT_HOUSEHOLD_PRODUCTS]
+"037270":
+  name: "YG PLUS"
+  themes: [GT_KCONTENT, GT_MEDIA_ENTERTAINMENT]
+"037460":
+  name: "삼지전자"
+  themes: [GT_HARDWARE, GT_DEFENSE_CYBER]
+"037560_DUP":
+  name: "LG헬로비전"
+  themes: [GT_TELECOM_INFRA]
+"037620":
+  name: "현대홈쇼핑"
+  themes: [GT_RETAIL_OFFLINE, GT_ECOMMERCE_PLATFORM]
+"037710":
+  name: "광주신세계"
+  themes: [GT_RETAIL_OFFLINE]
+"038010":
+  name: "제이에스티나"
+  themes: [GT_LUXURY, GT_FASHION_APPAREL]
+"038290":
+  name: "국순당"
+  themes: [GT_BEVERAGE_ALCOHOL]
+"039010":
+  name: "현대인프라코어"
+  themes: [GT_MACHINERY_HEAVY, GT_CONSTRUCTION_INFRA]
+"039490_DUP2":
+  name: "키움증권"
+  themes: [GT_BROKERAGE]
+"039570_DUP2":
+  name: "HDC아이콘트롤스"
+  themes: [GT_FACTORY_AUTOMATION]
+"040420":
+  name: "정상제이엘에스"
+  themes: [GT_AI_APPLICATIONS, GT_KCONTENT]
+"040910":
+  name: "아미코젠"
+  themes: [GT_BIOTECH, GT_BIO_CDMO]
+"041650":
+  name: "상신전자"
+  themes: [GT_BATTERY_CELL, GT_SEMI_PACKAGING]
+"041830":
+  name: "인바디"
+  themes: [GT_MED_DIAGNOSTIC, GT_DIGITAL_HEALTH_PLATFORM]
+"042520":
+  name: "한올바이오파마우"
+  themes: [GT_PHARMA_LARGE]
+"042670":
+  name: "HD현대인프라코어"
+  themes: [GT_MACHINERY_HEAVY, GT_CONSTRUCTION_INFRA]
+"042940":
+  name: "아이콘트롤스"
+  themes: [GT_IOT, GT_FACTORY_AUTOMATION]
+"043200":
+  name: "파루"
+  themes: [GT_SOLAR, GT_IOT]
+"043650":
+  name: "국도화학우"
+  themes: [GT_CHEM_SPECIALTY]
+"044020":
+  name: "코렌텍"
+  themes: [GT_MED_DEVICE_SURGICAL]
+"044490":
+  name: "태웅"
+  themes: [GT_STEEL, GT_WIND, GT_NUCLEAR_LARGE]
+"044820_DUP":
+  name: "코스맥스비티아이"
+  themes: [GT_HOLDING_CO, GT_COSMETICS]
+"045390_DUP":
+  name: "대아티아이"
+  themes: [GT_RAILWAY]
+"045440":
+  name: "삼우엠스"
+  themes: [GT_HARDWARE, GT_BATTERY_EQUIPMENT]
+"045460":
+  name: "삼광글라스"
+  themes: [GT_PACKAGING]
+"046890":
+  name: "서울반도체"
+  themes: [GT_SEMI_FABLESS, GT_DISPLAY]
+"046940":
+  name: "에버피아"
+  themes: [GT_IOT, GT_FACTORY_AUTOMATION]
+"047040_DUP":
+  name: "대우건설"
+  themes: [GT_CONSTRUCTION_BUILDING]
+"047270":
+  name: "중앙에이치엠"
+  themes: [GT_CONSTRUCTION_BUILDING]
+"047560":
+  name: "이스타코"
+  themes: [GT_CONSTRUCTION_BUILDING]
+"048770":
+  name: "TPC"
+  themes: [GT_MACHINERY_GENERAL]
+"049500":
+  name: "화신"
+  themes: [GT_AUTO_PARTS, GT_STEEL]
+"049520":
+  name: "유아이디"
+  themes: [GT_DISPLAY, GT_SEMI_PACKAGING]
+"050120":
+  name: "ES큐브"
+  themes: [GT_BIOENERGY, GT_UTILITY_WASTE]
+"050440":
+  name: "지씨씨"
+  themes: [GT_CONSTRUCTION_INFRA]
+"051600":
+  name: "한전KPS"
+  themes: [GT_UTILITY_ELECTRIC, GT_NUCLEAR_LARGE]
+"051630":
+  name: "진양홀딩스"
+  themes: [GT_HOLDING_CO, GT_CHEM_SPECIALTY]
+"051750":
+  name: "LH공사"
+  themes: [GT_REAL_ESTATE_DEV]
+"052300":
+  name: "대각인더스트리"
+  themes: [GT_AUTO_PARTS]
+"052430":
+  name: "마이크로텍"
+  themes: [GT_SEMI_PACKAGING]
+"053210_DUP2":
+  name: "스카이라이프"
+  themes: [GT_STREAMING]
+"054540":
+  name: "삼영전자공업"
+  themes: [GT_HARDWARE]
+"055490":
+  name: "신원"
+  themes: [GT_FASHION_APPAREL]
+"055550_DUP":
+  name: "신한지주"
+  themes: [GT_BANK_COMMERCIAL, GT_HOLDING_CO]
+"055650":
+  name: "삼성공조"
+  themes: [GT_AUTO_PARTS]
+"056000":
+  name: "조광ILI"
+  themes: [GT_CHEM_SPECIALTY]
+"056080":
+  name: "유진기업"
+  themes: [GT_CEMENT, GT_CONSTRUCTION_INFRA]
+"056090":
+  name: "이노션"
+  themes: [GT_DIGITAL_AD, GT_AI_APPLICATIONS]
+"057050":
+  name: "현대홈쇼핑우"
+  themes: [GT_RETAIL_OFFLINE]
+"057500":
+  name: "현대비앤지스틸"
+  themes: [GT_STEEL]
+"058220":
+  name: "에스에이티이엔지"
+  themes: [GT_SEMI_EQUIPMENT, GT_BATTERY_EQUIPMENT]
+"058430":
+  name: "포스코스틸리온"
+  themes: [GT_STEEL, GT_EV_COMPONENTS]
+"058450":
+  name: "KNN"
+  themes: [GT_MEDIA_ENTERTAINMENT, GT_FILM_TV]
+"058650":
+  name: "세아베스틸지주"
+  themes: [GT_HOLDING_CO, GT_STEEL]
+"058730":
+  name: "다음소프트"
+  themes: [GT_AI_SOFTWARE, GT_AI_APPLICATIONS]
+"059120":
+  name: "아진엑스텍"
+  themes: [GT_FACTORY_AUTOMATION, GT_SEMI_EQUIPMENT]
+"060260":
+  name: "NHN엔터테인먼트"
+  themes: [GT_GAMING_PUBLISHER, GT_FINTECH_PAYMENT]
+"060980":
+  name: "한진중공업홀딩스"
+  themes: [GT_HOLDING_CO, GT_SHIPBUILDING]
+"061970":
+  name: "세아베스틸"
+  themes: [GT_STEEL]
+"062040":
+  name: "대한전선"
+  themes: [GT_UTILITY_ELECTRIC, GT_EV_CHARGING]
+"063160":
+  name: "모베이스전자"
+  themes: [GT_AUTO_PARTS, GT_HARDWARE]
+"063810":
+  name: "보성파워텍"
+  themes: [GT_UTILITY_ELECTRIC, GT_CONSTRUCTION_INFRA]
+"064350":
+  name: "현대로템"
+  themes: [GT_DEFENSE_GROUND, GT_RAILWAY, GT_HYDROGEN_FUEL]
+"064960":
+  name: "S&T홀딩스"
+  themes: [GT_HOLDING_CO, GT_DEFENSE_GROUND, GT_AUTO_PARTS]
+"065150":
+  name: "야스"
+  themes: [GT_SEMI_EQUIPMENT, GT_DISPLAY]
+"065350":
+  name: "신성델타테크"
+  themes: [GT_SEMI_EQUIPMENT, GT_FACTORY_AUTOMATION]
+"065510":
+  name: "휴비스우"
+  themes: [GT_CHEM_SPECIALTY]
+"066570_DUP":
+  name: "LG전자"
+  themes: [GT_HARDWARE, GT_EV_COMPONENTS]
+"066910":
+  name: "손오공"
+  themes: [GT_MEDIA_ENTERTAINMENT]
+"067830":
+  name: "옵트론텍"
+  themes: [GT_DISPLAY, GT_HARDWARE]
+"068760":
+  name: "셀트리온제약"
+  themes: [GT_PHARMA_LARGE, GT_BIO_BIOSIMILAR]
+"069620_DUP":
+  name: "대웅제약"
+  themes: [GT_PHARMA_LARGE, GT_MED_DEVICE_AESTHETIC]
+"069960":
+  name: "현대백화점"
+  themes: [GT_RETAIL_OFFLINE, GT_LUXURY]
+"070960":
+  name: "모나미"
+  themes: [GT_HOUSEHOLD_PRODUCTS, GT_MEDIA_ENTERTAINMENT]
+"071055":
+  name: "한국금융지주우"
+  themes: [GT_BROKERAGE]
+"071090_DUP2":
+  name: "하이스틸"
+  themes: [GT_STEEL]
+"071840_DUP":
+  name: "롯데하이마트"
+  themes: [GT_RETAIL_OFFLINE]
+"072770":
+  name: "나스미디어"
+  themes: [GT_DIGITAL_AD, GT_SEARCH_PORTAL]
+"072990":
+  name: "에이치시티"
+  themes: [GT_BIOTECH]
+"073240":
+  name: "금호타이어"
+  themes: [GT_AUTO_TIRE]
+"074500":
+  name: "아시아나IDT"
+  themes: [GT_AI_SOFTWARE, GT_SAAS]
+"074600":
+  name: "원익QnC"
+  themes: [GT_SEMI_MATERIALS, GT_SEMI_EQUIPMENT]
+"075580":
+  name: "세진중공업"
+  themes: [GT_SHIPBUILDING, GT_STEEL]
+"075880":
+  name: "진원생명과학"
+  themes: [GT_BIO_MRNA, GT_BIOTECH]
+"076340":
+  name: "한국전력기술"
+  themes: [GT_NUCLEAR_LARGE, GT_UTILITY_ELECTRIC]
+"076400":
+  name: "동양생명"
+  themes: [GT_INSURANCE_LIFE]
+"077970":
+  name: "STX엔진"
+  themes: [GT_SHIPBUILDING, GT_DEFENSE_AIR]
+"079550":
+  name: "LIG넥스원"
+  themes: [GT_DEFENSE_MISSILE, GT_DEFENSE_CYBER]
+"080160":
+  name: "메가스터디교육"
+  themes: [GT_AI_APPLICATIONS, GT_KCONTENT]
+"080190":
+  name: "에이디엠코리아"
+  themes: [GT_CHEM_SPECIALTY, GT_SEMI_MATERIALS]
+"080470":
+  name: "KB오토시스"
+  themes: [GT_FINTECH_PAYMENT]
+"081660":
+  name: "후지필름"
+  themes: [GT_DISPLAY, GT_MED_DIAGNOSTIC]
+"082640":
+  name: "동양"
+  themes: [GT_HOLDING_CO, GT_CEMENT]
+"082740":
+  name: "HSD엔진"
+  themes: [GT_SHIPBUILDING, GT_MACHINERY_HEAVY]
+"082920":
+  name: "비씨월드제약"
+  themes: [GT_PHARMA_LARGE, GT_MED_DEVICE_AESTHETIC]
+"083150":
+  name: "제이알글로벌리츠"
+  themes: [GT_REIT_COMMERCIAL]
+"083420":
+  name: "그린리소스"
+  themes: [GT_BIOENERGY, GT_AGRICULTURE]
+"083640":
+  name: "CSP"
+  themes: [GT_LOGISTICS]
+"084010_DUP":
+  name: "대한제강"
+  themes: [GT_STEEL]
+"084650":
+  name: "랩지노믹스"
+  themes: [GT_MED_DIAGNOSTIC, GT_BIO_CRO]
+"085310":
+  name: "엘오티베큠"
+  themes: [GT_SEMI_EQUIPMENT]
+"085660":
+  name: "차바이오텍"
+  themes: [GT_BIO_GENE_CELL, GT_BIO_CDMO]
+"086790_DUP":
+  name: "하나금융지주"
+  themes: [GT_BANK_COMMERCIAL]
+"087010":
+  name: "쌍용씨앤이"
+  themes: [GT_CEMENT]
+"087600":
+  name: "나이스정보통신"
+  themes: [GT_FINTECH_PAYMENT]
+"087900":
+  name: "나이스홀딩스"
+  themes: [GT_HOLDING_CO, GT_BROKERAGE]
+"088590":
+  name: "씨씨에스충북방송"
+  themes: [GT_TELECOM_INFRA]
+"088790":
+  name: "진도"
+  themes: [GT_FASHION_APPAREL]
+"090435":
+  name: "아모레퍼시픽우"
+  themes: [GT_COSMETICS]
+"091810":
+  name: "티웨이홀딩스"
+  themes: [GT_HOLDING_CO, GT_AIRLINE]
+"091970":
+  name: "S&T중공업"
+  themes: [GT_DEFENSE_GROUND, GT_MACHINERY_HEAVY]
+"092200":
+  name: "디씨엠"
+  themes: [GT_SEMI_PACKAGING, GT_DISPLAY]
+"093960":
+  name: "화성밸브"
+  themes: [GT_MACHINERY_GENERAL]
+"094290":
+  name: "이니텍"
+  themes: [GT_CYBER_ENDPOINT, GT_FINTECH_PAYMENT]
+"094360":
+  name: "칩스앤미디어"
+  themes: [GT_SEMI_FABLESS, GT_AI_CHIPS]
+"095570":
+  name: "AJ네트웍스"
+  themes: [GT_LOGISTICS, GT_FINTECH_PAYMENT]
+"095680":
+  name: "마이크로컨텍솔"
+  themes: [GT_SEMI_PACKAGING]
+"096040":
+  name: "에코마케팅"
+  themes: [GT_DIGITAL_AD, GT_ECOMMERCE_PLATFORM]
+"097780":
+  name: "핵심소재"
+  themes: [GT_SEMI_MATERIALS, GT_BATTERY_SEPARATOR]
+"098660":
+  name: "에스티오"
+  themes: [GT_LOGISTICS, GT_AI_APPLICATIONS]
+"098790":
+  name: "유진저축은행"
+  themes: [GT_BANK_REGIONAL]
+"099190":
+  name: "아이오케이"
+  themes: [GT_KCONTENT, GT_MEDIA_ENTERTAINMENT]
+"099300":
+  name: "아케이드에이치더블유이"
+  themes: [GT_GAMING_PC_CONSOLE]
+"100120":
+  name: "뷰웍스"
+  themes: [GT_MED_DIAGNOSTIC, GT_FACTORY_AUTOMATION]
+"100660":
+  name: "화신테크"
+  themes: [GT_AUTO_PARTS, GT_MACHINERY_GENERAL]
+"101160":
+  name: "월드경영개발"
+  themes: [GT_REAL_ESTATE_DEV]
+"101240":
+  name: "씨큐브"
+  themes: [GT_SEMI_EQUIPMENT, GT_DISPLAY]
+"101490":
+  name: "에스앤에스텍"
+  themes: [GT_SEMI_MATERIALS]
+"102280":
+  name: "쌍용C&E"
+  themes: [GT_CEMENT]
+"103590":
+  name: "일진전기"
+  themes: [GT_UTILITY_ELECTRIC]
+"105190":
+  name: "엘티씨"
+  themes: [GT_DISPLAY, GT_SEMI_MATERIALS]
+"106080":
+  name: "하이소닉"
+  themes: [GT_HARDWARE, GT_SEMI_PACKAGING]
+"107590":
+  name: "CS홀딩스"
+  themes: [GT_HOLDING_CO, GT_LOGISTICS]
+"109070":
+  name: "아이에이"
+  themes: [GT_AUTO_PARTS, GT_EV_COMPONENTS]
+"109610":
+  name: "에스텍"
+  themes: [GT_AUTO_PARTS]
+"110020":
+  name: "전진바이오팜"
+  themes: [GT_PHARMA_LARGE, GT_AGRICULTURE]
+"110570":
+  name: "에스에프에이"
+  themes: [GT_DISPLAY, GT_FACTORY_AUTOMATION, GT_BATTERY_EQUIPMENT]
+"111770":
+  name: "영원무역홀딩스"
+  themes: [GT_HOLDING_CO, GT_FASHION_APPAREL]
+"111800":
+  name: "인지디스플레이"
+  themes: [GT_DISPLAY]
+"114090_DUP":
+  name: "GKL"
+  themes: [GT_TRAVEL_LEISURE]
+"115230":
+  name: "에스씨엔지니어링"
+  themes: [GT_CONSTRUCTION_INFRA]
+"115390":
+  name: "락앤락"
+  themes: [GT_HOUSEHOLD_PRODUCTS]
+"115530":
+  name: "씨에이치"
+  themes: [GT_CHEM_SPECIALTY]
+"116580":
+  name: "엔에스엔"
+  themes: [GT_NETWORKING, GT_TELECOM_INFRA]
+"117670":
+  name: "에이치케이이노엔"
+  themes: [GT_PHARMA_LARGE, GT_BIO_CDMO]
+"119050":
+  name: "SBI핀테크솔루션즈"
+  themes: [GT_FINTECH_PAYMENT]
+"119610":
+  name: "인터로조"
+  themes: [GT_MED_DEVICE_SURGICAL]
+"120110":
+  name: "코오롱인더"
+  themes: [GT_CHEM_SPECIALTY, GT_FASHION_APPAREL, GT_HYDROGEN_FUEL]
+"120115":
+  name: "코오롱인더우"
+  themes: [GT_CHEM_SPECIALTY]
+"120240":
+  name: "코오롱글로벌"
+  themes: [GT_CONSTRUCTION_BUILDING, GT_LOGISTICS]
+"120750":
+  name: "미래에셋글로벌리츠"
+  themes: [GT_REIT_COMMERCIAL, GT_REIT_INDUSTRIAL_LOGISTICS]
+"121550":
+  name: "리더스코스메틱"
+  themes: [GT_COSMETICS]
+"122380":
+  name: "솔브레인홀딩스"
+  themes: [GT_HOLDING_CO, GT_SEMI_MATERIALS]
+"123560":
+  name: "솔브레인"
+  themes: [GT_SEMI_MATERIALS, GT_BATTERY_ELECTROLYTE]
+"124560":
+  name: "태양금속"
+  themes: [GT_NONFERROUS, GT_AUTO_PARTS]
+"126860":
+  name: "비씨카드"
+  themes: [GT_FINTECH_PAYMENT]
+"127710":
+  name: "아시아나항공우"
+  themes: [GT_AIRLINE]
+"128700":
+  name: "BNK캐피탈"
+  themes: [GT_FINTECH_PAYMENT, GT_BANK_REGIONAL]
+"130960":
+  name: "CJ씨푸드"
+  themes: [GT_FOOD]
+"131290":
+  name: "코오롱모빌리티그룹"
+  themes: [GT_AUTO_PARTS, GT_RETAIL_OFFLINE]
+"131290_DUP":
+  name: "코오롱모빌리티"
+  themes: [GT_AUTO_PARTS]
+"133820":
+  name: "선진"
+  themes: [GT_FOOD, GT_AGRICULTURE]
+"134790":
+  name: "CJ바이오사이언스"
+  themes: [GT_BIOTECH, GT_BIO_CDMO]
+"135480":
+  name: "SK스퀘어"
+  themes: [GT_HOLDING_CO, GT_SEMI_MEMORY, GT_FINTECH_PAYMENT]
+"136490":
+  name: "선광"
+  themes: [GT_LOGISTICS, GT_CONSTRUCTION_INFRA]
+"138930_DUP":
+  name: "BNK금융지주"
+  themes: [GT_BANK_REGIONAL]
+"139940":
+  name: "메리츠화재우"
+  themes: [GT_INSURANCE_PROPERTY]
+"140070":
+  name: "파세코우"
+  themes: [GT_HOUSEHOLD_PRODUCTS]
+"140520":
+  name: "에쓰오일우"
+  themes: [GT_OIL_REFINING]
+"142280":
+  name: "녹십자엠에스"
+  themes: [GT_MED_DIAGNOSTIC, GT_PHARMA_LARGE]
+"143240":
+  name: "손오공"
+  themes: [GT_MEDIA_ENTERTAINMENT]
+"145140":
+  name: "비스타리얼티"
+  themes: [GT_REIT_COMMERCIAL]
+"145990":
+  name: "삼양사"
+  themes: [GT_FOOD, GT_CHEM_SPECIALTY]
+"146240":
+  name: "현대엔지니어링"
+  themes: [GT_CONSTRUCTION_PLANT, GT_CONSTRUCTION_BUILDING]
+"148780":
+  name: "동방"
+  themes: [GT_LOGISTICS]
+"150460":
+  name: "알에스오토메이션"
+  themes: [GT_FACTORY_AUTOMATION, GT_INDUSTRIAL_ROBOT]
+"151360":
+  name: "에코마케팅"
+  themes: [GT_DIGITAL_AD]
+"152100":
+  name: "대신증권우"
+  themes: [GT_BROKERAGE]
+"152400":
+  name: "텍셀네트컴"
+  themes: [GT_NETWORKING, GT_TELECOM_INFRA]
+"153130":
+  name: "에이엠에스"
+  themes: [GT_SEMI_EQUIPMENT]
+"155660":
+  name: "DSR"
+  themes: [GT_STEEL, GT_CHEM_SPECIALTY]
+"158640":
+  name: "사람인에이치알"
+  themes: [GT_SAAS, GT_AI_APPLICATIONS]
+"159190":
+  name: "조선내화"
+  themes: [GT_BUILDING_MAT, GT_STEEL]
+"160550":
+  name: "NEW"
+  themes: [GT_FILM_TV, GT_KCONTENT]
+"160980":
+  name: "싸이버로지텍"
+  themes: [GT_LOGISTICS, GT_AI_SOFTWARE]
+"161390_DUP":
+  name: "한국타이어앤테크놀로지"
+  themes: [GT_AUTO_TIRE]
+"162580":
+  name: "SK아이이테크놀로지"
+  themes: [GT_BATTERY_SEPARATOR, GT_DISPLAY]
+"163560":
+  name: "동양피씨에스"
+  themes: [GT_PC_PERIPHERAL]
+"166090":
+  name: "하나머티리얼즈"
+  themes: [GT_SEMI_MATERIALS]
+"167250":
+  name: "안트로젠"
+  themes: [GT_BIO_GENE_CELL, GT_MED_DEVICE_AESTHETIC]
+"170790":
+  name: "파이링크"
+  themes: [GT_NETWORKING, GT_IOT]
+"171120":
+  name: "라사공업"
+  themes: [GT_CHEM_SPECIALTY, GT_CONSTRUCTION_INFRA]
+"173130":
+  name: "넥스코어테크놀로지"
+  themes: [GT_AI_INFRA, GT_CLOUD_INFRA]
+"175250":
+  name: "아이씨디"
+  themes: [GT_SEMI_EQUIPMENT, GT_DISPLAY]
+"176750":
+  name: "태광"
+  themes: [GT_STEEL, GT_CONSTRUCTION_INFRA]
+"178920_DUP":
+  name: "PI첨단소재"
+  themes: [GT_DISPLAY, GT_BATTERY_SEPARATOR]
+"180060":
+  name: "탑코미디어"
+  themes: [GT_KCONTENT, GT_STREAMING]
+"180400":
+  name: "아티스트스튜디오"
+  themes: [GT_KCONTENT]
+"181710_DUP":
+  name: "NHN"
+  themes: [GT_GAMING_PUBLISHER]
+"184230":
+  name: "SCI평가정보"
+  themes: [GT_FINTECH_PAYMENT, GT_BROKERAGE]
+"187220":
+  name: "솔리드이오닉스"
+  themes: [GT_BATTERY_ELECTROLYTE]
+"189300":
+  name: "인텔리안테크"
+  themes: [GT_SPACE_SATELLITE, GT_NETWORKING]
+"192080":
+  name: "더블유게임즈"
+  themes: [GT_GAMING_MOBILE, GT_GAMING_PUBLISHER]
+"193400":
+  name: "삼천당제약"
+  themes: [GT_PHARMA_LARGE, GT_BIO_GENE_CELL]
+"194700":
+  name: "노바렉스"
+  themes: [GT_FOOD, GT_PHARMA_LARGE]
+"195940":
+  name: "HK이노엔"
+  themes: [GT_PHARMA_LARGE]
+"196300":
+  name: "한국투자금융지주"
+  themes: [GT_HOLDING_CO, GT_BROKERAGE]
+"199800":
+  name: "툴젠"
+  themes: [GT_BIO_GENE_CELL]
+"200130":
+  name: "콜마비앤에이치"
+  themes: [GT_COSMETICS, GT_FOOD]
+"200350":
+  name: "래몽래인"
+  themes: [GT_KCONTENT, GT_FILM_TV]
+"201490":
+  name: "미투온"
+  themes: [GT_GAMING_MOBILE, GT_SOCIAL_MEDIA]
+"204480":
+  name: "엔에이치스팩21호"
+  themes: [GT_BROKERAGE]
+"204510":
+  name: "알파홀딩스"
+  themes: [GT_HOLDING_CO, GT_RETAIL_OFFLINE]
+"205470":
+  name: "휴마시스"
+  themes: [GT_MED_DIAGNOSTIC]
+"206640":
+  name: "바디텍메드"
+  themes: [GT_MED_DIAGNOSTIC]
+"214420":
+  name: "토니모리"
+  themes: [GT_COSMETICS]
+"217270":
+  name: "넵튠"
+  themes: [GT_GAMING_PUBLISHER, GT_AI_SOFTWARE]
+"222110":
+  name: "팬퍼시픽리테일"
+  themes: [GT_RETAIL_OFFLINE]
+"225380":
+  name: "일진홀딩스"
+  themes: [GT_HOLDING_CO, GT_SEMI_MATERIALS, GT_EV_COMPONENTS]
+"225570":
+  name: "넥슨게임즈"
+  themes: [GT_GAMING_PC_CONSOLE, GT_GAMING_PUBLISHER]
+"226340":
+  name: "본느"
+  themes: [GT_COSMETICS]
+"226360":
+  name: "반도건설"
+  themes: [GT_CONSTRUCTION_BUILDING]
+"228760":
+  name: "지노믹트리"
+  themes: [GT_BIO_GENE_CELL, GT_MED_DIAGNOSTIC]
+"229160":
+  name: "쎄트렉아이"
+  themes: [GT_SPACE_SATELLITE, GT_DEFENSE_AIR]
+"234080":
+  name: "아이에스동서우"
+  themes: [GT_CONSTRUCTION_BUILDING]
+"234690":
+  name: "녹십자홀딩스우"
+  themes: [GT_HOLDING_CO]
+"236200":
+  name: "슈피겐코리아"
+  themes: [GT_HARDWARE, GT_SMARTPHONE]
+"237690":
+  name: "에스티팜"
+  themes: [GT_BIO_CDMO, GT_PHARMA_LARGE]
+"237840":
+  name: "LSK인베스트먼트"
+  themes: [GT_ASSET_MANAGEMENT]
+"240310":
+  name: "에스케이케미칼"
+  themes: [GT_CHEM_SPECIALTY]
+"241590":
+  name: "화진"
+  themes: [GT_COSMETICS, GT_CHEM_SPECIALTY]
+"241840":
+  name: "에이치엘비파워"
+  themes: [GT_BIOTECH, GT_BIO_ONCOLOGY]
+"243070":
+  name: "휴온스글로벌"
+  themes: [GT_HOLDING_CO, GT_PHARMA_LARGE, GT_MED_DEVICE_AESTHETIC]
+"244920":
+  name: "에이플러스에셋"
+  themes: [GT_INSURANCE_LIFE, GT_ASSET_MANAGEMENT]
+"245620":
+  name: "나인테크"
+  themes: [GT_BATTERY_EQUIPMENT]
+"246690":
+  name: "HS애드"
+  themes: [GT_DIGITAL_AD]
+"251270_DUP":
+  name: "넷마블"
+  themes: [GT_GAMING_MOBILE]
+"253450":
+  name: "스튜디오드래곤"
+  themes: [GT_KCONTENT, GT_FILM_TV]
+"256630":
+  name: "이노벡스"
+  themes: [GT_SEMI_EQUIPMENT, GT_BATTERY_EQUIPMENT]
+"260970":
+  name: "에스앤디"
+  themes: [GT_FOOD, GT_AGRICULTURE]
+"261200":
+  name: "에코앤드림"
+  themes: [GT_BATTERY_ANODE, GT_CHEM_SPECIALTY]
+"263860":
+  name: "현대중공업지주"
+  themes: [GT_HOLDING_CO, GT_SHIPBUILDING, GT_DEFENSE_NAVAL]
+"264450":
+  name: "유한양행우"
+  themes: [GT_PHARMA_LARGE]
+"265520":
+  name: "SK디앤디"
+  themes: [GT_REAL_ESTATE_DEV, GT_SOLAR]
+"266360":
+  name: "씨에스홀딩스"
+  themes: [GT_HOLDING_CO, GT_LOGISTICS]
+"267780":
+  name: "메인스트리트"
+  themes: [GT_RETAIL_OFFLINE, GT_ECOMMERCE_PLATFORM]
+"270810":
+  name: "에이치엘비제약"
+  themes: [GT_PHARMA_LARGE, GT_BIO_CDMO]
+"271560":
+  name: "오리온"
+  themes: [GT_FOOD]
+"272450":
+  name: "틸론"
+  themes: [GT_CLOUD_INFRA, GT_SAAS]
+"276300":
+  name: "코웰패션"
+  themes: [GT_FASHION_APPAREL, GT_LUXURY]
+"277070":
+  name: "린드먼아시아인베스트먼트"
+  themes: [GT_ASSET_MANAGEMENT]
+"278470":
+  name: "케어젠"
+  themes: [GT_MED_DEVICE_AESTHETIC, GT_BIO_GENE_CELL]
+"279060":
+  name: "미래에셋생명보험"
+  themes: [GT_INSURANCE_LIFE]
+"281820":
+  name: "케이씨텍"
+  themes: [GT_SEMI_MATERIALS, GT_SEMI_EQUIPMENT]
+"282650":
+  name: "교보증권우"
+  themes: [GT_BROKERAGE]
+"283770":
+  name: "공구우먼"
+  themes: [GT_ECOMMERCE_PLATFORM]
+"284740_DUP":
+  name: "쿠쿠홀딩스"
+  themes: [GT_HOLDING_CO]
+"286940":
+  name: "롯데정밀화학"
+  themes: [GT_CHEM_SPECIALTY]
+"287410":
+  name: "제이에스코퍼레이션우"
+  themes: [GT_FASHION_APPAREL]
+"290520":
+  name: "신풍제지"
+  themes: [GT_PAPER]
+"290650":
+  name: "엘비루셈우"
+  themes: [GT_SEMI_PACKAGING]
+"291230":
+  name: "지엔원에너지우"
+  themes: [GT_BATTERY_CELL]
+"293160":
+  name: "커넥트웨이브"
+  themes: [GT_ECOMMERCE_PLATFORM, GT_AI_SOFTWARE]
+"293780":
+  name: "현대캐피탈"
+  themes: [GT_FINTECH_PAYMENT, GT_BANK_COMMERCIAL]
+"296130":
+  name: "이노벡스우"
+  themes: [GT_SEMI_EQUIPMENT]
+"297090":
+  name: "씨에스베어링"
+  themes: [GT_WIND, GT_MACHINERY_GENERAL]
+"298060":
+  name: "에스엘"
+  themes: [GT_AUTO_PARTS, GT_EV_COMPONENTS]
+"299030":
+  name: "하나제약"
+  themes: [GT_PHARMA_LARGE]
+"299660":
+  name: "선바이오"
+  themes: [GT_BIOTECH, GT_PHARMA_LARGE]
+"300070":
+  name: "씨앤투스성진"
+  themes: [GT_CHEM_SPECIALTY, GT_SEMI_MATERIALS]
+"301670":
+  name: "알에프세미"
+  themes: [GT_SEMI_FABLESS, GT_SEMI_POWER]
+"302105":
+  name: "SK디스커버리우"
+  themes: [GT_HOLDING_CO]
+"303030":
+  name: "유니코아"
+  themes: [GT_CHEM_SPECIALTY, GT_HYDROGEN_FUEL]
+"304220":
+  name: "삼성에스디에스"
+  themes: [GT_SAAS, GT_AI_SOFTWARE, GT_ENTERPRISE_SOFTWARE, GT_CLOUD_INFRA]
+"304370":
+  name: "씨앤씨인터내셔널"
+  themes: [GT_COSMETICS]
+"305090":
+  name: "마이크로디지탈"
+  themes: [GT_MED_DIAGNOSTIC, GT_FACTORY_AUTOMATION]
+"305830":
+  name: "국일제지"
+  themes: [GT_PAPER]
+"306040":
+  name: "파인엠텍"
+  themes: [GT_BATTERY_EQUIPMENT, GT_SEMI_PACKAGING]
+"308080":
+  name: "무림P&P"
+  themes: [GT_PAPER, GT_BIOENERGY]
+"311060":
+  name: "POSCO홀딩스우"
+  themes: [GT_HOLDING_CO]
+"314130":
+  name: "지에프씨생명과학"
+  themes: [GT_BIOTECH]
+"316140_DUP":
+  name: "우리금융지주"
+  themes: [GT_BANK_COMMERCIAL]
+"319660":
+  name: "피씨엘"
+  themes: [GT_MED_DIAGNOSTIC]
+"319990":
+  name: "제라크래프트"
+  themes: [GT_GAMING_PUBLISHER]
+"321260":
+  name: "코어라인소프트"
+  themes: [GT_AI_APPLICATIONS, GT_MED_DIAGNOSTIC]
+"323180":
+  name: "KCC글라스우"
+  themes: [GT_BUILDING_MAT]
+"325000":
+  name: "풍산홀딩스우"
+  themes: [GT_HOLDING_CO]
+"326070":
+  name: "미코바이오메드"
+  themes: [GT_MED_DIAGNOSTIC, GT_BIO_CRO]
+"330590_DUP":
+  name: "롯데리츠"
+  themes: [GT_REIT_COMMERCIAL]
+"335890":
+  name: "비올"
+  themes: [GT_MED_DEVICE_AESTHETIC]
+"336260":
+  name: "두산퓨얼셀"
+  themes: [GT_HYDROGEN_FUEL, GT_ESS]
+"337340":
+  name: "에스티팜우"
+  themes: [GT_BIO_CDMO]
+"339770":
+  name: "교촌에프앤비"
+  themes: [GT_RESTAURANT, GT_FOOD]
+"344820":
+  name: "에스엠코어"
+  themes: [GT_FACTORY_AUTOMATION, GT_BATTERY_EQUIPMENT]
+"347000":
+  name: "제일엠앤에스"
+  themes: [GT_FOOD]
+"347050":
+  name: "이노와이어리스"
+  themes: [GT_TELECOM_INFRA]
+"350650":
+  name: "노루홀딩스"
+  themes: [GT_HOLDING_CO, GT_CHEM_SPECIALTY, GT_BUILDING_MAT]
+"353810_DUP":
+  name: "엘앤에프"
+  themes: [GT_BATTERY_CATHODE]
+"354890":
+  name: "블루엠텍"
+  themes: [GT_MED_DIAGNOSTIC]
+"357230":
+  name: "씨앤씨인터내셔날"
+  themes: [GT_COSMETICS]
+"358570":
+  name: "지오엘리먼트"
+  themes: [GT_SEMI_MATERIALS, GT_SOLAR]
+"361390":
+  name: "제이에스팸"
+  themes: [GT_FOOD, GT_AGRICULTURE]
+"363280":
+  name: "티와이홀딩스"
+  themes: [GT_HOLDING_CO]
+"365550":
+  name: "ESR켄달스퀘어리츠"
+  themes: [GT_REIT_INDUSTRIAL_LOGISTICS]
+"367340":
+  name: "마스턴프리미어리츠"
+  themes: [GT_REIT_COMMERCIAL]
+"368770":
+  name: "파나시아"
+  themes: [GT_SHIPBUILDING, GT_UTILITY_WASTE]
+"370110":
+  name: "도화엔지니어링"
+  themes: [GT_CONSTRUCTION_INFRA]
+"370900":
+  name: "엑스플러스"
+  themes: [GT_GAMING_PUBLISHER, GT_AI_APPLICATIONS]
+"373220_DUP":
+  name: "LG에너지솔루션"
+  themes: [GT_BATTERY_CELL]
+"374780":
+  name: "미래에셋파트너스"
+  themes: [GT_ASSET_MANAGEMENT]
+"378850":
+  name: "케이씨에스"
+  themes: [GT_FINTECH_PAYMENT, GT_SAAS]
+"381970":
+  name: "케이씨에스우"
+  themes: [GT_FINTECH_PAYMENT]
+"382480":
+  name: "지아이텍"
+  themes: [GT_AI_INFRA, GT_NETWORKING]
+"383220_DUP":
+  name: "F&F"
+  themes: [GT_FASHION_APPAREL]
+"384470":
+  name: "유진스팩9호"
+  themes: [GT_BROKERAGE]
+"388720":
+  name: "유일로보틱스"
+  themes: [GT_INDUSTRIAL_ROBOT, GT_FACTORY_AUTOMATION]
+"389020":
+  name: "자이에스앤디"
+  themes: [GT_REAL_ESTATE_DEV, GT_CONSTRUCTION_BUILDING]
+"389030":
+  name: "지코우"
+  themes: [GT_EV_COMPONENTS]
+"391020":
+  name: "위니아전자"
+  themes: [GT_HOUSEHOLD_PRODUCTS]
+"392310":
+  name: "그리드위즈"
+  themes: [GT_AI_INFRA, GT_ESS, GT_UTILITY_ELECTRIC]
+"393210":
+  name: "토마토시스템"
+  themes: [GT_SAAS, GT_ENTERPRISE_SOFTWARE]
+"394670":
+  name: "제이시스메디칼"
+  themes: [GT_MED_DEVICE_AESTHETIC]
+"396690":
+  name: "나노브릭"
+  themes: [GT_CHEM_SPECIALTY, GT_DISPLAY]
+"397920":
+  name: "엘티씨우"
+  themes: [GT_DISPLAY]
+"399610":
+  name: "두산밥캣우"
+  themes: [GT_MACHINERY_HEAVY]
+"403550":
+  name: "쏘카"
+  themes: [GT_TRAVEL_LEISURE, GT_AUTONOMOUS_DRIVING]
+"410920":
+  name: "현대두산인프라코어"
+  themes: [GT_MACHINERY_HEAVY]
+"417090":
+  name: "에이치엘비생명과학"
+  themes: [GT_BIOTECH, GT_BIO_ONCOLOGY]
+"418420":
+  name: "두산로보틱스"
+  themes: [GT_INDUSTRIAL_ROBOT, GT_AI_ROBOTICS]
+"419570":
+  name: "HD현대마린솔루션"
+  themes: [GT_SHIPBUILDING, GT_AI_APPLICATIONS]
+"422670":
+  name: "에스앤에스텍우"
+  themes: [GT_SEMI_MATERIALS]
+"424960":
+  name: "케이뱅크"
+  themes: [GT_FINTECH_PAYMENT, GT_BANK_COMMERCIAL]
+"425420":
+  name: "메가스터디교육우"
+  themes: [GT_AI_APPLICATIONS]
+"426550":
+  name: "HPSP"
+  themes: [GT_SEMI_EQUIPMENT]
+"427090":
+  name: "한화갤러리아타임월드"
+  themes: [GT_RETAIL_OFFLINE, GT_LUXURY]
+"428300":
+  name: "뷰티스킨"
+  themes: [GT_COSMETICS, GT_MED_DEVICE_AESTHETIC]
+"432090":
+  name: "두산퓨얼셀우"
+  themes: [GT_HYDROGEN_FUEL]
+"435330":
+  name: "케이엔에스"
+  themes: [GT_BATTERY_EQUIPMENT, GT_SEMI_EQUIPMENT]
+"439530":
+  name: "에이피알"
+  themes: [GT_COSMETICS, GT_MED_DEVICE_AESTHETIC]
+"443060":
+  name: "HD현대로보틱스"
+  themes: [GT_INDUSTRIAL_ROBOT, GT_FACTORY_AUTOMATION]
+"445680":
+  name: "에스앤비"
+  themes: [GT_SEMI_MATERIALS]
+"449280":
+  name: "메이사플래닛"
+  themes: [GT_AI_APPLICATIONS, GT_SPACE_SATELLITE]
+"452260":
+  name: "하나리츠"
+  themes: [GT_REIT_COMMERCIAL]
+"453340":
+  name: "삼성FN리츠"
+  themes: [GT_REIT_COMMERCIAL]
+"455250":
+  name: "한화리츠"
+  themes: [GT_REIT_COMMERCIAL]
+"456450":
+  name: "에이블씨엔씨"
+  themes: [GT_COSMETICS]
+"457470":
+  name: "노루페인트"
+  themes: [GT_CHEM_SPECIALTY, GT_BUILDING_MAT]
+"460860":
+  name: "나인원한남"
+  themes: [GT_REIT_RESIDENTIAL]
+"463500":
+  name: "현대힘스"
+  themes: [GT_SHIPBUILDING, GT_NUCLEAR_LARGE]
+"464600":
+  name: "한국원자력연구원"
+  themes: [GT_NUCLEAR_LARGE, GT_NUCLEAR_SMR]
+"471090":
+  name: "에이리츠"
+  themes: [GT_REIT_COMMERCIAL]
+"476580":
+  name: "신한알파리츠"
+  themes: [GT_REIT_COMMERCIAL]
+"479290":
+  name: "한화오션우"
+  themes: [GT_SHIPBUILDING]
+"480810":
+  name: "롯데렌탈"
+  themes: [GT_TRAVEL_LEISURE, GT_AUTO_OEM]
+"484700":
+  name: "에스케이오션플랜트"
+  themes: [GT_WIND, GT_CONSTRUCTION_INFRA]
+"486540":
+  name: "원스토어"
+  themes: [GT_ECOMMERCE_PLATFORM, GT_GAMING_PUBLISHER]
+"487010":
+  name: "나노팀"
+  themes: [GT_BATTERY_CELL, GT_CHEM_SPECIALTY]
+"489590":
+  name: "디비금융투자"
+  themes: [GT_BROKERAGE]
+"495080":
+  name: "코리아써키트우"
+  themes: [GT_SEMI_PACKAGING]

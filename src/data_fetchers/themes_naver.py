@@ -63,8 +63,9 @@ class NaverThemeFetcher(BaseFetcher):
             r = requests.get(f"{self.BASE_URL}?&page={page}", headers=self.HEADERS)
             if r.status_code != 200:
                 continue
-            soup = BeautifulSoup(r.content, 'lxml')
-            for row in soup.select('table.type_1 a.col_type1'):
+            r.encoding = 'euc-kr'  # 네이버 증권은 euc-kr 사용
+            soup = BeautifulSoup(r.text, 'lxml')
+            for row in soup.select('td.col_type1 a'):
                 themes.append((row.text.strip(), row['href']))
         return themes
     
@@ -72,7 +73,8 @@ class NaverThemeFetcher(BaseFetcher):
         r = requests.get(f"https://finance.naver.com{theme_url}", headers=self.HEADERS)
         if r.status_code != 200:
             return []
-        soup = BeautifulSoup(r.content, 'lxml')
+        r.encoding = 'euc-kr'
+        soup = BeautifulSoup(r.text, 'lxml')
         tickers = []
         for link in soup.select('div.name_area a'):
             href = link.get('href', '')

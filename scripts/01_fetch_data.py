@@ -17,7 +17,6 @@ load_dotenv()
 from src.data_fetchers.prices_kr import KoreanPriceFetcher
 from src.data_fetchers.prices_us import USPriceFetcher
 from src.data_fetchers.macro_us import FredMacroFetcher
-from src.data_fetchers.themes_naver import NaverThemeFetcher
 from src.utils.io import save_parquet, report_memory
 
 def get_sp500_tickers() -> list:
@@ -33,8 +32,7 @@ def get_sp500_tickers() -> list:
         return tickers
     except Exception as e:
         print(f"Error fetching S&P 500 tickers from Wikipedia: {e}")
-        # 예외 발생 시 기본 백업 티커 리스트 반환 (yfinance 오프라인/에러 방지)
-        return ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'META', 'NVDA', 'BRK-B', 'JNJ', 'V', 'TSLA']
+        raise
 
 def main(args):
     # 캐시 무시 처리
@@ -94,17 +92,10 @@ def main(args):
             report_memory(macro_us, "macro_us.parquet")
     except Exception as e:
         print(f"Error fetching US Macro data: {e}")
+        raise
         
-    # KR Themes: 네이버 증권 테마 수집
-    print("\n=== Step 5: Fetching Naver Stock Themes ===")
-    try:
-        theme_fetcher = NaverThemeFetcher(cache_dir='data/raw/prices')
-        themes = theme_fetcher.fetch()
-        if not themes.empty:
-            save_parquet(themes, 'data/processed/themes_naver.parquet')
-            report_memory(themes, "themes_naver.parquet")
-    except Exception as e:
-        print(f"Error fetching Naver stock themes: {e}")
+    # KR Themes: 글로벌 테마 매핑으로 대체되어 네이버 테마 크롤러는 비활성화됩니다.
+    print("\n=== Step 5: (Skipped) Global Theme Mapping Active ===")
     
     print("\nData fetch complete.")
 

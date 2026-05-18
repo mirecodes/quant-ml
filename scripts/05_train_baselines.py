@@ -6,10 +6,19 @@ sys.path.append(str(Path(__file__).resolve().parents[1]))
 import pandas as pd
 import numpy as np
 import yaml
+from yaml.resolver import Resolver
 
 from src.models.baseline_accounting import AccountingBaseline
 from src.models.baseline_gbm import GBMBaseline
 from src.utils.io import save_parquet, load_parquet, report_memory
+
+# Disable boolean parsing for ON, NO, etc. globally in YAML
+for char in list("yYnNoOtTfF"):
+    if char in Resolver.yaml_implicit_resolvers:
+        Resolver.yaml_implicit_resolvers[char] = [
+            (tag, regexp) for tag, regexp in Resolver.yaml_implicit_resolvers[char]
+            if tag != 'tag:yaml.org,2002:bool'
+        ]
 
 def main():
     print("=== Step 1: Loading Dataset ===")
@@ -77,77 +86,38 @@ def main():
     # 실제 회사명 컬럼이 없는 경우 티커명으로 매핑
     predictions['name'] = predictions['ticker']
     
-    # 네이버 테마 불러오기 및 매핑 (테마 갯수 대폭 확보)
+    # 글로벌 테마 및 회사명 불러오기 및 매핑
     themes_map = {}
-    themes_path = Path('data/processed/themes_naver.parquet')
+    ticker_names = {}
+    themes_path = Path('themes/processed/merged_themes.yaml')
     if themes_path.exists():
         try:
-            themes_df = pd.read_parquet(str(themes_path))
-            if not themes_df.empty:
-                themes_map = themes_df.groupby('ticker')['theme'].apply(list).to_dict()
+            with open(themes_path, 'r', encoding='utf-8') as f:
+                theme_data = yaml.safe_load(f)
+                
+            global_themes_metadata = theme_data.get('global_themes', {})
+            mappings = theme_data.get('mappings', {})
+            
+            for ticker, info in mappings.items():
+                ticker_names[ticker] = info.get('name', ticker)
+                theme_ids = info.get('themes', [])
+                theme_names = []
+                for tid in theme_ids:
+                    t_meta = global_themes_metadata.get(tid, {})
+                    # 한국어 이름 우선 사용
+                    t_name = t_meta.get('name_ko', tid)
+                    theme_names.append(t_name)
+                themes_map[ticker] = theme_names
         except Exception as e:
-            print(f"Error loading Naver themes: {e}")
+            print(f"Error loading merged themes: {e}")
 
-    # 한국 주요 종목에 대한 초고화질 테마 맵 사전 정의
-    kr_themes_pool = {
-        '005930': ['반도체 대표주', 'IT 대표주', '스마트폰', 'HBM(고대역폭메모리)', '삼성그룹', 'CXL(컴퓨트익스프레스링크)'],
-        '000660': ['반도체 대표주', 'HBM(고대역폭메모리)', 'IT 대표주', '시스템반도체'],
-        '035420': ['인터넷 대표주', '플랫폼/포털', 'AI/인공지능', '핀테크', '웹툰'],
-        '035720': ['플랫폼/포털', '카카오그룹', '핀테크', '모바일 서비스', '엔터테인먼트'],
-        '051910': ['2차전지(배터리)', '화학 대표주', '친환경에너지', '양극재/음극재'],
-        '005380': ['자동차 대표주', '수소차/전기차', '자율주행', '현대차그룹', '모빌리티'],
-        '000270': ['자동차 대표주', '전기차', '자율주행', '기아그룹', '친환경차'],
-        '005490': ['철강 대표주', '2차전지 소재', '리튬/니켈', '포스코그룹'],
-        '068270': ['바이오 대표주', '제약/바이오시밀러', '헬스케어', '면역항암제'],
-        '032830': ['생명보험', '금융지주', '지배구조 개편', '저PBR 수혜주'],
-        '006400': ['2차전지(배터리)', 'ESS(에너지저장장치)', '삼성그룹', '전고체배터리'],
-        '012330': ['자동차 부품', '자율주행', '현대차그룹', '로보틱스'],
-        '034730': ['지주사', 'SK그룹', '시스템통합(SI)', '저PBR 수혜주'],
-        '015760': ['전력/유틸리티', '원자력발전', '공기업', '송배전/전력망'],
-        '017670': ['통신 대표주', '5G/통신망', '배당성향 우량주', 'AI 데이터센터'],
-        '018260': ['제약/바이오', '메디톡스/보톡스', '에스티팜'],
-        '003550': ['지주사', 'LG그룹', '지배구조 개편'],
-        '096770': ['정유/에너지', '2차전지(배터리)', '윤활유', 'SK그룹'],
-        '000810': ['화재보험', '금융지주', '삼성그룹', '저PBR 수혜주'],
-        '086790': ['금융지주', '은행 대표주', '배당성향 우량주', '저PBR 수혜주'],
-    }
-
-    # US 테마 대량 매핑 사전 정의 (테마 다양성 확보)
-    us_themes_pool = {
-        'AAPL': ['Consumer Electronics', 'Big Tech', 'iOS Ecosystem', 'Smartphone', 'Luxury Tech', 'Vision Pro/AR'],
-        'MSFT': ['Cloud Computing', 'Enterprise Software', 'AI Developer', 'Big Tech', 'Gaming/Xbox', 'OpenAI Partner'],
-        'GOOGL': ['Online Advertising', 'Search Engine', 'AI/Deep Learning', 'Big Tech', 'Android Ecosystem', 'Autonomous Driving'],
-        'AMZN': ['E-Commerce', 'Cloud Computing', 'Logistics Giant', 'Streaming Media', 'Big Tech', 'Retail Tech'],
-        'META': ['Social Media', 'Metaverse', 'AI Developer', 'Big Tech', 'Online Ads', 'Open-Source AI'],
-        'NVDA': ['GPU/AI Hardware', 'Semiconductors', 'AI Boom', 'Gaming/GeForce', 'Self-Driving Tech', 'Data Center'],
-        'TSLA': ['Electric Vehicles', 'Autonomous Driving', 'Clean Energy', 'Battery Tech', 'Robotics/AI', 'Supercomputing/Dojo'],
-    }
-
-    # 업종(Sector)별 US 테마 자동 연동 풀 (기타 US 종목 대응용)
-    sector_themes_pool = {
-        'Technology': ['S&P 500', 'Global Tech', 'Software & IT', 'Digitalization'],
-        'Financials': ['S&P 500', 'Wall Street', 'Financial Services', 'Banking & Insurance', 'Value Stock'],
-        'Healthcare': ['S&P 500', 'Bio & Pharma', 'Healthcare Equipment', 'Medical Innovation'],
-        'Consumer Cyclical': ['S&P 500', 'Consumer Discretionary', 'Retail & Brand', 'Commerce'],
-        'Industrials': ['S&P 500', 'Industrial Giants', 'Infrastructure', 'Aerospace & Defense'],
-        'Communication Services': ['S&P 500', 'Telecom & Network', 'Digital Media', 'Entertainment'],
-    }
+    # 회사명 정밀 매핑 적용
+    if ticker_names:
+        predictions['name'] = predictions['ticker'].map(ticker_names).fillna(predictions['ticker'])
 
     def get_stock_themes(row):
         ticker = row['ticker']
-        country = row['country']
-        sector = row['sector']
-        if country == 'KR':
-            # 1. 크롤링된 실제 네이버 테마가 있으면 최우선 적용
-            if ticker in themes_map:
-                return themes_map[ticker]
-            # 2. 크롤링 결과가 없을 시 정밀 fallback 적용
-            return kr_themes_pool.get(ticker, ['KOSPI 200', '우량주', '코스피 대형주'])
-        else:
-            # US 종목의 경우 개별 테마 매핑 또는 섹터별 풍부한 테마 연동
-            if ticker in us_themes_pool:
-                return us_themes_pool[ticker]
-            return sector_themes_pool.get(sector, ['S&P 500', '미국 우량주', 'Global Corporate'])
+        return themes_map.get(ticker, ['기타 및 미분류'])
 
     predictions['themes'] = predictions.apply(get_stock_themes, axis=1)
     
