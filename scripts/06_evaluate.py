@@ -35,8 +35,7 @@ def main():
     
     # Target A (Attractiveness) 평가
     preds_a = {
-        'TFT': predictions['TFT_A'].values,
-        'LightGBM': predictions['GBM_A'].values,
+        'FT-Transformer': predictions['FTT_A'].values,
         'F-Score': predictions['C_FSCORE'].values,
         'Quality-Score': predictions['C_QUALITY'].values,
         'Composite-Score': predictions['ACC_COMPOSITE'].values,
@@ -48,8 +47,7 @@ def main():
     
     # Target R (Risk) 평가
     preds_r = {
-        'TFT': predictions['TFT_R'].values,
-        'LightGBM': predictions['GBM_R'].values,
+        'FT-Transformer': predictions['FTT_R'].values,
     }
     
     print("\n=== Step 3: Evaluating Risk (Target R) ===")

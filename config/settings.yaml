@@ -34,22 +34,42 @@ train_split:
   test_end: '2021-12-31'
 
 model:
-  type: tft
-  hidden_size: 128
-  attention_head_size: 4
-  dropout: 0.2
-  hidden_continuous_size: 64
-  learning_rate: 0.001
-  batch_size: 64
-  max_epochs: 50
-  patience: 8
-  device: mps
+  # LSTM_stock: 종목 재무 시계열 인코더
+  lstm_stock_hidden: 128      # 양방향이므로 출력 256
+  lstm_stock_layers: 2
+  lstm_stock_dropout: 0.2
+  lstm_stock_max_seq: 20      # 최대 20분기(5년) 과거
 
-  # M1 Pro 추가 옵션
-  num_workers: 2
-  persistent_workers: true
-  pin_memory: false
-  precision: "32-true"
+  # LSTM_macro: 거시 시계열 인코더
+  lstm_macro_hidden: 64       # 단방향, 출력 64
+  lstm_macro_layers: 1
+  lstm_macro_max_seq: 20
+
+  # ThemeContext Linear 투영
+  theme_proj_dim: 64          # 16 → 64
+
+  # FT-Transformer
+  d_token: 192                # 피처 임베딩 차원 (192 = 8 heads × 24)
+  n_heads: 8
+  n_layers: 4
+  ffn_factor: 1.333           # FFN hidden = d_token × ffn_factor
+  dropout: 0.2
+  attn_dropout: 0.1
+
+  # 학습
+  lr: 0.0001
+  weight_decay: 0.01
+  grad_clip: 1.0
+  batch_size: 64              # M1 Pro 16GB
+  max_epochs: 60
+  patience: 10
+  use_wandb: false            # WandB 사용 여부 (추가 기술)
+
+  # M1 Pro
+  num_workers: 0
+  persistent_workers: false
+  pin_memory: false           # MPS 미지원
+  precision: '32-true'
 
 device:
   prefer: mps

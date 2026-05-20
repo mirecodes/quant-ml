@@ -56,7 +56,7 @@ st.title("📊 QuantML 다차원 포트폴리오 분석 및 매크로 지능 엔
 
 st.markdown("""
     <div class="premium-card">
-        <h4>💡 다차원 정량적 분석 프레임워크 (v5.2)</h4>
+        <h4>💡 다차원 정량적 분석 프레임워크 (v5.3)</h4>
         <p style="margin: 0; color: #d1d5db;">
             본 시스템은 <b>S&P 500</b> 및 <b>KOSPI</b> 유니버스를 대상으로 다기간 시계열 데이터를 분석하여 매력도(A)와 위험도(R)를 추정하고,
             글로벌 <b>거시경제(Macro)</b> 및 <b>피처(Features)</b> 데이터의 다차원 연관관계를 실시간 심층 분석합니다.
@@ -83,7 +83,7 @@ def load_raw_prices():
 @st.cache_data
 def load_features():
     try:
-        df = pd.read_parquet('data/processed/features.parquet')
+        df = pd.read_parquet('data/processed/features_stock.parquet')
         df['date'] = pd.to_datetime(df['date'])
         return df
     except Exception:
@@ -204,12 +204,12 @@ with tab_portfolio:
     with col_detail1:
         A_val = stock['A']
         multiple = 5 ** A_val
-        st.metric(label="🌟 TFT 추정 매력도 (A)", value=f"{A_val:.2f}")
+        st.metric(label="🌟 FTT 추정 매력도 (A)", value=f"{A_val:.2f}")
         st.markdown(f"<div class='metric-caption'>향후 최대 5년 내 약 <b>{multiple:.1f}배</b> 주가 상승 여력 내포</div>", unsafe_allow_html=True)
     
     with col_detail2:
         R_val = stock['R']
-        st.metric(label="⚠️ TFT 추정 위험도 (R)", value=f"{R_val:.1%}")
+        st.metric(label="⚠️ FTT 추정 위험도 (R)", value=f"{R_val:.1%}")
         st.markdown("<div class='metric-caption'>연환산 변동성(표준편차) 기준 위험 수준</div>", unsafe_allow_html=True)
     
     with col_detail3:
@@ -428,5 +428,5 @@ with tab_macro:
 
 # 하단 푸터
 st.markdown("---")
-st.caption("QuantML v5.2 | Powered by Temporal Fusion Transformer (TFT) on M1 Pro GPU accelerator")
+st.caption("QuantML v5.3 | Powered by FT-Transformer (FTT) on M1 Pro GPU accelerator")
 

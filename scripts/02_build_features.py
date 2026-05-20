@@ -63,6 +63,18 @@ def main():
     df['equity'] = (df['total_assets'] - df['debt']).astype(np.float32)
     df['dividends'] = (df['net_income'] * np.random.uniform(0.0, 0.3, n_rows)).astype(np.float32)
     
+    # 2b. 테마 비중 컨텍스트 계산을 위한 밸류에이션, 수익성, 수익률 피처 생성
+    df['F_VAL_pbr'] = (df['close'] / (df['equity'] / df['shares'] + 1e-5)).astype(np.float32)
+    df['F_VAL_per'] = (df['close'] / (df['eps'] + 1e-5)).astype(np.float32)
+    df['F_VAL_ev_ebitda'] = np.random.uniform(5.0, 15.0, n_rows).astype(np.float32)
+    df['F_PRF_roe'] = (df['net_income'] / (df['equity'] + 1e-5)).astype(np.float32)
+    df['F_GRW_rev_cagr'] = np.random.normal(0.05, 0.08, n_rows).astype(np.float32)
+    df['C_GP_A'] = (df['gross_profit'] / (df['total_assets'] + 1e-5)).astype(np.float32)
+    
+    df = df.sort_values(by=['ticker', 'date'])
+    df['ret_1q'] = df.groupby('ticker')['close'].pct_change(1).astype(np.float32)
+    df['ret_4q'] = df.groupby('ticker')['close'].pct_change(4).astype(np.float32)
+    
     # 3. 자동 등록 시스템을 통한 Computed Indicators (F-Score, Quality) 계산
     print("\n=== Step 4: Discovering & Computing Registered Indicators ===")
     indicators = discover_indicators()
@@ -81,21 +93,6 @@ def main():
     for c in fundamental_cols:
         df = df.rename(columns={c: f"F_FUND_{c.upper()}"})
         
-    # 4. 거시경제 피처 병합 (date 기준)
-    print("\n=== Step 5: Merging Macroeconomic Indicators ===")
-    if not macro.empty:
-        # date 기준으로 병합
-        df = pd.merge(df, macro, on='date', how='left')
-        
-    # TFT 모델용 접두사 처리 (TFT stock_model.py에서 'M_'로 시작하는 피처들을 time_varying_unknown_reals로 인식함)
-    # macro 컬럼명에 M_ 접두사가 있는지 확인하고 없으면 붙여줌
-    for col in df.columns:
-        if col.startswith('M_INT_') or col.startswith('M_LIQ_') or col.startswith('M_INF_') or col.startswith('M_ECO_') or col.startswith('M_SNT_'):
-            continue
-        # FredMacroFetcher에 정의된 컬럼명 맵핑 처리
-        if col in ['M_INT_001', 'M_INT_002', 'M_INT_003', 'M_LIQ_002', 'M_INF_001', 'M_INF_002', 'M_ECO_004', 'M_ECO_008', 'M_SNT_001']:
-            pass
-            
     # 모든 결측치(NaN/Inf) 정밀 제거 및 보간
     df = df.replace([np.inf, -np.inf], np.nan)
     df = df.sort_values(by=['ticker', 'date'])
@@ -107,9 +104,34 @@ def main():
         df[col] = df.groupby('ticker', observed=True)[col].bfill()
         df[col] = df[col].fillna(0.0)
 
+    # 4. Stock 피처만 필터링하여 저장
+    # stock_cols: ticker, date, country, sector, size_tier, close, volume, market_cap + F_*, C_*, A_*
+    stock_cols = ['ticker', 'date', 'country', 'sector', 'size_tier', 'close', 'volume', 'market_cap', 'ret_1q', 'ret_4q']
+    stock_cols += [c for c in df.columns if c.startswith(('F_', 'C_', 'A_')) and c not in stock_cols]
+    df_stock = df[stock_cols].copy()
+
     # parquet 포맷 저장
-    save_parquet(df, 'data/processed/features.parquet')
-    report_memory(df, "features.parquet")
+    save_parquet(df_stock, 'data/processed/features_stock.parquet')
+    report_memory(df_stock, "features_stock.parquet")
+
+    # 5. 거시경제 피처 분리 저장
+    print("\n=== Step 5: Formatting and Saving Macroeconomic Indicators ===")
+    if not macro.empty:
+        macro = macro.replace([np.inf, -np.inf], np.nan)
+        macro = macro.sort_values(by='date')
+        
+        # 수치형 거시 피처 보간
+        macro_num_cols = [c for c in macro.columns if c != 'date']
+        for col in macro_num_cols:
+            macro[col] = macro[col].ffill()
+            macro[col] = macro[col].bfill()
+            macro[col] = macro[col].fillna(0.0)
+            
+        save_parquet(macro, 'data/processed/features_macro.parquet')
+        report_memory(macro, "features_macro.parquet")
+    else:
+        print("Error: Macro data is empty. Cannot save features_macro.parquet.")
+        
     print("\nFeature building complete.")
 
 if __name__ == '__main__':
