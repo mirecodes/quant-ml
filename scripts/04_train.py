@@ -74,31 +74,76 @@ def main():
         'max_epochs':        mcfg['max_epochs'],
     }
 
-    # ── 데이터 분할 ──────────────────────────────────────────────────────
-    train_end = pd.Timestamp(cfg['train_split']['train_end'])
-    val_end   = pd.Timestamp(cfg['train_split']['val_end'])
+    # ── 데이터 분할 및 테마 비중 계산 (peer 오염 방지) ──────────────────────
+    from src.utils.split import stratified_ticker_split, print_split_report
 
-    def make_dataset(df_s, label_date_filter):
-        labels_sub = df_labels[label_date_filter(df_labels['date'])]
-        return StockDataset(
-            df_stock=df_s,
-            df_macro=df_macro,
-            df_theme=df_theme,
-            df_labels=labels_sub,
-            stock_seq_cols=STOCK_SEQ_COLS,
-            macro_seq_cols=MACRO_SEQ_COLS,
-            snap_num_cols=SNAP_NUM_COLS,
-            snap_cat_cols=SNAP_CAT_COLS,
-            max_seq_len=mcfg.get('lstm_stock_max_seq', 20),
-        )
-
-    train_ds = make_dataset(
-        df_stock[df_stock['date'] <= train_end],
-        lambda d: d <= train_end,
+    split_cfg = cfg['split']
+    train_tickers, val_tickers, test_tickers = stratified_ticker_split(
+        processed_path = cfg['themes']['processed_path'],
+        test_ratio     = split_cfg['test_ratio'],
+        val_ratio      = split_cfg['val_ratio'],
+        seed           = split_cfg['seed'],
+        min_bucket_size= split_cfg['stratify']['min_bucket_size'],
+        theme_level    = split_cfg['stratify']['theme_level'],
     )
-    val_ds = make_dataset(
-        df_stock[(df_stock['date'] > train_end) & (df_stock['date'] <= val_end)],
-        lambda d: (d > train_end) & (d <= val_end),
+    print_split_report(
+        train_tickers, val_tickers, test_tickers,
+        processed_path=cfg['themes']['processed_path'],
+    )
+
+    # 저장 (재현성)
+    import json
+    from pathlib import Path
+    Path('data/splits').mkdir(exist_ok=True)
+    json.dump({
+        'train': train_tickers,
+        'val':   val_tickers,
+        'test':  test_tickers,
+    }, open('data/splits/ticker_split.json', 'w'))
+
+    # Dataset 분할
+    train_df = df_stock[df_stock['ticker'].isin(train_tickers)]
+    val_df   = df_stock[df_stock['ticker'].isin(val_tickers)]
+
+    # ── 테마 비중: Train peer 오염 방지 ───────────────────────────────────
+    # Train 종목의 theme_ctx는 Train peer만 참조
+    # Val/Test 종목의 theme_ctx는 전체 peer 참조 (실운용과 동일)
+    from src.theme.context import compute_theme_context
+
+    df_theme_train = compute_theme_context(
+        train_df,
+        processed_path=cfg['themes']['processed_path'],
+        peer_tickers=set(train_tickers),   # Train peer만
+    )
+    df_theme_val = compute_theme_context(
+        val_df,
+        processed_path=cfg['themes']['processed_path'],
+        peer_tickers=None,                 # 전체 peer
+    )
+    # Validation은 별도 계산 후 concat
+    df_theme = pd.concat([df_theme_train, df_theme_val], ignore_index=True)
+
+    train_ds = StockDataset(
+        df_stock=train_df,
+        df_macro=df_macro,
+        df_theme=df_theme,
+        df_labels=df_labels[df_labels['ticker'].isin(train_tickers)],
+        stock_seq_cols=STOCK_SEQ_COLS,
+        macro_seq_cols=MACRO_SEQ_COLS,
+        snap_num_cols=SNAP_NUM_COLS,
+        snap_cat_cols=SNAP_CAT_COLS,
+        max_seq_len=mcfg.get('lstm_stock_max_seq', 20),
+    )
+    val_ds = StockDataset(
+        df_stock=val_df,
+        df_macro=df_macro,
+        df_theme=df_theme,
+        df_labels=df_labels[df_labels['ticker'].isin(val_tickers)],
+        stock_seq_cols=STOCK_SEQ_COLS,
+        macro_seq_cols=MACRO_SEQ_COLS,
+        snap_num_cols=SNAP_NUM_COLS,
+        snap_cat_cols=SNAP_CAT_COLS,
+        max_seq_len=mcfg.get('lstm_stock_max_seq', 20),
     )
 
     batch_size = get_optimal_batch_size(mcfg['batch_size'])

@@ -35,19 +35,10 @@ def main():
     with open('config/settings.yaml') as f:
         config = yaml.safe_load(f)
 
-    val_end = pd.Timestamp(config['train_split']['val_end'])
-
-    # 테스트 분할 (학습/검증에 사용되지 않은 미래 데이터)
-    test_data = data[data['date'] > val_end].copy()
-    test_data = test_data.sort_values(['ticker', 'date']).dropna(subset=['A', 'R']).reset_index(drop=True)
-
-    if test_data.empty:
-        print("Warning: Test data is empty after filtering. Using validation split as fallback.")
-        val_cutoff = pd.Timestamp(config['train_split']['train_end'])
-        test_data = data[(data['date'] > val_cutoff) & (data['date'] <= val_end)].copy()
-        test_data = test_data.sort_values(['ticker', 'date']).dropna(subset=['A', 'R']).reset_index(drop=True)
-
-    print(f"Test size: {len(test_data)}")
+    # 전체 데이터셋을 테스트 대상으로 삼아 inference를 수행하고 predictions_latest를 채웁니다.
+    # 평가 대상 분리는 06_evaluate.py에서 수행합니다.
+    test_data = data.sort_values(['ticker', 'date']).dropna(subset=['A', 'R']).reset_index(drop=True)
+    print(f"Inference and baseline calculation size: {len(test_data)}")
 
     # ── 컬럼 정의 ───────────────────────────────────────────────────────
     STOCK_SEQ_COLS = (
@@ -89,10 +80,10 @@ def main():
             model.eval()
 
             test_ds = StockDataset(
-                df_stock=df_stock[df_stock['date'] > val_end].copy(),
+                df_stock=df_stock.copy(),
                 df_macro=df_macro,
                 df_theme=df_theme,
-                df_labels=df_labels[df_labels['date'] > val_end].copy(),
+                df_labels=df_labels.copy(),
                 stock_seq_cols=STOCK_SEQ_COLS,
                 macro_seq_cols=MACRO_SEQ_COLS,
                 snap_num_cols=SNAP_NUM_COLS,
@@ -153,20 +144,18 @@ def main():
     # 글로벌 테마 및 회사명 매핑 로드
     themes_map = {}
     ticker_names = {}
-    themes_path = Path('themes/processed/merged_themes.yaml')
-    if themes_path.exists():
-        try:
-            with open(themes_path, 'r', encoding='utf-8') as f:
-                theme_data = yaml.safe_load(f)
-            global_themes_metadata = theme_data.get('global_themes', {})
-            mappings = theme_data.get('mappings', {})
-            for ticker, info in mappings.items():
-                ticker_names[ticker] = info.get('name', ticker)
-                theme_ids = info.get('themes', [])
-                theme_names = [global_themes_metadata.get(tid, {}).get('name_ko', tid) for tid in theme_ids]
-                themes_map[ticker] = theme_names
-        except Exception as e:
-            print(f"Error loading merged themes: {e}")
+    from src.theme.loader import load_themes
+    try:
+        theme_data = load_themes(config['themes']['processed_path'])
+        global_themes_metadata = theme_data.get('themes', {})
+        tickers_metadata = theme_data.get('tickers', {})
+        for ticker, info in tickers_metadata.items():
+            ticker_names[ticker] = info.get('name', ticker)
+            theme_ids = info.get('themes', [])
+            theme_names = [global_themes_metadata.get(tid, {}).get('name_ko', tid) for tid in theme_ids]
+            themes_map[ticker] = theme_names
+    except Exception as e:
+        print(f"Error loading processed themes: {e}")
 
     if ticker_names:
         predictions['name'] = predictions['ticker'].map(ticker_names).fillna(predictions['ticker'])

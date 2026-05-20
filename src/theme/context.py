@@ -24,7 +24,7 @@ src/theme/context.py
 import numpy as np
 import pandas as pd
 from typing import Dict, List, Optional
-from src.theme.loader import load_theme_mapping
+from src.theme.loader import load_themes
 
 THEME_VEC_DIM = 16
 NEUTRAL = 0.5   # NaN 대체값
@@ -49,25 +49,31 @@ def _herfindahl(weights: pd.Series) -> float:
 
 def compute_theme_context(
     df: pd.DataFrame,
-    merged_path: str = "themes/processed/merged_themes.yaml",
+    processed_path: str = 'data/themes/processed/themes.yaml',
+    peer_tickers: set = None,    # None이면 전체 peer 사용
+                                 # set이면 해당 종목만 peer로 사용
 ) -> pd.DataFrame:
     """
-    전체 데이터프레임에 대해 테마 비중 벡터를 벡터화하여 빠르게 계산한다.
+    전체 데이터프레임에 대해 테마 비중 벡터를 계산한다 (벡터화).
     """
-    mapping = load_theme_mapping(merged_path)
-    t2th    = mapping["ticker_to_themes"]
-    th2t    = mapping["theme_to_tickers"]
+    mapping = load_themes(processed_path)
+    th2t    = mapping['theme_to_tickers']
 
     df = df.sort_values(['date', 'ticker']).reset_index(drop=True)
     results = []
 
     for date, date_group in df.groupby('date', observed=True, sort=False):
-        # 이 시점의 ticker별 각 테마 벡터 저장소
         theme_vectors: Dict[str, List[np.ndarray]] = {}
 
         # 1. 모든 테마에 대한 피어 벡터 미리 계산 (벡터화)
-        for theme_id, peer_tickers in th2t.items():
-            peers_df = date_group[date_group['ticker'].isin(peer_tickers)]
+        for theme_id, all_peers in th2t.items():
+            # peer 필터 적용
+            if peer_tickers is not None:
+                peer_list = [t for t in all_peers if t in peer_tickers]
+            else:
+                peer_list = all_peers
+
+            peers_df = date_group[date_group['ticker'].isin(peer_list)]
             if len(peers_df) < 2:
                 continue
 

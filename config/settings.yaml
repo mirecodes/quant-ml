@@ -26,12 +26,32 @@ targets:
     annualization_factor: 4         # 분기 → 연환산 √4
     min_forward_quarters: 4
 
-train_split:
-  train_end: '2017-12-31'
-  val_start: '2018-01-01'
-  val_end: '2019-12-31'
-  test_start: '2020-01-01'
-  test_end: '2021-12-31'
+split:
+  method: ticker                  # 종목 기반 분할
+  test_ratio:  0.15               # Test: 15%
+  val_ratio:   0.15               # Val:  15%
+  train_ratio: 0.70               # Train: 70% (명시, 합산 검증용)
+  seed: 42
+
+  # stratify 기준: market × theme_level
+  # market:      KR / US 각각에서 독립적으로 비율 맞춤
+  # theme_level: Tier3 우선, 종목 수 < min_bucket_size 이면 Tier2, 그래도 부족하면 Tier1
+  stratify:
+    market: true                  # KR/US 비율 유지
+    theme_level: tier3            # tier1 | tier2 | tier3
+    min_bucket_size: 3            # 버킷당 최소 종목 수 (미달 시 상위 tier로 합산)
+
+  # 보조: 시간 외삽 성능 별도 측정 (선택, 06_evaluate.py에서 수행)
+  time_holdout:
+    enabled: true
+    train_tickers: train_only     # train 종목만 사용
+    cutoff: '2015-12-31'          # 이전 학습, 이후 테스트
+
+themes:
+  raw_dir: data/themes/raw
+  processed_path: data/themes/processed/themes.yaml
+  # processed 파일이 존재하면 재생성하지 않음
+  # raw 파일 변경 후 재생성하려면: python scripts/00_merge_themes.py --force
 
 model:
   # LSTM_stock: 종목 재무 시계열 인코더

@@ -21,9 +21,16 @@ def main():
     df = load_parquet('data/processed/features_stock.parquet')
     report_memory(df, "features_stock")
 
+    import yaml
+    with open('config/settings.yaml') as f:
+        cfg = yaml.safe_load(f)
+
+    # 전체 peer 기준 (학습 전 전처리 단계이므로 peer 제한 없음)
+    # Train/Val 분리는 04_train.py에서 처리
     theme_ctx = compute_theme_context(
         df,
-        merged_path='themes/processed/merged_themes.yaml',
+        processed_path=cfg['themes']['processed_path'],
+        peer_tickers=None,
     )
 
     save_parquet(theme_ctx, 'data/processed/theme_context.parquet')

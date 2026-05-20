@@ -1,20 +1,11 @@
-# stockml 구현 가이드 v5.3
+# stockml 구현 가이드 v5.4
 # Coding Agent 전용 기술 명세서
 
 """
-이 문서는 v5.1을 기준으로 다음을 완전 교체한다:
-  - TFT, LightGBM 제거
-  - LSTM(stock) + LSTM(macro) + ThemeContext → FT-Transformer 단일 파이프라인
-  - 테마 내 비중 컨텍스트 신규 추가
-
-변경되지 않는 것:
-  - 환경 설정 (섹션 1)
-  - 데이터 수집 (섹션 4)
-  - 피처 엔지니어링 (섹션 5)
-  - 라벨 생성 (섹션 6)
-  - 평가 메트릭 (섹션 9)
-  - UI (섹션 10)
-  - 실행 순서 (섹션 11)
+이 문서는 v5.3을 기준으로 다음을 완전 교체/추가한다:
+  - 검증 방식: 시간 기반 분할 → 종목 교차 검증 (Ticker-Stratified Split)
+  - 테마 YAML 파이프라인: raw 분할 파일 매번 직접 로드 → processed/themes.yaml 병합 파이프라인 (00_merge_themes.py)
+  - Train peer 오염 방지를 위한 compute_theme_context peer_tickers 필터링 도입
 
 Coding agent 행동 원칙:
   - 모든 섹션을 위에서 아래로 순서대로 구현한다
@@ -104,60 +95,70 @@ scipy>=1.12.0
 stockml/
 ├── config/
 │   ├── settings.yaml
-│   ├── feature_lags.yaml
-│   └── theme_mapping/
-│       ├── global_themes.yaml
-│       ├── kospi_mapping_part1.yaml
-│       ├── kospi_mapping_part2.yaml
-│       ├── kospi_mapping_part3.yaml
-│       ├── sp500_mapping_part1.yaml
-│       ├── sp500_mapping_part2.yaml
-│       └── sp500_mapping_part3.yaml
+│   └── feature_lags.yaml
 │
 ├── data/
-│   ├── raw/prices/ financials/ macro/ themes/
-│   └── processed/
-│       ├── prices_quarterly.parquet
-│       ├── features_stock.parquet    ← 종목 재무 피처
-│       ├── features_macro.parquet    ← 거시 피처 (날짜별, 종목 무관)
-│       ├── theme_context.parquet     ← 테마 내 비중 (종목×날짜)
-│       └── labels.parquet
+│   ├── raw/prices/ financials/ macro/
+│   ├── themes/
+│   │   ├── raw/                          ← 원본 YAML (수동 편집)
+│   │   │   ├── global_themes.yaml
+│   │   │   ├── kospi/
+│   │   │   │   ├── kospi_mapping_part1.yaml
+│   │   │   │   ├── kospi_mapping_part2.yaml
+│   │   │   │   └── kospi_mapping_part3.yaml
+│   │   │   └── sp500/
+│   │   │       ├── sp500_mapping_part1.yaml
+│   │   │       ├── sp500_mapping_part2.yaml
+│   │   │       └── sp500_mapping_part3.yaml
+│   │   └── processed/
+│   │       └── themes.yaml               ← 병합본 (자동 생성, git ignore 가능)
+│   │
+│   ├── processed/
+│   │   ├── prices_quarterly.parquet
+│   │   ├── features_stock.parquet    ← 종목 재무 피처
+│   │   ├── features_macro.parquet    ← 거시 피처 (날짜별, 종목 무관)
+│   │   ├── theme_context.parquet     ← 테마 내 비중 (종목×날짜)
+│   │   └── labels.parquet
+│   └── splits/
+│       └── ticker_split.json         ← 종목 분할 결과 저장 (재현성)
 │
 ├── src/
 │   ├── utils/
 │   │   ├── device.py                 ← v5.1과 동일
 │   │   ├── io.py                     ← v5.1과 동일
-│   │   └── pit.py                    ← Point-in-Time 유틸
+│   │   ├── pit.py                    ← Point-in-Time 유틸
+│   │   └── split.py                  ← 신규: 종목 분할 유틸         ★v5.4 추가
 │   │
 │   ├── data_fetchers/                ← v5.1과 동일
 │   │
 │   ├── features/                     ← v5.1과 동일
 │   │
 │   ├── theme/
-│   │   ├── loader.py                 ← YAML 매핑 로드
-│   │   └── context.py                ← 테마 비중 벡터 계산  ★신규
+│   │   ├── loader.py                 ← processed YAML 로드         ★v5.4 교체
+│   │   └── context.py                ← 테마 비중 벡터 계산         ★v5.4 수정
 │   │
 │   ├── labels/                       ← v5.1과 동일
 │   │
 │   ├── models/
-│   │   ├── lstm_encoder.py           ← 가변길이 시계열 → 컨텍스트  ★신규
-│   │   ├── ft_transformer.py         ← 메인 예측 모델              ★신규
-│   │   ├── predictor.py              ← Lightning 통합 모듈         ★신규
-│   │   └── baseline_accounting.py   ← v5.1과 동일 (평가용)
+│   │   ├── lstm_encoder.py           ← 가변길이 시계열 → 컨텍스트
+│   │   ├── ft_transformer.py         ← 메인 예측 모델
+│   │   ├── predictor.py              ← Lightning 통합 모듈
+│   │   └── baseline_accounting.py    ← v5.1과 동일 (평가용)
 │   │
 │   ├── data/
-│   │   └── dataset.py                ← 가변길이 Dataset + collate  ★신규
+│   │   └── dataset.py                ← 가변길이 Dataset + collate
 │   │
 │   └── evaluation/                   ← v5.1과 동일
 │
 └── scripts/
+    ├── 00_merge_themes.py            ← 최초 1회 및 변경시 실행      ★v5.4 추가
     ├── 01_fetch_data.py              ← v5.1과 동일
     ├── 02_build_features.py          ← v5.1과 동일
-    ├── 02b_build_theme_context.py    ← 테마 비중 계산              ★신규
+    ├── 02b_build_theme_context.py    ← 테마 비중 계산              ★v5.4 수정
     ├── 03_build_labels.py            ← v5.1과 동일
-    ├── 04_train.py                   ← TFT 제거, 새 모델           ★교체
+    ├── 04_train.py                   ← stratified split 수행        ★v5.4 수정
     ├── 05_train_baselines.py         ← 회계 baseline만 유지
-    ├── 06_evaluate.py                ← v5.1과 동일
+    ├── 06_evaluate.py                ← ticker-split 평가 메인       ★v5.4 수정
     └── 07_run_ui.py                  ← v5.1과 동일
 """
 
@@ -195,12 +196,32 @@ targets:
     annualization_factor: 4
     min_forward_quarters: 4
 
-train_split:
-  train_end: '2017-12-31'
-  val_start: '2018-01-01'
-  val_end:   '2019-12-31'
-  test_start: '2020-01-01'
-  test_end:   '2021-12-31'
+split:
+  method: ticker                  # 종목 기반 분할
+  test_ratio:  0.15               # Test: 15%
+  val_ratio:   0.15               # Val:  15%
+  train_ratio: 0.70               # Train: 70% (명시, 합산 검증용)
+  seed: 42
+
+  # stratify 기준: market × theme_level
+  # market:      KR / US 각각에서 독립적으로 비율 맞춤
+  # theme_level: Tier3 우선, 종목 수 < min_bucket_size 이면 Tier2, 그래도 부족하면 Tier1
+  stratify:
+    market: true                  # KR/US 비율 유지
+    theme_level: tier3            # tier1 | tier2 | tier3
+    min_bucket_size: 3            # 버킷당 최소 종목 수 (미달 시 상위 tier로 합산)
+
+  # 보조: 시간 외삽 성능 별도 측정 (선택, 06_evaluate.py에서 수행)
+  time_holdout:
+    enabled: true
+    train_tickers: train_only     # train 종목만 사용
+    cutoff: '2015-12-31'          # 이전 학습, 이후 테스트
+
+themes:
+  raw_dir: data/themes/raw
+  processed_path: data/themes/processed/themes.yaml
+  # processed 파일이 존재하면 재생성하지 않음
+  # raw 파일 변경 후 재생성하려면: python scripts/00_merge_themes.py --force
 
 # ── 모델 설정 ──────────────────────────────────────────────────────
 model:
@@ -255,9 +276,8 @@ THEME_LOADER = '''
 """
 src/theme/loader.py
 
-global_themes.yaml + kospi/sp500 매핑 파일을 로드해
-ticker → [GT_XXX, ...] 딕셔너리와
-GT_XXX → [ticker, ...] 딕셔너리를 제공한다.
+processed/themes.yaml 만 읽는다.
+파일이 없으면 에러 메시지로 scripts/00_merge_themes.py 실행 안내.
 """
 import yaml
 from pathlib import Path
@@ -266,54 +286,34 @@ from typing import Dict, List
 
 
 @lru_cache(maxsize=1)
-def load_theme_mapping(mapping_dir: str = "config/theme_mapping") -> Dict:
+def load_themes(processed_path: str = 'data/themes/processed/themes.yaml') -> Dict:
     """
-    모든 매핑 파일을 로드해 두 방향 인덱스를 반환한다.
+    병합된 themes.yaml 로드.
 
     반환:
         {
-          "ticker_to_themes": {"005930": ["GT_SEMI_MEMORY", ...], ...},
-          "theme_to_tickers": {"GT_SEMI_MEMORY": ["005930", "000660", ...], ...},
-          "theme_meta":       {"GT_SEMI_MEMORY": {"tier":3, "parent":..., ...}, ...},
+          "meta":             {...},
+          "themes":           {"GT_XXX": {...}, ...},
+          "tickers":          {"005930": {"market","themes","primary_tier1/2/3",...}, ...},
+          "theme_to_tickers": {"GT_XXX": ["005930", ...], ...},
         }
     """
-    p = Path(mapping_dir)
+    p = Path(processed_path)
+    if not p.exists():
+        raise FileNotFoundError(
+            f"{p} 파일이 없습니다.\n"
+            "다음 명령을 먼저 실행하세요:\n"
+            "  python scripts/00_merge_themes.py"
+        )
 
-    # 테마 메타 로드
-    with open(p / "global_themes.yaml", encoding="utf-8") as f:
-        raw_themes = yaml.safe_load(f)
-    theme_meta = {k: v for k, v in raw_themes.items()
-                  if not k.startswith("#")}
+    with open(p, encoding='utf-8') as f:
+        return yaml.safe_load(f)
 
-    # 종목 매핑 로드 (part1~3, KR + US)
-    ticker_to_themes: Dict[str, List[str]] = {}
-    mapping_files = sorted(p.glob("*_mapping_part*.yaml"))
-    for fpath in mapping_files:
-        with open(fpath, encoding="utf-8") as f:
-            data = yaml.safe_load(f)
-        for ticker, info in data.items():
-            if not isinstance(info, dict):
-                continue
-            themes = info.get("themes", [])
-            # 중복 ticker (DUP 접미사): 이미 있으면 병합
-            clean = ticker.rstrip("_DUP0123456789").strip('"')
-            if clean not in ticker_to_themes:
-                ticker_to_themes[clean] = []
-            for t in themes:
-                if t not in ticker_to_themes[clean]:
-                    ticker_to_themes[clean].append(t)
 
-    # 역방향 인덱스
-    theme_to_tickers: Dict[str, List[str]] = {}
-    for ticker, themes in ticker_to_themes.items():
-        for t in themes:
-            theme_to_tickers.setdefault(t, []).append(ticker)
-
-    return {
-        "ticker_to_themes": ticker_to_themes,
-        "theme_to_tickers": theme_to_tickers,
-        "theme_meta": theme_meta,
-    }
+def get_tier_map(processed_path: str = 'data/themes/processed/themes.yaml') -> Dict[str, int]:
+    """GT_XXX → tier 정수 딕셔너리."""
+    data = load_themes(processed_path)
+    return {k: v.get('tier', 0) for k, v in data['themes'].items()}
 '''
 
 # ── src/theme/context.py ─────────────────────────────────────────────────────
@@ -351,7 +351,7 @@ src/theme/context.py
 import numpy as np
 import pandas as pd
 from typing import Dict, List, Optional
-from src.theme.loader import load_theme_mapping
+from src.theme.loader import load_themes
 
 THEME_VEC_DIM = 16
 NEUTRAL = 0.5   # NaN 대체값
@@ -441,21 +441,18 @@ def compute_theme_vector(
 
 def compute_theme_context(
     df: pd.DataFrame,
-    mapping_dir: str = "config/theme_mapping",
+    processed_path: str = 'data/themes/processed/themes.yaml',
+    peer_tickers: set = None,    # None이면 전체 peer 사용
+                                 # set이면 해당 종목만 peer로 사용
 ) -> pd.DataFrame:
     """
-    전체 데이터프레임에 대해 테마 비중 벡터를 계산한다.
-
-    Args:
-        df: 종목-분기별 DataFrame. 필수 컬럼: ['ticker', 'date']
-            선택 컬럼: 피처 컬럼들 (없으면 중립값 사용)
-
-    Returns:
-        ['ticker', 'date', 'theme_ctx_0', ..., 'theme_ctx_15'] DataFrame
+    peer_tickers:
+      None  → 같은 날짜의 같은 테마 모든 종목을 peer로 사용 (실운용/Val/Test)
+      set   → 지정된 종목만 peer로 사용 (Train 오염 방지)
     """
-    mapping = load_theme_mapping(mapping_dir)
-    t2th    = mapping["ticker_to_themes"]
-    th2t    = mapping["theme_to_tickers"]
+    mapping = load_themes(processed_path)
+    t2th    = mapping['tickers']       # ticker → {themes, ...}
+    th2t    = mapping['theme_to_tickers']
 
     df = df.sort_values(['date', 'ticker']).reset_index(drop=True)
     results = []
@@ -466,10 +463,13 @@ def compute_theme_context(
             row['ticker']: row
             for _, row in date_group.iterrows()
         }
+        
+        date_group_tickers = set(date_group['ticker'])
 
         for _, row in date_group.iterrows():
             ticker = row['ticker']
-            themes = t2th.get(ticker, [])
+            ticker_info = t2th.get(ticker, {})
+            themes = ticker_info.get('themes', [])
 
             if not themes:
                 # 매핑 없는 종목: 중립값
@@ -478,12 +478,17 @@ def compute_theme_context(
                 # 각 테마별 벡터 계산 후 평균
                 vecs = []
                 for theme_id in themes:
-                    peer_tickers = th2t.get(theme_id, [])
-                    # 같은 시점에 데이터가 있는 peer만 사용
-                    peer_rows = [
-                        ticker_rows[t] for t in peer_tickers
-                        if t in ticker_rows
-                    ]
+                    all_peers = th2t.get(theme_id, [])
+                    if peer_tickers is not None:
+                        # Train 모드: peer는 peer_tickers 집합 내에서만
+                        peer_list = [t for t in all_peers
+                                     if t in peer_tickers and t in date_group_tickers]
+                    else:
+                        peer_list = [t for t in all_peers if t in date_group_tickers]
+                        
+                    if not peer_list:
+                        continue
+                    peer_rows = [ticker_rows[t] for t in peer_list if t in ticker_rows]
                     if not peer_rows:
                         continue
                     peers_df = pd.DataFrame(peer_rows)
@@ -505,6 +510,351 @@ def compute_theme_context(
     ctx_cols = [f'theme_ctx_{i}' for i in range(THEME_VEC_DIM)]
     out[ctx_cols] = out[ctx_cols].astype('float32')
     return out
+'''
+
+# =============================================================================
+# 섹션 4b. 테마 병합 및 종목 분할 모듈 (v5.4 신규)
+# =============================================================================
+
+# ── scripts/00_merge_themes.py ───────────────────────────────────────────────
+
+MERGE_THEMES_SCRIPT = '''
+"""
+scripts/00_merge_themes.py
+
+실행 조건:
+  - 최초 1회 필수 실행
+  - data/themes/raw/ 파일 변경 시 --force 옵션으로 재실행
+  - 그 외에는 processed/themes.yaml이 존재하면 건너뜀
+
+역할:
+  raw/global_themes.yaml + raw/kospi/*.yaml + raw/sp500/*.yaml 를
+  하나의 processed/themes.yaml로 병합한다.
+"""
+import argparse
+import yaml
+import re
+from pathlib import Path
+from datetime import datetime
+
+
+def get_tier1(theme_id: str, tier_map: dict, parent_map: dict) -> str:
+    cur = theme_id
+    for _ in range(10):
+        p = parent_map.get(cur, 'null')
+        if p == 'null' or p not in tier_map:
+            return cur
+        cur = p
+    return cur
+
+
+def get_primary_tiers(themes: list, tier_map: dict, parent_map: dict) -> dict:
+    """
+    themes 리스트에서 primary tier1/tier2/tier3 결정.
+    tier3인 첫 번째 테마를 primary_tier3로 사용.
+    없으면 tier2, 그래도 없으면 tier1.
+    """
+    primary = themes[0] if themes else None
+    tier3, tier2, tier1 = None, None, None
+
+    for t in themes:
+        tier = tier_map.get(t, 0)
+        if tier == 3 and tier3 is None:
+            tier3 = t
+            tier2 = parent_map.get(t)
+            tier1 = get_tier1(t, tier_map, parent_map)
+            break
+        elif tier == 2 and tier2 is None:
+            tier2 = t
+            tier1 = get_tier1(t, tier_map, parent_map)
+        elif tier == 1 and tier1 is None:
+            tier1 = t
+
+    if tier3 is None and tier2 is not None:
+        tier3 = tier2   # fallback: tier2를 tier3 자리에
+    if tier2 is None and tier1 is not None:
+        tier2 = tier1
+    if tier1 is None:
+        tier1 = 'UNMAPPED'
+
+    return {
+        'primary_theme': primary,
+        'primary_tier3': tier3 or 'UNMAPPED',
+        'primary_tier2': tier2 or 'UNMAPPED',
+        'primary_tier1': tier1 or 'UNMAPPED',
+    }
+
+
+def parse_mapping_file(path: Path, market: str, tier_map: dict, parent_map: dict) -> dict:
+    """
+    단일 매핑 YAML 파일 파싱.
+    DUP 접미사 ticker는 이미 등록된 ticker와 병합.
+    """
+    with open(path, encoding='utf-8') as f:
+        raw = yaml.safe_load(f) or {}
+
+    result = {}
+    for key, info in raw.items():
+        if not isinstance(info, dict):
+            continue
+        # DUP 정리: "005930_DUP", "005930_DUP2" → "005930"
+        clean_key = re.sub(r'_DUP\d*$', '', str(key)).strip('"').strip("'")
+
+        themes = info.get('themes', [])
+        if clean_key in result:
+            # 이미 등록된 ticker: 테마 병합 (중복 제거, 순서 유지)
+            existing = result[clean_key]['themes']
+            for t in themes:
+                if t not in existing:
+                    existing.append(t)
+        else:
+            tier_info = get_primary_tiers(themes, tier_map, parent_map)
+            result[clean_key] = {
+                'name': info.get('name', clean_key),
+                'market': market,
+                'themes': themes,
+                **tier_info,
+            }
+
+    return result
+
+
+def merge(raw_dir: str, output_path: str, force: bool = False):
+    raw = Path(raw_dir)
+    out = Path(output_path)
+    out.parent.mkdir(parents=True, exist_ok=True)
+
+    if out.exists() and not force:
+        print(f"[skip] {out} 이미 존재. 재생성하려면 --force 사용.")
+        return
+
+    # ── global_themes 로드 ───────────────────────────────────────────
+    with open(raw / 'global_themes.yaml', encoding='utf-8') as f:
+        themes_raw = yaml.safe_load(f)
+
+    # tier/parent 인덱스 구축
+    tier_map, parent_map = {}, {}
+    for k, v in themes_raw.items():
+        if not k.startswith('GT_') or not isinstance(v, dict):
+            continue
+        tier_map[k]   = v.get('tier', 0)
+        parent_map[k] = v.get('parent', 'null')
+
+    # ── 종목 매핑 로드 ───────────────────────────────────────────────
+    all_tickers = {}
+
+    kr_files = sorted((raw / 'kospi').glob('*.yaml'))
+    for fpath in kr_files:
+        parsed = parse_mapping_file(fpath, 'KR', tier_map, parent_map)
+        for ticker, info in parsed.items():
+            if ticker not in all_tickers:
+                all_tickers[ticker] = info
+            else:
+                for t in info['themes']:
+                    if t not in all_tickers[ticker]['themes']:
+                        all_tickers[ticker]['themes'].append(t)
+
+    us_files = sorted((raw / 'sp500').glob('*.yaml'))
+    for fpath in us_files:
+        parsed = parse_mapping_file(fpath, 'US', tier_map, parent_map)
+        for ticker, info in parsed.items():
+            if ticker not in all_tickers:
+                all_tickers[ticker] = info
+            else:
+                for t in info['themes']:
+                    if t not in all_tickers[ticker]['themes']:
+                        all_tickers[ticker]['themes'].append(t)
+
+    # ── 역방향 인덱스 ────────────────────────────────────────────────
+    theme_to_tickers = {}
+    for ticker, info in all_tickers.items():
+        for t in info['themes']:
+            theme_to_tickers.setdefault(t, []).append(ticker)
+
+    # ── 통계 ─────────────────────────────────────────────────────────
+    n_kr = sum(1 for v in all_tickers.values() if v['market'] == 'KR')
+    n_us = sum(1 for v in all_tickers.values() if v['market'] == 'US')
+
+    # ── 저장 ─────────────────────────────────────────────────────────
+    output = {
+        'meta': {
+            'generated_at': datetime.now().isoformat(),
+            'n_themes': len(tier_map),
+            'n_tickers_kr': n_kr,
+            'n_tickers_us': n_us,
+            'n_tickers_total': len(all_tickers),
+            'source_files': (
+                [str(f) for f in kr_files] +
+                [str(f) for f in us_files]
+            ),
+        },
+        'themes': {k: v for k, v in themes_raw.items()
+                   if k.startswith('GT_')},
+        'tickers': all_tickers,
+        'theme_to_tickers': theme_to_tickers,
+    }
+
+    with open(out, 'w', encoding='utf-8') as f:
+        yaml.dump(output, f, allow_unicode=True,
+                  default_flow_style=False, sort_keys=False)
+
+    print(f"[done] {out}")
+    print(f"  테마: {len(tier_map)}개 | KR: {n_kr}종목 | US: {n_us}종목")
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--raw-dir',  default='data/themes/raw')
+    parser.add_argument('--output',   default='data/themes/processed/themes.yaml')
+    parser.add_argument('--force',    action='store_true',
+                        help='processed 파일이 있어도 강제 재생성')
+    args = parser.parse_args()
+    merge(args.raw_dir, args.output, args.force)
+'''
+
+# ── src/utils/split.py ───────────────────────────────────────────────────────
+
+SPLIT_UTIL = '''
+"""
+src/utils/split.py
+
+종목 기반 Stratified Split.
+"""
+import random
+from collections import defaultdict
+from typing import Dict, List, Tuple
+
+from src.theme.loader import load_themes
+
+
+def stratified_ticker_split(
+    processed_path: str = 'data/themes/processed/themes.yaml',
+    test_ratio:  float = 0.15,
+    val_ratio:   float = 0.15,
+    seed:        int   = 42,
+    min_bucket_size: int = 3,
+    theme_level: str = 'tier3',    # 'tier1' | 'tier2' | 'tier3'
+) -> Tuple[List[str], List[str], List[str]]:
+    """
+    종목을 market × theme_level 버킷 기준으로 균등 분할한다.
+    """
+    rng = random.Random(seed)
+
+    data     = load_themes(processed_path)
+    tickers  = data['tickers']
+
+    # ── 버킷 배정 ─────────────────────────────────────────────────────
+    tier_key = {
+        'tier1': 'primary_tier1',
+        'tier2': 'primary_tier2',
+        'tier3': 'primary_tier3',
+    }[theme_level]
+
+    buckets: Dict[Tuple[str, str], List[str]] = defaultdict(list)
+
+    for ticker, info in tickers.items():
+        market = info.get('market', 'UNKNOWN')
+        tier_id = info.get(tier_key, 'UNMAPPED')
+        buckets[(market, tier_id)].append(ticker)
+
+    # ── 소형 버킷 상향 합산 ───────────────────────────────────────────
+    if theme_level == 'tier3':
+        merged: Dict[Tuple[str, str], List[str]] = defaultdict(list)
+        theme_meta = data['themes']
+
+        for (market, tier3_id), ticker_list in buckets.items():
+            if len(ticker_list) >= min_bucket_size:
+                merged[(market, tier3_id)].extend(ticker_list)
+            else:
+                tier2_id = theme_meta.get(tier3_id, {}).get('parent', 'UNMAPPED')
+                if tier2_id == 'null' or tier2_id not in theme_meta:
+                    tier2_id = 'UNMAPPED'
+                merged[(market, tier2_id)].extend(ticker_list)
+
+        final: Dict[Tuple[str, str], List[str]] = defaultdict(list)
+        for (market, tier2_id), ticker_list in merged.items():
+            if len(ticker_list) >= min_bucket_size:
+                final[(market, tier2_id)].extend(ticker_list)
+            else:
+                tier1_id = theme_meta.get(tier2_id, {}).get('parent', 'UNMAPPED')
+                if tier1_id == 'null' or tier1_id not in theme_meta:
+                    tier1_id = 'UNMAPPED'
+                final[(market, tier1_id)].extend(ticker_list)
+
+        buckets = final
+
+    # ── 버킷별 분할 ───────────────────────────────────────────────────
+    train_tickers, val_tickers, test_tickers = [], [], []
+
+    for (market, theme_id), ticker_list in sorted(buckets.items()):
+        unique = list(dict.fromkeys(ticker_list))
+        rng.shuffle(unique)
+        n = len(unique)
+
+        n_test = max(1, round(n * test_ratio))
+        n_val  = max(1, round(n * val_ratio))
+        n_train = n - n_test - n_val
+
+        if n_train < 1:
+            train_tickers.extend(unique)
+            continue
+
+        test_tickers.extend(unique[:n_test])
+        val_tickers.extend(unique[n_test:n_test + n_val])
+        train_tickers.extend(unique[n_test + n_val:])
+
+    def dedup(lst):
+        return list(dict.fromkeys(lst))
+
+    train_tickers = dedup(train_tickers)
+    val_tickers   = dedup(val_tickers)
+    test_tickers  = dedup(test_tickers)
+
+    train_set = set(train_tickers)
+    val_tickers  = [t for t in val_tickers  if t not in train_set]
+    test_tickers = [t for t in test_tickers if t not in train_set]
+
+    return train_tickers, val_tickers, test_tickers
+
+
+def print_split_report(
+    train: List[str],
+    val:   List[str],
+    test:  List[str],
+    processed_path: str = 'data/themes/processed/themes.yaml',
+):
+    """
+    분할 결과 요약 출력.
+    """
+    from collections import Counter
+    data    = load_themes(processed_path)
+    tickers = data['tickers']
+
+    def market_dist(lst):
+        c = Counter(tickers[t]['market'] for t in lst if t in tickers)
+        return dict(c)
+
+    def tier1_dist(lst):
+        c = Counter(tickers[t]['primary_tier1'] for t in lst if t in tickers)
+        return dict(c)
+
+    total = len(train) + len(val) + len(test)
+    print(f"{'='*55}")
+    print(f"  분할 결과 (총 {total}종목)")
+    print(f"  Train: {len(train)} ({len(train)/total:.0%})")
+    print(f"  Val:   {len(val)}  ({len(val)/total:.0%})")
+    print(f"  Test:  {len(test)} ({len(test)/total:.0%})")
+    print(f"{'='*55}")
+
+    print("  [Market 분포]")
+    for split_name, split_list in [('Train', train), ('Val', val), ('Test', test)]:
+        d = market_dist(split_list)
+        print(f"    {split_name}: KR={d.get('KR',0)}, US={d.get('US',0)}")
+
+    print("  [Tier1 분포 — Test]")
+    for tier1, cnt in sorted(tier1_dist(test).items(), key=lambda x: -x[1]):
+        print(f"    {tier1:<35s}: {cnt}종목")
+    print(f"{'='*55}")
 '''
 
 # =============================================================================
@@ -1123,31 +1473,77 @@ def main():
         'max_epochs':        mcfg['max_epochs'],
     }
 
-    # ── 데이터 분할 ──────────────────────────────────────────────────────
-    train_end = pd.Timestamp(cfg['train_split']['train_end'])
-    val_end   = pd.Timestamp(cfg['train_split']['val_end'])
+    # ── 데이터 분할 및 테마 비중 계산 (peer 오염 방지) ──────────────────────
+    from src.utils.split import stratified_ticker_split, print_split_report
 
-    def make_dataset(df_s, label_date_filter):
-        labels_sub = df_labels[label_date_filter(df_labels['date'])]
-        return StockDataset(
-            df_stock=df_s,
-            df_macro=df_macro,
-            df_theme=df_theme,
-            df_labels=labels_sub,
-            stock_seq_cols=STOCK_SEQ_COLS,
-            macro_seq_cols=MACRO_SEQ_COLS,
-            snap_num_cols=SNAP_NUM_COLS,
-            snap_cat_cols=SNAP_CAT_COLS,
-            max_seq_len=mcfg.get('lstm_stock_max_seq', 20),
-        )
-
-    train_ds = make_dataset(
-        df_stock[df_stock['date'] <= train_end],
-        lambda d: d <= train_end,
+    split_cfg = cfg['split']
+    train_tickers, val_tickers, test_tickers = stratified_ticker_split(
+        processed_path = cfg['themes']['processed_path'],
+        test_ratio     = split_cfg['test_ratio'],
+        val_ratio      = split_cfg['val_ratio'],
+        seed           = split_cfg['seed'],
+        min_bucket_size= split_cfg['stratify']['min_bucket_size'],
+        theme_level    = split_cfg['stratify']['theme_level'],
     )
-    val_ds = make_dataset(
-        df_stock[(df_stock['date'] > train_end) & (df_stock['date'] <= val_end)],
-        lambda d: (d > train_end) & (d <= val_end),
+    print_split_report(
+        train_tickers, val_tickers, test_tickers,
+        processed_path=cfg['themes']['processed_path'],
+    )
+
+    # 저장 (재현성)
+    import json
+    from pathlib import Path
+    Path('data/splits').mkdir(exist_ok=True)
+    json.dump({
+        'train': train_tickers,
+        'val':   val_tickers,
+        'test':  test_tickers,
+    }, open('data/splits/ticker_split.json', 'w'))
+
+    # Dataset 분할
+    train_df = df_stock[df_stock['ticker'].isin(train_tickers)]
+    val_df   = df_stock[df_stock['ticker'].isin(val_tickers)]
+
+    # ── 테마 비중: Train peer 오염 방지 ───────────────────────────────────
+    # Train 종목의 theme_ctx는 Train peer만 참조
+    # Val/Test 종목의 theme_ctx는 전체 peer 참조 (실운용과 동일)
+    from src.theme.context import compute_theme_context
+
+    df_theme_train = compute_theme_context(
+        train_df,
+        processed_path=cfg['themes']['processed_path'],
+        peer_tickers=set(train_tickers),   # Train peer만
+    )
+    df_theme_val = compute_theme_context(
+        val_df,
+        processed_path=cfg['themes']['processed_path'],
+        peer_tickers=None,                 # 전체 peer
+    )
+    # Validation은 별도 계산 후 concat
+    df_theme = pd.concat([df_theme_train, df_theme_val], ignore_index=True)
+
+    # dataset 생성
+    train_ds = StockDataset(
+        df_stock=train_df,
+        df_macro=df_macro,
+        df_theme=df_theme,
+        df_labels=df_labels[df_labels['ticker'].isin(train_tickers)],
+        stock_seq_cols=STOCK_SEQ_COLS,
+        macro_seq_cols=MACRO_SEQ_COLS,
+        snap_num_cols=SNAP_NUM_COLS,
+        snap_cat_cols=SNAP_CAT_COLS,
+        max_seq_len=mcfg.get('lstm_stock_max_seq', 20),
+    )
+    val_ds = StockDataset(
+        df_stock=val_df,
+        df_macro=df_macro,
+        df_theme=df_theme,
+        df_labels=df_labels[df_labels['ticker'].isin(val_tickers)],
+        stock_seq_cols=STOCK_SEQ_COLS,
+        macro_seq_cols=MACRO_SEQ_COLS,
+        snap_num_cols=SNAP_NUM_COLS,
+        snap_cat_cols=SNAP_CAT_COLS,
+        max_seq_len=mcfg.get('lstm_stock_max_seq', 20),
     )
 
     batch_size = get_optimal_batch_size(mcfg['batch_size'])
@@ -1224,11 +1620,8 @@ scripts/02b_build_theme_context.py
 
 실행: python scripts/02b_build_theme_context.py
 02_build_features.py 이후, 03_build_labels.py 이전에 실행한다.
-
-Point-in-Time 보장:
-  분기별로 해당 시점의 종목 피처만 사용해 테마 내 순위를 계산한다.
-  미래 데이터 참조 없음.
 """
+import yaml
 from src.theme.context import compute_theme_context
 from src.utils.io import load_parquet, save_parquet, report_memory
 
@@ -1238,9 +1631,15 @@ def main():
     df = load_parquet('data/processed/features_stock.parquet')
     report_memory(df, "features_stock")
 
+    with open('config/settings.yaml') as f:
+        cfg = yaml.safe_load(f)
+
+    # 전체 peer 기준 (학습 전 전처리 단계이므로 peer 제한 없음)
+    # Train/Val 분리는 04_train.py에서 처리
     theme_ctx = compute_theme_context(
         df,
-        mapping_dir='config/theme_mapping',
+        processed_path=cfg['themes']['processed_path'],
+        peer_tickers=None,
     )
 
     save_parquet(theme_ctx, 'data/processed/theme_context.parquet')
@@ -1257,7 +1656,7 @@ if __name__ == '__main__':
 # =============================================================================
 
 EXECUTION_ORDER = """
-# 실행 순서
+# 실행 순서 (v5.4)
 
 # 1. 환경 설정
 python3 -m venv .venv && source .venv/bin/activate
@@ -1265,36 +1664,24 @@ pip install -r requirements.txt
 cp .env.example .env
 # .env: FRED_API_KEY, ECOS_API_KEY, DART_API_KEY
 
-# 2. 데이터 수집
+# ── 최초 1회 (raw 파일 변경 시 --force 추가) ──────────────────────────
+python scripts/00_merge_themes.py
+# → data/themes/processed/themes.yaml 생성
+# 이미 존재하면 건너뜀. raw 변경 후 재생성: --force 옵션
+
+# ── 이후 매 실행 ─────────────────────────────────────────────────────
 python scripts/01_fetch_data.py --start 2010-01-01 --end 2026-05-01
-
-# 3. 피처 빌드 (stock 피처와 macro 피처를 분리 저장)
-python scripts/02_build_features.py
-# → data/processed/features_stock.parquet  (종목 재무, 자산집중도)
-# → data/processed/features_macro.parquet  (거시 80종, 날짜별)
-
-# 4. 테마 비중 계산 (★신규 — 피처 빌드 후 실행)
+python scripts/02_build_features.py     # features_stock + features_macro 분리 저장
 python scripts/02b_build_theme_context.py
-# → data/processed/theme_context.parquet
-
-# 5. 라벨 생성
 python scripts/03_build_labels.py
-
-# 6. 모델 학습
-python scripts/04_train.py
-
-# 7. 베이스라인 비교 (회계 지표)
-python scripts/05_train_baselines.py
-
-# 8. 평가
-python scripts/06_evaluate.py
-
-# 9. UI
+python scripts/04_train.py              # 내부에서 stratified split 수행
+python scripts/05_train_baselines.py    # 회계 지표 baseline
+python scripts/06_evaluate.py           # ticker-split 평가 + time_holdout 보조 평가
 streamlit run scripts/07_run_ui.py
 """
 
 # =============================================================================
-# 섹션 12. 단위 테스트 (신규 포함)
+# 섹션 12. 단위 테스트 (신규 및 v5.4 포함)
 # =============================================================================
 
 TESTS = '''
@@ -1358,20 +1745,6 @@ def test_ft_transformer_output_shape():
 
 def test_theme_context_point_in_time():
     """테마 비중 계산이 미래 데이터를 참조하지 않는지 확인."""
-    # t1 시점과 t2 시점에 서로 다른 피처값을 갖는 더미 데이터
-    dates = pd.to_datetime(['2020-03-31', '2020-06-30'])
-    df = pd.DataFrame({
-        'ticker': ['A', 'B', 'A', 'B'],
-        'date':   [dates[0], dates[0], dates[1], dates[1]],
-        'market_cap': [100, 200, 150, 250],
-        'F_VAL_pbr':  [1.0, 2.0, 1.5, 2.5],
-    })
-
-    from src.theme.context import compute_theme_context
-    # 두 종목이 같은 테마에 있다고 가정하는 더미 매핑은
-    # 실제 테스트에서는 mock 사용
-    # 여기서는 함수가 날짜별로 분리 계산함을 구조적으로 검증
-    # (실제 YAML 없이 실행 불가 → 통합 테스트에서 확인)
     pass
 
 
@@ -1385,9 +1758,8 @@ def test_attractiveness_label_no_lookahead():
     })
     result = compute_attractiveness(prices, max_horizon_years=5,
                                     min_forward_quarters=4)
-    # 첫 번째 시점의 A는 index 1~9의 최고가 기준이어야 함
     first = result.iloc[0]
-    max_price = max([110, 90, 120, 130, 125, 140, 135, 145, 150])  # = 150
+    max_price = max([110, 90, 120, 130, 125, 140, 135, 145, 150])
     expected_A = np.log(150 / 100) / np.log(5)
     assert abs(first['A'] - expected_A) < 1e-5
 
@@ -1420,6 +1792,77 @@ def test_collate_padding():
     assert out['s_lengths'][0]  == 5
     assert out['s_lengths'][1]  == 12
     assert out['theme'].shape   == (2, 16)
+
+
+# ── v5.4 신규 테스트 (tests/test_split.py) ───────────────────────────────────
+
+def test_stratified_split_market_ratio():
+    """KR/US 비율이 Train/Val/Test에서 유사하게 유지되는지."""
+    from src.utils.split import stratified_ticker_split
+    from src.theme.loader import load_themes
+
+    train, val, test = stratified_ticker_split()
+    data    = load_themes()
+    tickers = data['tickers']
+
+    def kr_ratio(lst):
+        kr = sum(1 for t in lst if tickers.get(t, {}).get('market') == 'KR')
+        return kr / len(lst) if lst else 0
+
+    r_train = kr_ratio(train)
+    r_val   = kr_ratio(val)
+    r_test  = kr_ratio(test)
+
+    assert abs(r_train - r_test) < 0.05, f"KR ratio mismatch: train={r_train:.2f}, test={r_test:.2f}"
+    assert abs(r_train - r_val)  < 0.05
+
+
+def test_stratified_split_no_overlap():
+    """Train/Val/Test 간 종목 중복 없음."""
+    from src.utils.split import stratified_ticker_split
+
+    train, val, test = stratified_ticker_split()
+    train_set = set(train)
+    val_set   = set(val)
+    test_set  = set(test)
+
+    assert len(train_set & val_set)  == 0, "Train-Val overlap"
+    assert len(train_set & test_set) == 0, "Train-Test overlap"
+    assert len(val_set   & test_set) == 0, "Val-Test overlap"
+
+
+def test_stratified_split_tier1_coverage():
+    """Test 셋에 모든 Tier1 카테고리가 최소 1종목 포함."""
+    from src.utils.split import stratified_ticker_split
+    from src.theme.loader import load_themes
+
+    _, _, test = stratified_ticker_split()
+    data    = load_themes()
+    tickers = data['tickers']
+
+    tier1_in_test = set(
+        tickers[t]['primary_tier1'] for t in test if t in tickers
+    )
+    all_tier1 = set(
+        k for k, v in data['themes'].items() if v.get('tier') == 1
+    )
+    missing = all_tier1 - tier1_in_test
+    assert not missing, f"Test에 없는 Tier1: {missing}"
+
+
+def test_merge_themes_idempotent(tmp_path):
+    """00_merge_themes.py 두 번 실행해도 결과 동일."""
+    from scripts.00_merge_themes import merge
+    out = tmp_path / 'themes.yaml'
+    merge('data/themes/raw', str(out), force=True)
+    import yaml
+    with open(out) as f:
+        content1 = yaml.safe_load(f)
+    merge('data/themes/raw', str(out), force=True)
+    with open(out) as f:
+        content2 = yaml.safe_load(f)
+    assert content1['meta']['n_tickers_total'] == content2['meta']['n_tickers_total']
+    assert content1['meta']['n_themes'] == content2['meta']['n_themes']
 '''
 
 # =============================================================================
@@ -1467,48 +1910,60 @@ TROUBLESHOOTING = """
 """
 
 # =============================================================================
-# 섹션 14. 변경 체크리스트
+# 섹션 14. 변경 체크리스트 (v5.4 업데이트)
 # =============================================================================
 
 CHECKLIST = """
-# v5.1 → v5.3 변경 체크리스트
+# v5.3 → v5.4 변경 체크리스트
 
-## 제거
-□ src/models/tft_model.py           (TFT 완전 제거)
-□ src/models/baseline_gbm.py        (LightGBM 완전 제거)
-□ scripts/04_train_tft.py           (교체됨)
-□ requirements.txt: pytorch-forecasting, lightgbm 제거
+## 신규 파일
+□ scripts/00_merge_themes.py
+    - raw YAML → processed/themes.yaml 병합
+    - --force 옵션으로 강제 재생성 가능
+    - 최초 1회 실행 or raw 변경 시에만 실행
 
-## 신규 생성
-□ src/theme/loader.py               (YAML 매핑 로드)
-□ src/theme/context.py              (테마 비중 벡터 계산)
-□ src/data/dataset.py               (StockDataset + collate_fn)
-□ src/models/lstm_encoder.py        (가변길이 시계열 인코더)
-□ src/models/ft_transformer.py      (FT-Transformer)
-□ src/models/predictor.py           (Lightning 통합 모듈)
+□ src/utils/split.py
+    - stratified_ticker_split() : market × tier3(fallback tier2/1) 기반 분할
+    - print_split_report()      : 분할 결과 요약 출력
+
+□ data/themes/raw/kospi/        ← 기존 kospi_mapping_part*.yaml 이동
+□ data/themes/raw/sp500/        ← 기존 sp500_mapping_part*.yaml 이동
+□ data/themes/raw/global_themes.yaml ← 이동
+□ data/themes/processed/        ← 자동 생성 디렉토리 (git ignore 가능)
+
+□ tests/test_split.py
+
+## 수정 파일
+□ config/settings.yaml
+    - train_split 섹션 제거
+    - split 섹션 추가 (method, ratios, stratify, time_holdout)
+    - themes 섹션 추가 (raw_dir, processed_path)
+
+□ src/theme/loader.py
+    - raw 파일 직접 로드 제거
+    - processed/themes.yaml 단독 로드로 교체
+    - load_themes() 시그니처 변경
+
+□ src/theme/context.py
+    - compute_theme_context() 파라미터 추가:
+        processed_path (mapping_dir 대체)
+        peer_tickers (None = 전체, set = 지정 종목만)
+
 □ scripts/02b_build_theme_context.py
-□ scripts/04_train.py               (새 모델 학습 진입점)
+    - processed_path 참조로 변경
 
-## 수정
-□ config/settings.yaml: model 섹션 교체
-□ scripts/02_build_features.py:
-    features_stock.parquet (F_, A_ 컬럼)
-    features_macro.parquet (M_ 컬럼, 날짜별)
-    두 파일로 분리 저장하도록 수정
-□ scripts/05_train_baselines.py: GBM baseline 제거, 회계 지표만 유지
-□ requirements.txt: pytorch-forecasting/lightgbm 제거
+□ scripts/04_train.py
+    - 날짜 기반 분할 → stratified_ticker_split() 호출로 교체
+    - Train theme_ctx와 Val theme_ctx 분리 계산 (peer 오염 방지)
+    - data/splits/ticker_split.json 저장 (재현성)
 
-## 유지 (변경 없음)
-□ src/utils/device.py, io.py, pit.py
-□ src/data_fetchers/ 전체
-□ src/features/ 전체
-□ src/labels/ 전체
-□ src/models/baseline_accounting.py
-□ src/evaluation/ 전체
-□ src/ui/streamlit_app.py
-□ scripts/01, 03, 06, 07
-□ config/feature_lags.yaml
-□ config/theme_mapping/*.yaml
+□ scripts/06_evaluate.py
+    - ticker-split 기반 평가 메인
+    - time_holdout 보조 평가 추가
+
+## 삭제
+□ config/settings.yaml 의 train_split 섹션
+□ config/theme_mapping/ 디렉토리 (data/themes/raw/ 로 이동)
 """
 
 # =============================================================================
