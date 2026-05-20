@@ -108,6 +108,66 @@ except Exception as e:
     st.error(f"데이터 로드 실패: {e}. 파이프라인을 먼저 순서대로 실행해주세요.")
     st.stop()
 
+@st.cache_data
+def load_ticker_names() -> dict:
+    """기존 매핑 정보(yaml), Wikipedia(S&P 500) 등을 종합하여 티커-종목명 사전 구축"""
+    names = {}
+    
+    # 1. processed themes YAML에서 매핑 정보 추출
+    try:
+        import yaml
+        yaml_path = 'data/themes/processed/themes.yaml'
+        with open(yaml_path, 'r', encoding='utf-8') as f:
+            theme_data = yaml.safe_load(f) or {}
+            tickers_metadata = theme_data.get('tickers', {})
+            for ticker, info in tickers_metadata.items():
+                name = info.get('name')
+                if name and name != ticker:
+                    names[ticker] = name
+    except Exception as e:
+        print(f"Error loading names from themes.yaml: {e}")
+
+    # 2. Wikipedia에서 S&P 500 실명 정보 수집하여 미국 기업 실명 보완
+    try:
+        import urllib.request
+        import ssl
+        url = 'https://en.wikipedia.org/wiki/List_of_S%26P_500_companies'
+        req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36'})
+        context = ssl._create_unverified_context()
+        with urllib.request.urlopen(req, timeout=5, context=context) as response:
+            tables = pd.read_html(response.read())
+            sp500 = tables[0]
+            sp500['Symbol'] = sp500['Symbol'].str.replace('.', '-', regex=False)
+            for _, row in sp500.iterrows():
+                symbol = row['Symbol']
+                security = row['Security']
+                if symbol not in names or names[symbol] == symbol:
+                    names[symbol] = security
+    except Exception as e:
+        print(f"Error fetching S&P 500 names from Wikipedia: {e}")
+
+    return names
+
+# 티커-종목명 매핑 사전 생성 (selectbox 표시 포맷용)
+ticker_to_name = load_ticker_names()
+
+# df(predictions)에 있는 이름 중 매핑 사전이나 Wikipedia에 없던 이름 병합
+if 'ticker' in df.columns and 'name' in df.columns:
+    for t, n in zip(df['ticker'].astype(str), df['name'].astype(str)):
+        if n and n != t:
+            if t not in ticker_to_name or ticker_to_name[t] == t:
+                ticker_to_name[t] = n
+
+# df(predictions)의 'name' 컬럼에 고품질 이름 적용하여 차트 및 테이블 시각화 개선
+if 'name' in df.columns and 'ticker' in df.columns:
+    df['name'] = df['ticker'].astype(str).map(ticker_to_name).fillna(df['name'].astype(str))
+
+def format_ticker_label(ticker):
+    name = ticker_to_name.get(ticker, "")
+    if name and name != ticker:
+        return f"{ticker} ({name})"
+    return ticker
+
 # 사이드바 필터
 with st.sidebar:
     st.header("🔍 글로벌 필터 설정")
@@ -196,7 +256,12 @@ with tab_portfolio:
     st.markdown("---")
     st.subheader("🔍 개별 종목 정밀 진단")
     
-    selected_ticker = st.selectbox("진단할 종목 선택", sorted(filtered_latest['ticker'].unique()), key="deepdive_ticker")
+    selected_ticker = st.selectbox(
+        "진단할 종목 선택", 
+        sorted(filtered_latest['ticker'].unique()), 
+        format_func=format_ticker_label,
+        key="deepdive_ticker"
+    )
     stock = filtered_latest[filtered_latest['ticker'] == selected_ticker].iloc[0]
     
     col_detail1, col_detail2, col_detail3 = st.columns(3)
@@ -236,7 +301,12 @@ with tab_data:
     # 돋보이는 종목 선택
     all_tickers = sorted(df_raw['ticker'].unique()) if not df_raw.empty else []
     if all_tickers:
-        selected_raw_ticker = st.selectbox("조회 대상 종목 선택", all_tickers, index=all_tickers.index(selected_ticker) if selected_ticker in all_tickers else 0)
+        selected_raw_ticker = st.selectbox(
+            "조회 대상 종목 선택", 
+            all_tickers, 
+            index=all_tickers.index(selected_ticker) if selected_ticker in all_tickers else 0,
+            format_func=format_ticker_label
+        )
         
         # 1. 원본 데이터 섹션
         st.markdown("### 📈 1. 원본 종가 및 거래량 (Raw Historical Data)")
@@ -245,16 +315,29 @@ with tab_data:
         if not raw_stock_df.empty:
             col_raw_chart, col_raw_table = st.columns([2, 1])
             with col_raw_chart:
-                # Plotly 이중 축 차트 (종가 & 거래량)
+                # Plotly 이중 축 차트 (캔들 차트 & 거래량)
                 fig_raw = go.Figure()
-                fig_raw.add_trace(go.Scatter(x=raw_stock_df['date'], y=raw_stock_df['close'], name="종가", line=dict(color="#3b82f6", width=2.5)))
-                fig_raw.add_trace(go.Bar(x=raw_stock_df['date'], y=raw_stock_df['volume'], name="거래량", yaxis="y2", marker_color="rgba(147, 51, 234, 0.3)"))
+                fig_raw.add_trace(go.Candlestick(
+                    x=raw_stock_df['date'],
+                    open=raw_stock_df['open'],
+                    high=raw_stock_df['high'],
+                    low=raw_stock_df['low'],
+                    close=raw_stock_df['close'],
+                    name="주가 캔들"
+                ))
+                fig_raw.add_trace(go.Bar(
+                    x=raw_stock_df['date'],
+                    y=raw_stock_df['volume'],
+                    name="거래량",
+                    yaxis="y2",
+                    marker_color="rgba(147, 51, 234, 0.3)"
+                ))
                 
                 fig_raw.update_layout(
                     template="plotly_dark",
-                    title=f"{selected_raw_ticker} 분기별 종가 및 거래량 추이",
+                    title=f"{selected_raw_ticker} 분기별 캔들 및 거래량 추이",
                     xaxis_title="날짜",
-                    yaxis=dict(title="종가 (Close)", title_font=dict(color="#3b82f6"), tickfont=dict(color="#3b82f6")),
+                    yaxis=dict(title="주가 (Price)", title_font=dict(color="#3b82f6"), tickfont=dict(color="#3b82f6")),
                     yaxis2=dict(title="거래량 (Volume)", title_font=dict(color="#9333ea"), tickfont=dict(color="#9333ea"), overlaying="y", side="right"),
                     plot_bgcolor='rgba(0,0,0,0)',
                     paper_bgcolor='rgba(0,0,0,0)',
@@ -265,9 +348,12 @@ with tab_data:
             with col_raw_table:
                 st.markdown("<br>", unsafe_allow_html=True)
                 st.dataframe(
-                    raw_stock_df[['date', 'close', 'volume']].sort_values('date', ascending=False),
+                    raw_stock_df[['date', 'open', 'high', 'low', 'close', 'volume']].sort_values('date', ascending=False),
                     column_config={
                         "date": "날짜",
+                        "open": st.column_config.NumberColumn("시가", format="%.2f"),
+                        "high": st.column_config.NumberColumn("고가", format="%.2f"),
+                        "low": st.column_config.NumberColumn("저가", format="%.2f"),
                         "close": st.column_config.NumberColumn("종가", format="%.2f"),
                         "volume": st.column_config.NumberColumn("거래량", format="%,d"),
                     },

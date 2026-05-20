@@ -79,6 +79,10 @@ def main(args):
     if not merged_prices.empty:
         save_parquet(merged_prices, 'data/processed/prices_quarterly.parquet')
         report_memory(merged_prices, "prices_quarterly.parquet")
+        
+        # 중간 결측치 및 분기 누락 정밀 검증 경고 출력
+        from src.utils.validation import check_intermediate_gaps
+        check_intermediate_gaps(merged_prices, "Merged Raw Prices")
     else:
         print("Warning: No price data merged.")
     

@@ -36,6 +36,7 @@ def main():
     STOCK_SEQ_COLS = (
         [c for c in df_stock.columns if c.startswith('F_')]   # 재무 45
       + [c for c in df_stock.columns if c.startswith('A_')]   # 자산집중도 35
+      + ['open', 'high', 'low', 'close', 'volume']
       + ['ret_1q', 'ret_4q']
     )
     # 거시 시계열 피처

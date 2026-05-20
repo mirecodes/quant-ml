@@ -56,25 +56,37 @@ class USPriceFetcher(BaseFetcher):
         
         # 컬럼명 통일 및 정제
         full.columns = [c.lower() for c in full.columns]
-        full = full.rename(columns={'close': 'close', 'volume': 'volume'})
         
         # 필요한 컬럼만 추출 및 국가/통화 추가
         full['country'] = 'US'
         full['currency'] = 'USD'
         full['date'] = pd.to_datetime(full['date'])
         
-        # 시가총액은 yfinance 일별 데이터에 없으므로 (필요하다면 분기 데이터 병합 시 처리), 0 또는 임시값으로 채워둠
+        # 시가총액은 yfinance 일별 데이터에 없으므로, 0 또는 임시값으로 채워둠
         if 'market_cap' not in full.columns:
             full['market_cap'] = 0.0
             
-        full = full[['ticker', 'country', 'currency', 'date', 'close', 'volume', 'market_cap']]
+        full = full[['ticker', 'country', 'currency', 'date', 'open', 'high', 'low', 'close', 'volume', 'market_cap']]
+        
+        # 0값 및 결측치 필터링
+        full = full.dropna(subset=['close'])
+        full = full[full['close'] > 0]
         
         # 분기말로 리샘플링
         full = full.set_index('date')
         quarterly = (full.groupby('ticker', observed=True)
                      .resample('QE')
-                     .last()
-                     .drop(columns=['ticker'])
+                     .agg({
+                         'open': 'first',
+                         'high': 'max',
+                         'low': 'min',
+                         'close': 'last',
+                         'volume': 'sum',
+                         'market_cap': 'last',
+                         'country': 'last',
+                         'currency': 'last'
+                     })
+                     .drop(columns=['ticker'], errors='ignore')
                      .reset_index())
                      
         quarterly = optimize_dtypes(quarterly)

@@ -18,6 +18,11 @@ def main():
         return
         
     prices = load_parquet(prices_path)
+    
+    # 중간 결측치 및 분기 누락 정밀 검증 경고 출력
+    from src.utils.validation import check_intermediate_gaps
+    check_intermediate_gaps(prices, "Quarterly Prices (Before Feature Building)")
+    
     prices = prices.dropna(subset=['close'])
     report_memory(prices, "prices")
     
@@ -53,6 +58,11 @@ def main():
     df['leverage'] = np.random.uniform(0.1, 0.8, n_rows).astype(np.float32)
     df['current_ratio'] = np.random.uniform(1.0, 3.0, n_rows).astype(np.float32)
     df['shares'] = np.random.randint(10, 100, n_rows).astype(np.int32)
+    
+    # yfinance 다운로드에서 시가총액이 0.0 또는 결측치(NaN)인 경우 복구
+    if 'market_cap' in df.columns:
+        df.loc[(df['market_cap'] == 0.0) | df['market_cap'].isnull(), 'market_cap'] = (df['close'] * df['shares'] * 1000000.0).astype(np.float32)
+        
     df['gross_margin'] = np.random.uniform(0.2, 0.6, n_rows).astype(np.float32)
     df['asset_turnover'] = np.random.uniform(0.5, 2.0, n_rows).astype(np.float32)
     
@@ -113,7 +123,7 @@ def main():
 
     # 4. Stock 피처만 필터링하여 저장
     # stock_cols: ticker, date, country, sector, size_tier, close, volume, market_cap + F_*, C_*, A_*
-    stock_cols = ['ticker', 'date', 'country', 'sector', 'size_tier', 'close', 'volume', 'market_cap', 'ret_1q', 'ret_4q']
+    stock_cols = ['ticker', 'date', 'country', 'sector', 'size_tier', 'open', 'high', 'low', 'close', 'volume', 'market_cap', 'ret_1q', 'ret_4q']
     stock_cols += [c for c in df.columns if c.startswith(('F_', 'C_', 'A_')) and c not in stock_cols]
     df_stock = df[stock_cols].copy()
 

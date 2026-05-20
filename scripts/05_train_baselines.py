@@ -44,6 +44,7 @@ def main():
     STOCK_SEQ_COLS = (
         [c for c in df_stock.columns if c.startswith('F_')]
       + [c for c in df_stock.columns if c.startswith('A_')]
+      + ['open', 'high', 'low', 'close', 'volume']
       + ['ret_1q', 'ret_4q']
     )
     MACRO_SEQ_COLS = [c for c in df_macro.columns if c.startswith('M_') and c != 'date']
