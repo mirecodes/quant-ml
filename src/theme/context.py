@@ -1,143 +1,237 @@
 """
-src/theme/context.py
+src/theme/context.py  (v5.5)
 
-각 (종목, 분기) 시점에 대해 테마 내 비중 벡터를 계산한다.
-
-출력 벡터 (16차원, float32):
-  [0]  theme_mktcap_weight        : 시총 비중 (0~1)
-  [1]  theme_mktcap_rank_pct      : 시총 순위 백분위
-  [2]  theme_pbr_rank_pct         : PBR 순위 백분위 (낮을수록 저평가)
-  [3]  theme_per_rank_pct         : PER 순위 백분위
-  [4]  theme_ev_ebitda_rank_pct   : EV/EBITDA 순위 백분위
-  [5]  theme_roe_rank_pct         : ROE 순위 백분위 (높을수록 우수)
-  [6]  theme_rev_growth_rank_pct  : 매출성장률 순위 백분위
-  [7]  theme_gp_a_rank_pct        : GP/Assets 순위 백분위
-  [8]  theme_ret_1q_rank_pct      : 1분기 수익률 순위 백분위
-  [9]  theme_ret_4q_rank_pct      : 4분기 수익률 순위 백분위
-  [10] theme_avg_ret_4q           : 테마 평균 4분기 수익률
-  [11] theme_ret_dispersion       : 테마 내 수익률 표준편차
-  [12] theme_avg_pbr              : 테마 평균 PBR
-  [13] theme_pbr_dispersion       : 테마 내 PBR 표준편차
-  [14] theme_n_stocks             : 테마 종목 수 (로그 스케일)
-  [15] theme_hhi                  : Herfindahl 시총 집중도
+테마 비중 벡터: 순위 백분위 → 실질 비중 및 상대 배수로 교체.
 """
 import numpy as np
 import pandas as pd
-from typing import Dict, List, Optional
+from typing import Optional, Set
 from src.theme.loader import load_themes
 
-THEME_VEC_DIM = 16
-NEUTRAL = 0.5   # NaN 대체값
+THEME_VEC_DIM = 18
+NEUTRAL_WEIGHT = 0.0        # 비중 기본값 (데이터 없을 때)
+NEUTRAL_RELATIVE = 1.0      # 상대 배수 기본값 (평균과 같음)
 
 
-def _rank_pct(series: pd.Series, ascending: bool = True) -> pd.Series:
-    """0~1 백분위 변환. NaN은 NEUTRAL로."""
-    if series.isna().all():
-        return pd.Series(NEUTRAL, index=series.index)
-    ranked = series.rank(method='average', ascending=ascending, pct=True)
-    return ranked.fillna(NEUTRAL).astype('float32')
+def _safe_weight(numerator: float, denominator: float) -> float:
+    """비중 계산. denominator가 0이거나 음수이면 0 반환."""
+    if denominator <= 0 or np.isnan(denominator) or np.isnan(numerator):
+        return NEUTRAL_WEIGHT
+    val = numerator / denominator
+    return float(np.clip(val, 0.0, 1.0))
 
 
-def _herfindahl(weights: pd.Series) -> float:
-    """HHI 집중도 (0~1). 높을수록 특정 종목에 집중."""
-    w = weights.fillna(0).values
-    if w.sum() < 1e-8:
-        return NEUTRAL
-    w_norm = w / w.sum()
-    return float(np.sum(w_norm ** 2))
+def _safe_relative(value: float, mean: float) -> float:
+    """
+    상대 배수 = value / mean.
+    mean이 0이거나 부호가 다른 경우 NEUTRAL 반환.
+    극단값 클리핑: [0.1, 10.0] 범위로 제한.
+    """
+    if mean == 0 or np.isnan(mean) or np.isnan(value):
+        return NEUTRAL_RELATIVE
+    if mean < 0 and value < 0:
+        # 둘 다 음수: 비율 의미 있음
+        ratio = value / mean
+    elif mean < 0 or value < 0:
+        # 부호 다름: 의미 없음
+        return NEUTRAL_RELATIVE
+    else:
+        ratio = value / mean
+    return float(np.clip(ratio, 0.1, 10.0))
+
+
+def _signed_weight(numerator: float, denominator: float) -> float:
+    """
+    음수 허용 비중 (EBITDA, FCF, 순이익).
+    분모는 양수 합계만 사용 (음수 기업은 분모에서 제외).
+    결과는 [-1, 1] 클리핑.
+    """
+    if np.isnan(numerator) or denominator <= 0:
+        return NEUTRAL_WEIGHT
+    return float(np.clip(numerator / denominator, -1.0, 1.0))
+
+
+def compute_theme_vector(
+    ticker: str,
+    ticker_row: pd.Series,
+    peers: pd.DataFrame,
+) -> np.ndarray:
+    """
+    단일 테마에 대한 18차원 벡터 계산.
+
+    Args:
+        ticker     : 대상 종목 코드
+        ticker_row : 대상 종목의 현재 시점 피처 (pd.Series)
+        peers      : 같은 테마·같은 시점의 종목 DataFrame (대상 포함)
+
+    Returns:
+        (18,) float32 벡터
+    """
+    vec = np.full(THEME_VEC_DIM, NEUTRAL_WEIGHT, dtype=np.float32)
+
+    if len(peers) < 2:
+        return vec
+
+    def col_sum_pos(col):
+        """양수 합계 (음수 기업은 분모에서 제외)."""
+        return peers[col].clip(lower=0).sum() if col in peers.columns else 0.0
+
+    def col_sum_all(col):
+        return peers[col].sum() if col in peers.columns else 0.0
+
+    def own(col):
+        mask = peers['ticker'] == ticker
+        if col in peers.columns and mask.any():
+            v = peers.loc[mask, col].iloc[0]
+            return float(v) if not pd.isna(v) else np.nan
+        return np.nan
+
+    def col_mean(col):
+        if col not in peers.columns:
+            return np.nan
+        vals = peers[col].dropna()
+        return float(vals.mean()) if len(vals) > 0 else np.nan
+
+    # ── [0] 시총 비중 ──────────────────────────────────────────────────
+    total_mktcap = col_sum_pos('market_cap')
+    vec[0] = _safe_weight(own('market_cap') or 0.0, total_mktcap)
+
+    # ── [1] 매출 비중 ──────────────────────────────────────────────────
+    total_rev = col_sum_pos('F_GRW_rev_base')   # 매출 절대값 컬럼
+    vec[1] = _safe_weight(own('F_GRW_rev_base') or 0.0, total_rev)
+
+    # ── [2] EBITDA 비중 (음수 허용) ───────────────────────────────────
+    total_ebitda_pos = col_sum_pos('F_PRF_ebitda_abs')
+    vec[2] = _signed_weight(own('F_PRF_ebitda_abs') or 0.0, total_ebitda_pos)
+
+    # ── [3] FCF 비중 (음수 허용) ──────────────────────────────────────
+    total_fcf_pos = col_sum_pos('F_CF_002')
+    vec[3] = _signed_weight(own('F_CF_002') or 0.0, total_fcf_pos)
+
+    # ── [4] 순이익 비중 (음수 허용) ───────────────────────────────────
+    total_ni_pos = col_sum_pos('F_PRF_net_income_abs')
+    vec[4] = _signed_weight(own('F_PRF_net_income_abs') or 0.0, total_ni_pos)
+
+    # ── [5] 자산 비중 ──────────────────────────────────────────────────
+    total_assets = col_sum_pos('F_FIN_total_assets')
+    vec[5] = _safe_weight(own('F_FIN_total_assets') or 0.0, total_assets)
+
+    # ── [6]~[11] 상대 배수 ────────────────────────────────────────────
+    for i, col in enumerate([
+        'F_VAL_003',      # PBR    [6]
+        'F_VAL_001',      # PER    [7]
+        'F_VAL_005',      # EV/EBITDA [8]
+        'F_PRF_005',      # ROE   [9]
+        'F_GRW_001',      # 매출 CAGR [10]
+        'F_CF_003',       # FCF 마진 [11]
+    ], start=6):
+        mean_val = col_mean(col)
+        own_val  = own(col)
+        if own_val is not None and not np.isnan(own_val):
+            vec[i] = _safe_relative(own_val, mean_val)
+
+    # ── [12]~[17] 테마 전체 상태 ──────────────────────────────────────
+
+    # [12] 테마 전체 시총 (로그 스케일, 억 단위 정규화)
+    if total_mktcap > 0:
+        vec[12] = float(np.log1p(total_mktcap / 1e8))   # 억 단위
+
+    # [13] 테마 시총 4분기 성장률 (데이터 없으면 0)
+    if 'theme_mktcap_prev4q' in peers.columns:
+        prev = peers['theme_mktcap_prev4q'].mean()
+        if prev > 0:
+            vec[13] = float(np.clip(total_mktcap / prev - 1, -1.0, 3.0))
+
+    # [14] 테마 평균 4분기 수익률
+    if 'ret_4q' in peers.columns:
+        ret4q = peers['ret_4q'].dropna()
+        if len(ret4q) > 0:
+            vec[14] = float(np.clip(ret4q.mean(), -1.0, 3.0))
+
+    # [15] 테마 수익률 변동성
+    if 'ret_4q' in peers.columns:
+        ret4q = peers['ret_4q'].dropna()
+        if len(ret4q) > 1:
+            vec[15] = float(np.clip(ret4q.std(), 0.0, 2.0))
+
+    # [16] HHI 집중도
+    if total_mktcap > 0 and 'market_cap' in peers.columns:
+        weights = peers['market_cap'].clip(lower=0) / total_mktcap
+        vec[16] = float(np.clip((weights ** 2).sum(), 0.0, 1.0))
+
+    # [17] 테마 종목 수 (로그 스케일)
+    vec[17] = float(np.log1p(len(peers)))
+
+    return vec
 
 
 def compute_theme_context(
     df: pd.DataFrame,
     processed_path: str = 'data/themes/processed/themes.yaml',
-    peer_tickers: set = None,    # None이면 전체 peer 사용
-                                 # set이면 해당 종목만 peer로 사용
+    peer_tickers: Optional[Set[str]] = None,
 ) -> pd.DataFrame:
     """
-    전체 데이터프레임에 대해 테마 비중 벡터를 계산한다 (벡터화).
+    전체 DataFrame에 대해 테마 비중 벡터를 계산한다.
+
+    Args:
+        df             : 종목-분기별 DataFrame. 필수: ['ticker', 'date']
+        processed_path : themes.yaml 경로
+        peer_tickers   : None=전체, set=Train 오염 방지용 지정 종목만
+
+    Returns:
+        ['ticker', 'date', 'theme_ctx_0', ..., 'theme_ctx_17'] DataFrame
     """
     mapping = load_themes(processed_path)
+    t2th    = mapping['tickers']
     th2t    = mapping['theme_to_tickers']
 
     df = df.sort_values(['date', 'ticker']).reset_index(drop=True)
     results = []
 
     for date, date_group in df.groupby('date', observed=True, sort=False):
-        theme_vectors: Dict[str, List[np.ndarray]] = {}
+        ticker_rows = {row['ticker']: row for _, row in date_group.iterrows()}
 
-        # 1. 모든 테마에 대한 피어 벡터 미리 계산 (벡터화)
-        for theme_id, all_peers in th2t.items():
-            # peer 필터 적용
-            if peer_tickers is not None:
-                peer_list = [t for t in all_peers if t in peer_tickers]
-            else:
-                peer_list = all_peers
-
-            peers_df = date_group[date_group['ticker'].isin(peer_list)]
-            if len(peers_df) < 2:
-                continue
-
-            n_peers = len(peers_df)
-            vec_matrix = np.full((n_peers, THEME_VEC_DIM), NEUTRAL, dtype=np.float32)
-
-            mktcap_col = 'market_cap' if 'market_cap' in peers_df.columns else None
-            if mktcap_col:
-                caps = peers_df[mktcap_col].fillna(0.0).to_numpy()
-                total_cap = caps.sum()
-                if total_cap > 0:
-                    vec_matrix[:, 0] = caps / total_cap
-                vec_matrix[:, 1] = _rank_pct(peers_df[mktcap_col], ascending=True).to_numpy()
-
-            for i, (col, asc) in enumerate([
-                ('F_VAL_pbr',        True),   # [2]
-                ('F_VAL_per',        True),   # [3]
-                ('F_VAL_ev_ebitda',  True),   # [4]
-                ('F_PRF_roe',        False),  # [5]
-                ('F_GRW_rev_cagr',   False),  # [6]
-                ('C_GP_A',           False),  # [7]
-                ('ret_1q',           False),  # [8]
-                ('ret_4q',           False),  # [9]
-            ], start=2):
-                if col in peers_df.columns:
-                    vec_matrix[:, i] = _rank_pct(peers_df[col], ascending=asc).to_numpy()
-
-            if 'ret_4q' in peers_df.columns:
-                ret4q = peers_df['ret_4q'].dropna().to_numpy()
-                if len(ret4q) > 0:
-                    vec_matrix[:, 10] = ret4q.mean()
-                if len(ret4q) > 1:
-                    vec_matrix[:, 11] = ret4q.std()
-                else:
-                    vec_matrix[:, 11] = 0.0
-
-            if 'F_VAL_pbr' in peers_df.columns:
-                pbr = peers_df['F_VAL_pbr'].dropna().to_numpy()
-                if len(pbr) > 0:
-                    vec_matrix[:, 12] = pbr.mean()
-                if len(pbr) > 1:
-                    vec_matrix[:, 13] = pbr.std()
-                else:
-                    vec_matrix[:, 13] = 0.0
-
-            vec_matrix[:, 14] = np.log1p(n_peers)
-            if mktcap_col:
-                vec_matrix[:, 15] = _herfindahl(peers_df[mktcap_col])
-
-            for ticker, vec in zip(peers_df['ticker'].to_list(), vec_matrix):
-                theme_vectors.setdefault(ticker, []).append(vec)
-
-        # 2. 각 종목에 대해 테마 벡터 평균 산출
         for _, row in date_group.iterrows():
-            ticker = row['ticker']
-            vecs = theme_vectors.get(ticker)
-            if vecs:
-                vec = np.mean(vecs, axis=0).astype(np.float32)
+            ticker  = row['ticker']
+            info    = t2th.get(ticker, {})
+            themes  = info.get('themes', [])
+
+            if not themes:
+                vec = np.zeros(THEME_VEC_DIM, dtype=np.float32)
+                vec[6:12] = NEUTRAL_RELATIVE    # 상대 배수는 1.0 (평균)
             else:
-                vec = np.full(THEME_VEC_DIM, NEUTRAL, dtype=np.float32)
+                vecs = []
+                for theme_id in themes:
+                    all_peers = th2t.get(theme_id, [])
+                    if peer_tickers is not None:
+                        peers_list = [t for t in all_peers
+                                      if t in peer_tickers and t in ticker_rows]
+                    else:
+                        peers_list = [t for t in all_peers if t in ticker_rows]
+
+                    if not peers_list:
+                        continue
+                    peers_df = pd.DataFrame([ticker_rows[t] for t in peers_list])
+                    vecs.append(compute_theme_vector(ticker, row, peers_df))
+
+                if vecs:
+                    # 시총 비중 기준 가중 평균
+                    # primary 테마(첫 번째)에 더 높은 가중치 (2:1)
+                    if len(vecs) == 1:
+                        vec = vecs[0]
+                    else:
+                        weights = np.array(
+                            [2.0] + [1.0] * (len(vecs) - 1), dtype=np.float32
+                        )
+                        weights /= weights.sum()
+                        vec = np.average(vecs, axis=0, weights=weights).astype(np.float32)
+                else:
+                    vec = np.zeros(THEME_VEC_DIM, dtype=np.float32)
+                    vec[6:12] = NEUTRAL_RELATIVE
 
             entry = {'ticker': ticker, 'date': date}
             for i, v in enumerate(vec):
-                entry[f'theme_ctx_{i}'] = v
+                entry[f'theme_ctx_{i}'] = float(v)
             results.append(entry)
 
     out = pd.DataFrame(results)

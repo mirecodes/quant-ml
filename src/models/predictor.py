@@ -35,9 +35,9 @@ class StockPredictor(pl.LightningModule):
             dropout=0.0,
         )
 
-        # 테마 비중 Linear 투영 (16 → theme_proj_dim)
+        # 테마 비중 Linear 투영 (18 → theme_proj_dim)
         self.theme_proj = nn.Sequential(
-            nn.Linear(16, c['theme_proj_dim']),
+            nn.Linear(18, c['theme_proj_dim']),
             nn.GELU(),
             nn.Dropout(c['dropout']),
         )

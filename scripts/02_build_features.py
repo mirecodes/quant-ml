@@ -104,6 +104,13 @@ def main():
         df[col] = df.groupby('ticker', observed=True)[col].bfill()
         df[col] = df[col].fillna(0.0)
 
+    # 3b. 절대값 USD 컬럼 추가 및 spot 환산 (v5.5)
+    print("\n=== Step 4b: Appending Absolute USD Columns & Spot Currency Conversion ===")
+    if not macro.empty and 'M_FX_001' not in macro.columns:
+        macro['M_FX_001'] = 1300.0
+    from src.features.fundamental.abs_values import append_absolute_usd_columns
+    df = append_absolute_usd_columns(df, macro)
+
     # 4. Stock 피처만 필터링하여 저장
     # stock_cols: ticker, date, country, sector, size_tier, close, volume, market_cap + F_*, C_*, A_*
     stock_cols = ['ticker', 'date', 'country', 'sector', 'size_tier', 'close', 'volume', 'market_cap', 'ret_1q', 'ret_4q']

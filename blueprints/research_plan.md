@@ -1,11 +1,11 @@
-# stockml 구현 가이드 v5.4
+# stockml 구현 가이드 v5.5
 # Coding Agent 전용 기술 명세서
 
 """
-이 문서는 v5.3을 기준으로 다음을 완전 교체/추가한다:
-  - 검증 방식: 시간 기반 분할 → 종목 교차 검증 (Ticker-Stratified Split)
-  - 테마 YAML 파이프라인: raw 분할 파일 매번 직접 로드 → processed/themes.yaml 병합 파이프라인 (00_merge_themes.py)
-  - Train peer 오염 방지를 위한 compute_theme_context peer_tickers 필터링 도입
+이 문서는 v5.4를 기준으로 다음을 완전 교체/추가한다:
+  - 지표 레퍼런스 신규: M_* (거시), A_* (한국 자산집중도), F_* (기업 재무), C_* (계산형) 지표 전수 정의
+  - 테마 비중 벡터 설계 변경: 순위 백분위 (rank percentile) → 실질 비중 (actual weight) 및 상대 배수 (relative multiple) (18차원)
+  - theme_context.py 교체: w_mktcap, w_revenue, w_ebitda, rel_pbr 등 18차원 계산 로직 구현
 
 Coding agent 행동 원칙:
   - 모든 섹션을 위에서 아래로 순서대로 구현한다
@@ -16,6 +16,299 @@ Coding agent 행동 원칙:
 """
 
 # =============================================================================
+# PART 1. 전체 지표 목록 (레퍼런스)
+# =============================================================================
+
+# 사용 흐름:
+#   M_*  → features_macro.parquet  → LSTM_macro 시계열 입력
+#   F_*, A_* → features_stock.parquet → LSTM_stock 시계열 입력
+#   C_*  → features_stock.parquet  → FT-Transformer 스냅샷 입력
+#   THEME_CTX → theme_context.parquet → FT-Transformer 스냅샷 입력
+#
+# 각 지표는 분기 종가 기준으로 resample('QE').last() 로 집계.
+# Point-in-Time lag은 config/feature_lags.yaml 참조.
+
+# -----------------------------------------------------------------------------
+# M — 거시 지표 (80종, LSTM_macro 입력)
+# -----------------------------------------------------------------------------
+MACRO_INDICATORS = """
+# ── M_INT: 금리 (13종) ────────────────────────────────────────────────────────
+M_INT_001  기준금리                   중앙은행 정책금리                  FRED(DFF) / ECOS       US·KR
+M_INT_002  국채 2Y                    단기 기대 정책금리                 FRED(DGS2) / ECOS      US·KR
+M_INT_003  국채 10Y                   장기 성장·인플레 기대              FRED(DGS10) / ECOS     US·KR
+M_INT_004  국채 30Y                   초장기 자본비용                    FRED(DGS30) / ECOS     US·KR
+M_INT_005  장단기 스프레드 10Y-2Y      경기침체 선행                      산출                   US·KR
+M_INT_006  장단기 스프레드 10Y-3M      Estrella & Mishkin 기준            산출                   US
+M_INT_007  실질금리 TIPS              명목금리 - 기대인플레              FRED(DFII10)           US
+M_INT_008  실질금리 한국              국고채 10Y - 기대CPI              ECOS                   KR
+M_INT_009  모기지 30Y                 부동산·소비 선행                   FRED(MORTGAGE30US)     US
+M_INT_010  SOFR                      LIBOR 대체 기준금리                FRED(SOFR)             US
+M_INT_011  CD 91일                   단기 자금시장 기준                 ECOS                   KR
+M_INT_012  COFIX                     주택담보대출 기준금리              은행연합회             KR
+M_INT_013  가산금리 은행채3Y-국채3Y    단기 크레딧 스프레드              ECOS                   KR
+
+# ── M_LIQ: 유동성 (10종) ──────────────────────────────────────────────────────
+M_LIQ_001  M1                        현금+요구불예금                    FRED(M1SL) / ECOS      US·KR
+M_LIQ_002  M2                        M1+저축성예금                      FRED(M2SL) / ECOS      US·KR
+M_LIQ_003  M2 YoY 성장률             복리 기준                          산출                   US·KR
+M_LIQ_004  연준 대차대조표            QE/QT 사이클                       FRED(WALCL)            US
+M_LIQ_005  역레포 RRP 잔액            연준 단기 유동성 흡수              FRED(RRPONTSYD)        US
+M_LIQ_006  한국은행 RP 잔액           공개시장조작                       ECOS                   KR
+M_LIQ_007  통화승수 M2/본원통화       신용창출 배율                      산출                   US·KR
+M_LIQ_008  화폐유통속도 V=GDP/M2      실물 유동성 활용도                 산출                   US·KR
+M_LIQ_009  글로벌 M2 USD 환산         전세계 유동성                      FRED 합산              GLOBAL
+M_LIQ_010  초과지급준비금             은행 여유 유동성                   FRED / ECOS            US·KR
+
+# ── M_CRD: 신용·리스크 (11종) ─────────────────────────────────────────────────
+M_CRD_001  하이일드 스프레드 HY       ICE BofA HY OAS                   FRED(BAMLH0A0HYM2)     US
+M_CRD_002  투자등급 스프레드 IG       ICE BofA IG OAS                   FRED(BAMLC0A0CM)       US
+M_CRD_003  TED 스프레드               LIBOR 3M - T-Bill 3M              FRED                   US
+M_CRD_004  LIBOR-OIS 스프레드         은행 간 신용리스크                 FRED                   US
+M_CRD_005  CDS 5Y 국가신용            미국·한국 부도 위험                Bloomberg              US·KR
+M_CRD_006  회사채 스프레드 한국 AAA   우량채 가산금리                    ECOS                   KR
+M_CRD_007  회사채 스프레드 한국 BBB   투기등급 가산금리                  ECOS                   KR
+M_CRD_008  기업 파산 건수 YoY         신용 사이클 후행                   법원통계 / Fed         US·KR
+M_CRD_009  연체율 가계                소비자 신용리스크                  금융감독원 / Fed       US·KR
+M_CRD_010  연체율 기업                기업 신용리스크                    금융감독원 / Fed       US·KR
+M_CRD_011  대출 연체 90일+ 비율       부실 심화                          금융감독원             KR
+
+# ── M_INF: 인플레이션 (15종) ──────────────────────────────────────────────────
+M_INF_001  CPI YoY                   소비자물가 복리 변화율             BLS / 통계청           US·KR
+M_INF_002  Core CPI YoY              식품·에너지 제외                   BLS / 통계청           US·KR
+M_INF_003  PCE 디플레이터 YoY         연준 선호 물가                     BEA                    US
+M_INF_004  Core PCE YoY              연준 목표 물가 2%                  BEA                    US
+M_INF_005  PPI YoY                   생산자물가 CPI 선행                BLS / 통계청           US·KR
+M_INF_006  기대인플레이션 5Y5Y        장기 인플레 기대                   FRED(T5YIFR)           US
+M_INF_007  기대인플레이션 2Y          단기 인플레 기대                   FRED                   US
+M_INF_008  수입물가 YoY               해외발 인플레 압력                 한국은행 / BLS         US·KR
+M_INF_009  주거비 CPI Shelter         미국 CPI 최대 구성요소             BLS                    US
+M_INF_010  임금 상승률 YoY            비용 인플레 핵심                   BLS / 고용부           US·KR
+M_INF_011  유가 WTI/Brent             에너지 인플레                      EIA / Bloomberg        GLOBAL
+M_INF_012  천연가스 가격               에너지 비용                        EIA                    GLOBAL
+M_INF_013  구리 가격 Dr. Copper        실물경기 선행                      LME                    GLOBAL
+M_INF_014  CRB 원자재 지수             광범위 원자재 물가                 Refinitiv              GLOBAL
+M_INF_015  발틱운임지수 BDI            글로벌 교역·물류 비용              Baltic Exchange        GLOBAL
+
+# ── M_ECO: 경기실물 (22종) ────────────────────────────────────────────────────
+M_ECO_001  GDP 성장률 QoQ 연율        분기 실질 성장률                   BEA / 한국은행         US·KR
+M_ECO_002  GDP 성장률 YoY             전년 동기 대비                     BEA / 한국은행         US·KR
+M_ECO_003  GDP 갭 Output Gap          잠재 GDP 대비 실제 GDP             CBO / KDI              US·KR
+M_ECO_004  ISM 제조업 PMI             50 기준 확장/수축                  ISM                    US
+M_ECO_005  ISM 비제조업 PMI           서비스업 경기                      ISM                    US
+M_ECO_006  S&P 글로벌 제조업 PMI      글로벌 제조업                      S&P Global             GLOBAL
+M_ECO_007  한국 제조업 PMI            수출 중심 제조업                   S&P Global             KR
+M_ECO_008  실업률                     고용시장 후행                      BLS / 통계청           US·KR
+M_ECO_009  비농업 고용 NFP            미국 고용 핵심                     BLS                    US
+M_ECO_010  JOLTS 구인 건수            고용시장 선행                      BLS                    US
+M_ECO_011  소비자신뢰지수 CB          소비 심리                          Conference Board       US
+M_ECO_012  미시간 소비심리지수         소비자 인플레 기대                 UMich                  US
+M_ECO_013  소매판매 YoY               실물 소비 모멘텀                   Census / 통계청        US·KR
+M_ECO_014  산업생산 YoY               제조업 실물 생산                   Fed / 통계청           US·KR
+M_ECO_015  설비 가동률                인플레·투자 선행                   Fed                    US
+M_ECO_016  주택착공 건수              건설·소비 선행                     Census                 US
+M_ECO_017  건축허가 건수              주택착공 선행                      Census                 US
+M_ECO_018  내구재 수주                기업 투자 선행                     Census                 US
+M_ECO_019  한국 수출 YoY              글로벌 수요 집약                   관세청                 KR
+M_ECO_020  한국 수출 반도체           IT 사이클 선행                     산업통상자원부         KR
+M_ECO_021  경기선행지수 CLI           OECD 복합 선행지수                 OECD                   US·KR
+M_ECO_022  기업경기실사지수 BSI        기업 체감경기                      한국은행               KR
+
+# ── M_FX: 환율 (8종) ──────────────────────────────────────────────────────────
+M_FX_001   USD/KRW                   원·달러 환율                       한국은행               KR
+M_FX_002   DXY 달러 인덱스            달러 강약 종합                     FRED(DX-Y.NYB)         US
+M_FX_003   EUR/USD                   유로·달러                          ECB                    GLOBAL
+M_FX_004   USD/JPY                   엔·달러 안전자산 심리              BOJ                    GLOBAL
+M_FX_005   원화 실효환율 REER         교역 가중 실질 환율                BIS                    KR
+M_FX_006   경상수지 USD               외환 수급 펀더멘털                 한국은행               KR
+M_FX_007   외환보유액                 외부충격 완충 능력                 한국은행               KR
+M_FX_008   외국인 국채 보유 비율       국채 수급 외국 의존도              기재부                 KR
+
+# ── M_SNT: 센티멘트 (15종) ────────────────────────────────────────────────────
+M_SNT_001  VIX                       미국 시장 공포 지수                CBOE                   US
+M_SNT_002  VKOSPI                    한국 변동성 지수                   KRX                    KR
+M_SNT_003  SKEW Index                극단적 하락 헤지 수요              CBOE                   US
+M_SNT_004  Put/Call Ratio            풋 vs 콜 옵션 비율                CBOE                   US
+M_SNT_005  CNN Fear & Greed          복합 심리 지수                     CNN                    US
+M_SNT_006  AAII Bullish 비율          개인 투자자 심리                   AAII                   US
+M_SNT_007  II Bullish 기관            기관 투자자 심리                   Investors Intelligence US
+M_SNT_008  외국인 순매수 주식          한국 외국인 수급                   KRX                    KR
+M_SNT_009  기관 순매수 주식            국내 기관 수급                     KRX                    KR
+M_SNT_010  개인 신용융자 잔고          개인 레버리지 수준                 금융투자협회           KR
+M_SNT_011  공매도 비율                하락 베팅 강도                     KRX / FINRA            US·KR
+M_SNT_012  주식형 펀드 순유입          간접 투자 자금 흐름               금융투자협회           KR
+M_SNT_013  ETF 자금 유출입            직접 수급 지표                     ETFDB / 금투협         US·KR
+M_SNT_014  GS 위험선호지수 GSRAII      글로벌 위험 선호                   Goldman Sachs          GLOBAL
+M_SNT_015  BofA 펀드매니저 서베이      기관 현금·자산 배분               BofA                   GLOBAL
+
+# ── M_FSC: 재정·국채 (7종) ────────────────────────────────────────────────────
+M_FSC_001  미국 연방부채/GDP          재정 지속가능성                    FRED / CBO             US
+M_FSC_002  미국 재정적자/GDP          국채 발행 압력                     CBO / Treasury         US
+M_FSC_003  미국 국채 경매 BTC         Bid-to-Cover Ratio                Treasury               US
+M_FSC_004  한국 국가채무/GDP          재정 건전성                        기재부                 KR
+M_FSC_005  한국 국채 발행 잔액         국채 공급 압력                     기재부                 KR
+M_FSC_006  한국 국채 외국인 보유       외국 자본 이탈 리스크              기재부                 KR
+M_FSC_007  한국 통안채 발행 잔액       한국은행 불태화 정책               한국은행               KR
+
+총계: 13+10+11+15+22+8+15+7 = 101종 (설계 상 80종 목표, 우선순위 ★★★ 기준 약 80종 선별)
+"""
+
+# -----------------------------------------------------------------------------
+# A — 한국 자산집중도 지표 (35종, LSTM_stock 입력 — KR 종목에만 적용)
+# -----------------------------------------------------------------------------
+KOREAN_ASSET_INDICATORS = """
+# ── A_RE: 부동산 (11종) ────────────────────────────────────────────────────────
+A_RE_001   전국 아파트 실거래가 YoY    주거용 부동산 자산가치             국토부 실거래가        KR
+A_RE_002   서울 아파트 실거래가 YoY    핵심 지역 선행성                   국토부 실거래가        KR
+A_RE_003   KB 주택가격지수 YoY         장기 시계열                        KB국민은행             KR
+A_RE_004   주택매매 거래량             수요·유동성 강도                   국토부                 KR
+A_RE_005   전세가율                    레버리지 수요 압력                 KB국민은행             KR
+A_RE_006   PIR Price-to-Income         소득 대비 주택가격                 산출 KB+통계청         KR
+A_RE_007   주택담보대출 잔액 YoY        부동산 레버리지 총량               한국은행               KR
+A_RE_008   주택담보대출 월별 증감       신규 차입 흐름                     한국은행               KR
+A_RE_009   분양물량·미분양 건수         공급 압력·수요 소진               국토부                 KR
+A_RE_010   상업용 부동산 공실률         비주거용 건전성                    한국부동산원           KR
+A_RE_011   전국 부동산 시가총액 추정    부동산에 묶인 자산 총량            한국은행 국민대차대조표 KR
+
+# ── A_EQ: 주식 (8종) ──────────────────────────────────────────────────────────
+A_EQ_001   KOSPI 시가총액/GDP          버핏 지표 한국판                   KRX+한국은행           KR
+A_EQ_002   KOSDAQ 시가총액/GDP         성장주 시장 밸류에이션             KRX+한국은행           KR
+A_EQ_003   주식형 펀드 설정원본 잔액   간접 투자 집중 금액               금융투자협회           KR
+A_EQ_004   직접투자 계좌 예탁금         투자 대기 자금                     금융투자협회           KR
+A_EQ_005   고객예탁금                  즉시 투자 대기 자금                금융투자협회           KR
+A_EQ_006   신용융자 잔고/시가총액       레버리지 과잉 여부                 금융투자협회           KR
+A_EQ_007   KOSPI 12M Forward PER        시장 전체 밸류에이션               Quantiwise/ECOS        KR
+A_EQ_008   외국인 주식 보유 비율        외국 자본 집중도                   KRX                    KR
+
+# ── A_BD: 채권·대출 (12종) ────────────────────────────────────────────────────
+A_BD_001   가계부채 총잔액             민간 부문 최대 리스크              한국은행               KR
+A_BD_002   가계부채/GDP                지속가능성 비율                    한국은행+기재부         KR
+A_BD_003   가계부채 YoY                부채 팽창 속도                     한국은행               KR
+A_BD_004   기업부채 총잔액             기업 레버리지 총량                 한국은행               KR
+A_BD_005   기업부채/GDP                기업 재무 리스크                   산출                   KR
+A_BD_006   은행권 총대출 잔액          은행 신용 공급 총량                한국은행               KR
+A_BD_007   비은행권 총대출 2금융권      그림자 금융 리스크                 한국은행               KR
+A_BD_008   DSR 평균                    상환 능력 대비 부채 부담           금융감독원             KR
+A_BD_009   LTV 평균 비율               담보 대비 대출 비율                금융감독원             KR
+A_BD_010   국채 발행 잔액 YoY          국가 채무 팽창 속도                기재부                 KR
+A_BD_011   회사채 발행 잔액            기업 직접금융 규모                 금융감독원             KR
+A_BD_012   ABS 잔액                    부채 구조화 규모                   금융감독원             KR
+
+# ── A_ALT: 금·대체 (8종) ──────────────────────────────────────────────────────
+A_ALT_001  금 가격 국제 CAGR           안전자산 수요                      LBMA/FRED              GLOBAL
+A_ALT_002  금 가격 국내 CAGR           환율 반영 국내 금 가치             KRX 금시장             KR
+A_ALT_003  금 ETF 순매수 전세계         금 투자 수요                       WGC                    GLOBAL
+A_ALT_004  중앙은행 금 보유량 한국       한국은행 준비자산                  한국은행               KR
+A_ALT_005  금/S&P500 비율              안전자산 vs 위험자산                산출                   GLOBAL
+A_ALT_006  금/WTI 비율                 에너지 대비 금 가치                산출                   GLOBAL
+A_ALT_007  비트코인 가격 CAGR           디지털 대체자산                    Coinbase/Binance       GLOBAL
+A_ALT_008  크립토 시총/글로벌 M2        디지털 자산 유동성 흡수            CoinGecko+FRED         GLOBAL
+
+# ── A_IDX: 자산 배분 비중 합성 (5종) ─────────────────────────────────────────
+A_IDX_001  부동산 비중                 전체 가계 자산 중 부동산 비율      한국은행 국민대차대조표 KR
+A_IDX_002  주식 비중                   전체 가계 자산 중 주식 비율        한국은행               KR
+A_IDX_003  채권 비중                   전체 가계 자산 중 채권 비율        한국은행               KR
+A_IDX_004  예금 비중                   전체 가계 자산 중 예금 비율        한국은행               KR
+A_IDX_005  금·대체 비중                전체 가계 자산 중 금·대체 비율     산출                   KR
+
+총계: 11+8+12+8+5 = 44종
+"""
+
+# -----------------------------------------------------------------------------
+# F — 기업 재무 지표 (45종, LSTM_stock 입력)
+# -----------------------------------------------------------------------------
+FUNDAMENTAL_INDICATORS = """
+# ── F_VAL: 밸류에이션 (13종) ──────────────────────────────────────────────────
+F_VAL_001  PER Trailing 12M          주가/EPS(TTM)                      낮을수록 저평가
+F_VAL_002  Forward PER               주가/예상 EPS                      낮을수록 저평가
+F_VAL_003  PBR                       주가/BPS                           낮을수록 저평가
+F_VAL_004  PSR                       시총/매출                          낮을수록 저평가
+F_VAL_005  EV/EBITDA                 EV/EBITDA                          낮을수록 저평가
+F_VAL_006  EV/Sales                  EV/매출                            낮을수록 저평가
+F_VAL_007  EV/FCF                    EV/FCF                             낮을수록 저평가
+F_VAL_008  PCR                       주가/주당 영업현금흐름              낮을수록 저평가
+F_VAL_009  CAPE Shiller PER          주가/10년 평균 EPS 물가조정         낮을수록 저평가
+F_VAL_010  PEG Ratio                 PER/EPS CAGR                       1 이하 저평가
+F_VAL_011  FCF Yield                 FCF/시총                           높을수록 저평가
+F_VAL_012  배당수익률                 DPS/주가                           높을수록 저평가
+F_VAL_013  총주주수익률 TSY           (배당+자사주매입)/시총              높을수록 저평가
+
+# ── F_PRF: 수익성 (9종) ───────────────────────────────────────────────────────
+F_PRF_001  매출총이익률               매출총이익/매출
+F_PRF_002  영업이익률                 영업이익/매출
+F_PRF_003  EBITDA 마진               EBITDA/매출
+F_PRF_004  순이익률                   순이익/매출
+F_PRF_005  ROE                       순이익/자기자본
+F_PRF_006  ROA                       순이익/총자산
+F_PRF_007  ROIC                      NOPAT/투하자본
+F_PRF_008  ROCE                      EBIT/(총자산-유동부채)
+F_PRF_009  ROE 듀퐁 분해              순이익률×자산회전율×레버리지
+
+# ── F_GRW: 성장성 (7종, 모두 기하평균 CAGR) ──────────────────────────────────
+F_GRW_001  매출 CAGR                  1Y/3Y/5Y
+F_GRW_002  영업이익 CAGR              1Y/3Y/5Y
+F_GRW_003  EPS CAGR                  1Y/3Y/5Y
+F_GRW_004  FCF CAGR                  1Y/3Y/5Y
+F_GRW_005  BPS CAGR                  1Y/3Y/5Y
+F_GRW_006  배당 CAGR                  1Y/3Y/5Y
+F_GRW_007  시장 점유율 변화           YoY
+
+# ── F_CF: 현금흐름 (8종) ──────────────────────────────────────────────────────
+F_CF_001   영업현금흐름 OCF           핵심 현금창출 능력
+F_CF_002   잉여현금흐름 FCF           OCF - CapEx
+F_CF_003   FCF 마진                   FCF/매출
+F_CF_004   FCF/순이익                 이익 품질 (1에 가까울수록 우량)
+F_CF_005   CapEx/매출                 투자 집중도
+F_CF_006   현금전환주기 CCC           DSO+DIO-DPO
+F_CF_007   순부채/EBITDA              레버리지 상환 능력
+F_CF_008   FCF CAGR 3Y·5Y            기하평균 기준 FCF 성장률
+
+# ── F_FIN: 재무건전성 (8종) ───────────────────────────────────────────────────
+F_FIN_001  부채비율                   총부채/자기자본
+F_FIN_002  순부채비율                 (총부채-현금)/EBITDA
+F_FIN_003  유동비율                   유동자산/유동부채
+F_FIN_004  당좌비율                   (유동자산-재고)/유동부채
+F_FIN_005  이자보상배율               EBIT/이자비용
+F_FIN_006  Altman Z-Score            파산 예측 복합 지수
+F_FIN_007  Piotroski F-Score         재무 건전성 9개 기준 합산
+F_FIN_008  자기자본 증가율 CAGR       내부 축적 속도
+
+총계: 13+9+7+8+8 = 45종
+"""
+
+# -----------------------------------------------------------------------------
+# C — 계산형 지표 (7종, FT-Transformer 스냅샷 입력)
+# -----------------------------------------------------------------------------
+COMPUTED_INDICATORS = """
+C_FSCORE   Piotroski F-Score (0~9)          재무건전성 9개 기준 합산         Piotroski (2000)
+C_ZSCORE   Altman Z-Score                    파산 예측 선형 모델              Altman (1968)
+C_QUALITY  Quality Score                     GP/A + ROE + Safety + Payout    Asness et al. (2019)
+C_EPS_STAB EPS 변동계수 CV (20분기)          이익 안정성                      표준 회계
+C_OPLEV    영업 레버리지 ΔEBIT%/ΔRev%        비용 고정도 민감성               표준 회계
+C_AMIHUD   Amihud 비유동성                   |수익률|/거래량                  Amihud (2002)
+C_GP_A     Gross Profitability/Assets         수익성 자산 효율                 Novy-Marx (2013)
+
+총계: 7종
+"""
+
+# -----------------------------------------------------------------------------
+# 지표 수 요약
+# -----------------------------------------------------------------------------
+SUMMARY = """
+모듈           지표 수    입력 위치
+M (거시)       80종*      LSTM_macro 시계열
+A (한국 자산)  44종       LSTM_stock 시계열 (KR 종목만)
+F (기업 재무)  45종       LSTM_stock 시계열
+C (계산형)     7종        FT-Transformer 스냅샷
+THEME_CTX      아래 참조  FT-Transformer 스냅샷
+─────────────────────────────
+합계           176종 + 테마 비중
+
+* M 지표는 ★★★ 기준 약 80종 선별. 전체 정의는 101종.
+  KR 전용 지표는 US 종목에서 0으로 패딩.
+"""
+
+
+# =============================================================================
 # 섹션 0. 아키텍처 개요
 # =============================================================================
 
@@ -24,7 +317,7 @@ Coding agent 행동 원칙:
 
   [종목 재무 시계열]  (B, T_stock, F_stock)   F_stock = 거시 제외 피처 (재무 45 + 자산 35)
   [거시 시계열]       (B, T_macro, F_macro)   F_macro = 거시 80종, 모든 종목 공유
-  [테마 비중 벡터]    (B, F_theme)            F_theme = 16차원, 분기별 스냅샷
+  [테마 비중 벡터]    (B, F_theme)            F_theme = 18차원, 분기별 스냅샷
   [스냅샷 피처]       (B, F_snap)             F_snap  = 계산형 7 + 범주형(섹터,국가 등)
 
          ↓                   ↓                   ↓              ↓
@@ -237,7 +530,7 @@ model:
   lstm_macro_max_seq: 20
 
   # ThemeContext Linear 투영
-  theme_proj_dim: 64          # 16 → 64
+  theme_proj_dim: 64          # 18 → 64
 
   # FT-Transformer
   d_token: 192                # 피처 임베딩 차원 (192 = 8 heads × 24)
@@ -320,56 +613,56 @@ def get_tier_map(processed_path: str = 'data/themes/processed/themes.yaml') -> D
 
 THEME_CONTEXT = '''
 """
-src/theme/context.py
+src/theme/context.py  (v5.5)
 
-각 (종목, 분기) 시점에 대해 테마 내 비중 벡터를 계산한다.
-
-출력 벡터 (16차원, float32):
-  [0]  theme_mktcap_weight        : 시총 비중 (0~1)
-  [1]  theme_mktcap_rank_pct      : 시총 순위 백분위
-  [2]  theme_pbr_rank_pct         : PBR 순위 백분위 (낮을수록 저평가)
-  [3]  theme_per_rank_pct         : PER 순위 백분위
-  [4]  theme_ev_ebitda_rank_pct   : EV/EBITDA 순위 백분위
-  [5]  theme_roe_rank_pct         : ROE 순위 백분위 (높을수록 우수)
-  [6]  theme_rev_growth_rank_pct  : 매출성장률 순위 백분위
-  [7]  theme_gp_a_rank_pct        : GP/Assets 순위 백분위
-  [8]  theme_ret_1q_rank_pct      : 1분기 수익률 순위 백분위
-  [9]  theme_ret_4q_rank_pct      : 4분기 수익률 순위 백분위
-  [10] theme_avg_ret_4q           : 테마 평균 4분기 수익률
-  [11] theme_ret_dispersion       : 테마 내 수익률 표준편차
-  [12] theme_avg_pbr              : 테마 평균 PBR
-  [13] theme_pbr_dispersion       : 테마 내 PBR 표준편차
-  [14] theme_n_stocks             : 테마 종목 수 (로그 스케일)
-  [15] theme_hhi                  : Herfindahl 시총 집중도
-
-설계 원칙:
-  - 모든 rank_pct는 0~1 percentile → 종목 수 차이 무관하게 비교 가능
-  - 피처 부재(NaN)는 0.5로 대체 (중립값)
-  - Point-in-Time: 같은 날짜의 같은 테마 종목만 참조
-  - 멀티 테마: 각 테마 벡터를 단순 평균 (primary 가중 옵션 있음)
+테마 비중 벡터: 순위 백분위 → 실질 비중 및 상대 배수로 교체.
 """
 import numpy as np
 import pandas as pd
-from typing import Dict, List, Optional
+from typing import Optional, Set
 from src.theme.loader import load_themes
 
-THEME_VEC_DIM = 16
-NEUTRAL = 0.5   # NaN 대체값
+THEME_VEC_DIM = 18
+NEUTRAL_WEIGHT = 0.0        # 비중 기본값 (데이터 없을 때)
+NEUTRAL_RELATIVE = 1.0      # 상대 배수 기본값 (평균과 같음)
 
 
-def _rank_pct(series: pd.Series, ascending: bool = True) -> pd.Series:
-    """0~1 백분위 변환. NaN은 NEUTRAL로."""
-    ranked = series.rank(method='average', ascending=ascending, pct=True)
-    return ranked.fillna(NEUTRAL).astype('float32')
+def _safe_weight(numerator: float, denominator: float) -> float:
+    """비중 계산. denominator가 0이거나 음수이면 0 반환."""
+    if denominator <= 0 or np.isnan(denominator) or np.isnan(numerator):
+        return NEUTRAL_WEIGHT
+    val = numerator / denominator
+    return float(np.clip(val, 0.0, 1.0))
 
 
-def _herfindahl(weights: pd.Series) -> float:
-    """HHI 집중도 (0~1). 높을수록 특정 종목에 집중."""
-    w = weights.fillna(0).values
-    if w.sum() < 1e-8:
-        return NEUTRAL
-    w_norm = w / w.sum()
-    return float(np.sum(w_norm ** 2))
+def _safe_relative(value: float, mean: float) -> float:
+    """
+    상대 배수 = value / mean.
+    mean이 0이거나 부호가 다른 경우 NEUTRAL 반환.
+    극단값 클리핑: [0.1, 10.0] 범위로 제한.
+    """
+    if mean == 0 or np.isnan(mean) or np.isnan(value):
+        return NEUTRAL_RELATIVE
+    if mean < 0 and value < 0:
+        # 둘 다 음수: 비율 의미 있음
+        ratio = value / mean
+    elif mean < 0 or value < 0:
+        # 부호 다름: 의미 없음
+        return NEUTRAL_RELATIVE
+    else:
+        ratio = value / mean
+    return float(np.clip(ratio, 0.1, 10.0))
+
+
+def _signed_weight(numerator: float, denominator: float) -> float:
+    """
+    음수 허용 비중 (EBITDA, FCF, 순이익).
+    분모는 양수 합계만 사용 (음수 기업은 분모에서 제외).
+    결과는 [-1, 1] 클리핑.
+    """
+    if np.isnan(numerator) or denominator <= 0:
+        return NEUTRAL_WEIGHT
+    return float(np.clip(numerator / denominator, -1.0, 1.0))
 
 
 def compute_theme_vector(
@@ -378,63 +671,110 @@ def compute_theme_vector(
     peers: pd.DataFrame,
 ) -> np.ndarray:
     """
-    단일 테마에 대한 16차원 벡터 계산.
+    단일 테마에 대한 18차원 벡터 계산.
 
     Args:
-        ticker    : 대상 종목 코드
-        ticker_row: 대상 종목의 현재 시점 피처 row (pd.Series)
-        peers     : 같은 테마, 같은 시점의 모든 종목 DataFrame
-                    (대상 종목 포함)
+        ticker     : 대상 종목 코드
+        ticker_row : 대상 종목의 현재 시점 피처 (pd.Series)
+        peers      : 같은 테마·같은 시점의 종목 DataFrame (대상 포함)
+
+    Returns:
+        (18,) float32 벡터
     """
-    vec = np.full(THEME_VEC_DIM, NEUTRAL, dtype=np.float32)
+    vec = np.full(THEME_VEC_DIM, NEUTRAL_WEIGHT, dtype=np.float32)
 
     if len(peers) < 2:
-        # 테마 내 종목이 1개뿐이면 의미 없음 → 중립값 반환
         return vec
 
-    # ── 시총 비중 ────────────────────────────────────────────────────
-    mktcap_col = 'market_cap' if 'market_cap' in peers.columns else None
-    if mktcap_col:
-        total_cap = peers[mktcap_col].fillna(0).sum()
-        own_cap   = ticker_row.get(mktcap_col, 0) or 0
-        vec[0] = float(own_cap / total_cap) if total_cap > 0 else NEUTRAL
-        vec[1] = float(_rank_pct(peers[mktcap_col])[
-            peers.index[peers['ticker'] == ticker][0]
-            if (peers['ticker'] == ticker).any() else peers.index[0]
-        ])
+    def col_sum_pos(col):
+        """양수 합계 (음수 기업은 분모에서 제외)."""
+        return peers[col].clip(lower=0).sum() if col in peers.columns else 0.0
 
-    # ── 밸류에이션 순위 ─────────────────────────────────────────────
-    # PBR: 낮을수록 저평가 → ascending=True → 낮은 값이 높은 백분위
-    for i, (col, asc) in enumerate([
-        ('F_VAL_pbr',        True),   # [2]
-        ('F_VAL_per',        True),   # [3]
-        ('F_VAL_ev_ebitda',  True),   # [4]
-        ('F_PRF_roe',        False),  # [5] 높을수록 우수
-        ('F_GRW_rev_cagr',   False),  # [6]
-        ('C_GP_A',           False),  # [7]
-        ('ret_1q',           False),  # [8]
-        ('ret_4q',           False),  # [9]
-    ], start=2):
-        if col in peers.columns:
-            ranks = _rank_pct(peers[col], ascending=asc)
-            mask  = peers['ticker'] == ticker
-            if mask.any():
-                vec[i] = float(ranks[mask].iloc[0])
+    def col_sum_all(col):
+        return peers[col].sum() if col in peers.columns else 0.0
 
-    # ── 테마 전체 상태 ───────────────────────────────────────────────
+    def own(col):
+        mask = peers['ticker'] == ticker
+        if col in peers.columns and mask.any():
+            v = peers.loc[mask, col].iloc[0]
+            return float(v) if not pd.isna(v) else np.nan
+        return np.nan
+
+    def col_mean(col):
+        if col not in peers.columns:
+            return np.nan
+        vals = peers[col].dropna()
+        return float(vals.mean()) if len(vals) > 0 else np.nan
+
+    # ── [0] 시총 비중 ──────────────────────────────────────────────────
+    total_mktcap = col_sum_pos('market_cap')
+    vec[0] = _safe_weight(own('market_cap') or 0.0, total_mktcap)
+
+    # ── [1] 매출 비중 ──────────────────────────────────────────────────
+    total_rev = col_sum_pos('F_GRW_rev_base')   # 매출 절대값 컬럼
+    vec[1] = _safe_weight(own('F_GRW_rev_base') or 0.0, total_rev)
+
+    # ── [2] EBITDA 비중 (음수 허용) ───────────────────────────────────
+    total_ebitda_pos = col_sum_pos('F_PRF_ebitda_abs')
+    vec[2] = _signed_weight(own('F_PRF_ebitda_abs') or 0.0, total_ebitda_pos)
+
+    # ── [3] FCF 비중 (음수 허용) ──────────────────────────────────────
+    total_fcf_pos = col_sum_pos('F_CF_002')
+    vec[3] = _signed_weight(own('F_CF_002') or 0.0, total_fcf_pos)
+
+    # ── [4] 순이익 비중 (음수 허용) ───────────────────────────────────
+    total_ni_pos = col_sum_pos('F_PRF_net_income_abs')
+    vec[4] = _signed_weight(own('F_PRF_net_income_abs') or 0.0, total_ni_pos)
+
+    # ── [5] 자산 비중 ──────────────────────────────────────────────────
+    total_assets = col_sum_pos('F_FIN_total_assets')
+    vec[5] = _safe_weight(own('F_FIN_total_assets') or 0.0, total_assets)
+
+    # ── [6]~[11] 상대 배수 ────────────────────────────────────────────
+    for i, col in enumerate([
+        'F_VAL_003',      # PBR    [6]
+        'F_VAL_001',      # PER    [7]
+        'F_VAL_005',      # EV/EBITDA [8]
+        'F_PRF_005',      # ROE   [9]
+        'F_GRW_001',      # 매출 CAGR [10]
+        'F_CF_003',       # FCF 마진 [11]
+    ], start=6):
+        mean_val = col_mean(col)
+        own_val  = own(col)
+        if own_val is not None and not np.isnan(own_val):
+            vec[i] = _safe_relative(own_val, mean_val)
+
+    # ── [12]~[17] 테마 전체 상태 ──────────────────────────────────────
+
+    # [12] 테마 전체 시총 (로그 스케일, 억 단위 정규화)
+    if total_mktcap > 0:
+        vec[12] = float(np.log1p(total_mktcap / 1e8))   # 억 단위
+
+    # [13] 테마 시총 4분기 성장률 (데이터 없으면 0)
+    if 'theme_mktcap_prev4q' in peers.columns:
+        prev = peers['theme_mktcap_prev4q'].mean()
+        if prev > 0:
+            vec[13] = float(np.clip(total_mktcap / prev - 1, -1.0, 3.0))
+
+    # [14] 테마 평균 4분기 수익률
     if 'ret_4q' in peers.columns:
         ret4q = peers['ret_4q'].dropna()
-        vec[10] = float(ret4q.mean()) if len(ret4q) > 0 else NEUTRAL
-        vec[11] = float(ret4q.std())  if len(ret4q) > 1 else 0.0
+        if len(ret4q) > 0:
+            vec[14] = float(np.clip(ret4q.mean(), -1.0, 3.0))
 
-    if 'F_VAL_pbr' in peers.columns:
-        pbr = peers['F_VAL_pbr'].dropna()
-        vec[12] = float(pbr.mean()) if len(pbr) > 0 else NEUTRAL
-        vec[13] = float(pbr.std())  if len(pbr) > 1 else 0.0
+    # [15] 테마 수익률 변동성
+    if 'ret_4q' in peers.columns:
+        ret4q = peers['ret_4q'].dropna()
+        if len(ret4q) > 1:
+            vec[15] = float(np.clip(ret4q.std(), 0.0, 2.0))
 
-    vec[14] = float(np.log1p(len(peers)))   # 로그 스케일 종목 수
-    if mktcap_col:
-        vec[15] = _herfindahl(peers[mktcap_col])
+    # [16] HHI 집중도
+    if total_mktcap > 0 and 'market_cap' in peers.columns:
+        weights = peers['market_cap'].clip(lower=0) / total_mktcap
+        vec[16] = float(np.clip((weights ** 2).sum(), 0.0, 1.0))
+
+    # [17] 테마 종목 수 (로그 스케일)
+    vec[17] = float(np.log1p(len(peers)))
 
     return vec
 
@@ -442,68 +782,70 @@ def compute_theme_vector(
 def compute_theme_context(
     df: pd.DataFrame,
     processed_path: str = 'data/themes/processed/themes.yaml',
-    peer_tickers: set = None,    # None이면 전체 peer 사용
-                                 # set이면 해당 종목만 peer로 사용
+    peer_tickers: Optional[Set[str]] = None,
 ) -> pd.DataFrame:
     """
-    peer_tickers:
-      None  → 같은 날짜의 같은 테마 모든 종목을 peer로 사용 (실운용/Val/Test)
-      set   → 지정된 종목만 peer로 사용 (Train 오염 방지)
+    전체 DataFrame에 대해 테마 비중 벡터를 계산한다.
+
+    Args:
+        df             : 종목-분기별 DataFrame. 필수: ['ticker', 'date']
+        processed_path : themes.yaml 경로
+        peer_tickers   : None=전체, set=Train 오염 방지용 지정 종목만
+
+    Returns:
+        ['ticker', 'date', 'theme_ctx_0', ..., 'theme_ctx_17'] DataFrame
     """
     mapping = load_themes(processed_path)
-    t2th    = mapping['tickers']       # ticker → {themes, ...}
+    t2th    = mapping['tickers']
     th2t    = mapping['theme_to_tickers']
 
     df = df.sort_values(['date', 'ticker']).reset_index(drop=True)
     results = []
 
     for date, date_group in df.groupby('date', observed=True, sort=False):
-        # 이 시점의 ticker → row 빠른 조회용
-        ticker_rows = {
-            row['ticker']: row
-            for _, row in date_group.iterrows()
-        }
-        
-        date_group_tickers = set(date_group['ticker'])
+        ticker_rows = {row['ticker']: row for _, row in date_group.iterrows()}
 
         for _, row in date_group.iterrows():
-            ticker = row['ticker']
-            ticker_info = t2th.get(ticker, {})
-            themes = ticker_info.get('themes', [])
+            ticker  = row['ticker']
+            info    = t2th.get(ticker, {})
+            themes  = info.get('themes', [])
 
             if not themes:
-                # 매핑 없는 종목: 중립값
-                vec = np.full(THEME_VEC_DIM, NEUTRAL, dtype=np.float32)
+                vec = np.zeros(THEME_VEC_DIM, dtype=np.float32)
+                vec[6:12] = NEUTRAL_RELATIVE    # 상대 배수는 1.0 (평균)
             else:
-                # 각 테마별 벡터 계산 후 평균
                 vecs = []
                 for theme_id in themes:
                     all_peers = th2t.get(theme_id, [])
                     if peer_tickers is not None:
-                        # Train 모드: peer는 peer_tickers 집합 내에서만
-                        peer_list = [t for t in all_peers
-                                     if t in peer_tickers and t in date_group_tickers]
+                        peers_list = [t for t in all_peers
+                                      if t in peer_tickers and t in ticker_rows]
                     else:
-                        peer_list = [t for t in all_peers if t in date_group_tickers]
-                        
-                    if not peer_list:
+                        peers_list = [t for t in all_peers if t in ticker_rows]
+
+                    if not peers_list:
                         continue
-                    peer_rows = [ticker_rows[t] for t in peer_list if t in ticker_rows]
-                    if not peer_rows:
-                        continue
-                    peers_df = pd.DataFrame(peer_rows)
-                    vecs.append(
-                        compute_theme_vector(ticker, row, peers_df)
-                    )
-                vec = (
-                    np.mean(vecs, axis=0).astype(np.float32)
-                    if vecs
-                    else np.full(THEME_VEC_DIM, NEUTRAL, dtype=np.float32)
-                )
+                    peers_df = pd.DataFrame([ticker_rows[t] for t in peers_list])
+                    vecs.append(compute_theme_vector(ticker, row, peers_df))
+
+                if vecs:
+                    # 시총 비중 기준 가중 평균
+                    # primary 테마(첫 번째)에 더 높은 가중치 (2:1)
+                    if len(vecs) == 1:
+                        vec = vecs[0]
+                    else:
+                        weights = np.array(
+                            [2.0] + [1.0] * (len(vecs) - 1), dtype=np.float32
+                        )
+                        weights /= weights.sum()
+                        vec = np.average(vecs, axis=0, weights=weights).astype(np.float32)
+                else:
+                    vec = np.zeros(THEME_VEC_DIM, dtype=np.float32)
+                    vec[6:12] = NEUTRAL_RELATIVE
 
             entry = {'ticker': ticker, 'date': date}
             for i, v in enumerate(vec):
-                entry[f'theme_ctx_{i}'] = v
+                entry[f'theme_ctx_{i}'] = float(v)
             results.append(entry)
 
     out = pd.DataFrame(results)
@@ -511,6 +853,62 @@ def compute_theme_context(
     out[ctx_cols] = out[ctx_cols].astype('float32')
     return out
 '''
+
+# =============================================================================
+# 벡터 차원 레이블 (사람이 읽는 용도)
+# =============================================================================
+THEME_CTX_LABELS = """
+차원   컬럼명                  의미                         범위        해석
+[0]    theme_ctx_0  w_mktcap   시총 비중                    [0, 1]      클수록 이 종목이 테마를 지배
+[1]    theme_ctx_1  w_revenue  매출 비중                    [0, 1]
+[2]    theme_ctx_2  w_ebitda   EBITDA 비중                  [-1, 1]     음수=적자 기업
+[3]    theme_ctx_3  w_fcf      FCF 비중                     [-1, 1]
+[4]    theme_ctx_4  w_ni       순이익 비중                  [-1, 1]
+[5]    theme_ctx_5  w_assets   자산 비중                    [0, 1]
+[6]    theme_ctx_6  rel_pbr    상대 PBR                     [0.1, 10]   <1이면 테마 평균보다 저평가
+[7]    theme_ctx_7  rel_per    상대 PER                     [0.1, 10]   <1이면 테마 평균보다 저평가
+[8]    theme_ctx_8  rel_ev_ebitda 상대 EV/EBITDA            [0.1, 10]
+[9]    theme_ctx_9  rel_roe    상대 ROE                     [0.1, 10]   >1이면 테마 평균보다 우수
+[10]   theme_ctx_10 rel_rev_g  상대 매출성장률              [0.1, 10]
+[11]   theme_ctx_11 rel_fcf_mg 상대 FCF 마진               [0.1, 10]
+[12]   theme_ctx_12 log_mktcap 테마 전체 시총 로그          [0, ∞)      테마 규모
+[13]   theme_ctx_13 mktcap_g4q 테마 시총 4분기 성장률       [-1, 3]     테마 모멘텀
+[14]   theme_ctx_14 avg_ret4q  테마 평균 4분기 수익률       [-1, 3]
+[15]   theme_ctx_15 ret_vol    테마 수익률 변동성            [0, 2]
+[16]   theme_ctx_16 hhi        시총 HHI 집중도              [0, 1]      높을수록 특정 종목 독과점
+[17]   theme_ctx_17 n_log      테마 종목 수 로그             [0, ∞)
+
+예시: 삼성전자 (GT_SEMI_MEMORY)
+  [0] w_mktcap = 0.42   → 이 테마 시총의 42% 차지
+  [1] w_revenue = 0.35  → 이 테마 매출의 35% 차지
+  [6] rel_pbr = 1.2     → 테마 평균 PBR보다 20% 높음 (약간 고평가)
+  [9] rel_roe = 2.1     → 테마 평균 ROE의 2.1배 (우수한 수익성)
+  [16] hhi = 0.28       → 삼성전자+하이닉스가 테마를 과점 (집중도 높음)
+"""
+
+# =============================================================================
+# 필요 컬럼 추가 요건 (features_stock.parquet에 포함되어야 하는 절대값 컬럼)
+# =============================================================================
+REQUIRED_ABS_COLUMNS = """
+비중 계산에 필요한 절대값 컬럼 (기존 F_ 지표에 추가):
+
+F_GRW_rev_base         매출 절대값 (TTM 기준, 통화별 원단위)
+F_PRF_ebitda_abs       EBITDA 절대값
+F_PRF_net_income_abs   순이익 절대값
+F_FIN_total_assets     총자산 절대값
+
+주의:
+  KRW/USD 혼합 비교는 하지 않음.
+  같은 테마 내 KR-US 종목 비중 계산 시 모두 USD로 환산 후 합산.
+  환산 방법: KRW 값 × 분기말 USD/KRW 환율 (M_FX_001의 역수)
+  
+  환산 코드 (features/fundamental/abs_values.py):
+      if row['currency'] == 'KRW':
+          usd_rate = macro.loc[date, 'M_FX_001']   # USD/KRW
+          value_usd = value_krw / usd_rate
+      else:
+          value_usd = value_usd  # 이미 USD
+"""
 
 # =============================================================================
 # 섹션 4b. 테마 병합 및 종목 분할 모듈 (v5.4 신규)
@@ -870,7 +1268,7 @@ src/data/dataset.py
 샘플 = (종목, 기준분기) 쌍.
   seq_stock  : 과거 T분기의 종목 재무 피처 (가변 길이)
   seq_macro  : 과거 T분기의 거시 피처 (동일 날짜 기준, 가변 길이)
-  theme_ctx  : 현재 분기의 테마 비중 벡터 (16차원, 고정)
+  theme_ctx  : 현재 분기의 테마 비중 벡터 (18차원, 고정)
   snap_num   : 현재 분기 수치형 스냅샷 피처 (계산형 등)
   snap_cat   : 현재 분기 범주형 스냅샷 피처 (섹터, 국가 등)
   A, R       : 타깃
@@ -907,7 +1305,7 @@ class StockDataset(Dataset):
         self.macro_seq_cols = macro_seq_cols
         self.snap_num_cols  = snap_num_cols
         self.snap_cat_cols  = snap_cat_cols
-        theme_ctx_cols      = [f'theme_ctx_{i}' for i in range(16)]
+        theme_ctx_cols      = [f'theme_ctx_{i}' for i in range(18)]
 
         # 거시 데이터를 날짜 → 배열 딕셔너리로 변환 (빠른 조회)
         df_macro = df_macro.sort_values('date').set_index('date')
@@ -948,7 +1346,7 @@ class StockDataset(Dataset):
                     m_seq = self._macro_array[macro_start_idx:macro_end_idx+1]
                 m_seq = np.nan_to_num(m_seq, nan=0.0)
 
-                # 테마 비중 (현재 시점, 고정 16차원)
+                # 테마 비중 (현재 시점, 고정 18차원)
                 theme_vec = row[theme_ctx_cols].values.astype('float32')
 
                 # 스냅샷
@@ -960,7 +1358,7 @@ class StockDataset(Dataset):
                 self.samples.append({
                     's_seq':    s_seq,          # (T_s, F_stock)
                     'm_seq':    m_seq,          # (T_m, F_macro)
-                    'theme':    theme_vec,      # (16,)
+                    'theme':    theme_vec,      # (18,)
                     'snap_num': snap_num,       # (F_snap_num,)
                     'snap_cat': snap_cat,       # (F_snap_cat,)
                     'A':        float(row['A']),
@@ -1010,7 +1408,7 @@ def collate_fn(batch):
         's_lengths':  s_lengths,                  # (B,)
         'm_seq':      m_padded,                  # (B, T_m, F_macro)
         'm_lengths':  m_lengths,                  # (B,)
-        'theme':      torch.stack(themes),        # (B, 16)
+        'theme':      torch.stack(themes),        # (B, 18)
         'snap_num':   torch.stack(snap_nums),     # (B, F_snap_num)
         'snap_cat':   torch.stack(snap_cats),     # (B, F_snap_cat)
         'A':          torch.stack(As),            # (B,)
@@ -1315,9 +1713,9 @@ class StockPredictor(pl.LightningModule):
             dropout=0.0,
         )
 
-        # 테마 비중 Linear 투영 (16 → theme_proj_dim)
+        # 테마 비중 Linear 투영 (18 → theme_proj_dim)
         self.theme_proj = nn.Sequential(
-            nn.Linear(16, c['theme_proj_dim']),
+            nn.Linear(18, c['theme_proj_dim']),
             nn.GELU(),
             nn.Dropout(c['dropout']),
         )
@@ -1722,7 +2120,7 @@ def test_ft_transformer_output_shape():
     """FT-Transformer 출력 차원 확인."""
     from src.models.ft_transformer import FTTransformer
     model = FTTransformer(
-        context_dims=[64, 32, 16],
+        context_dims=[64, 32, 18],
         n_num_features=5,
         cat_cardinalities=[10, 5, 3],
         d_token=64,
@@ -1731,7 +2129,7 @@ def test_ft_transformer_output_shape():
     )
     model.eval()
     B = 8
-    contexts = [torch.randn(B, 64), torch.randn(B, 32), torch.randn(B, 16)]
+    contexts = [torch.randn(B, 64), torch.randn(B, 32), torch.randn(B, 18)]
     x_num = torch.randn(B, 5)
     x_cat = torch.randint(0, 3, (B, 3))
 
@@ -1771,7 +2169,7 @@ def test_collate_padding():
         {
             's_seq':    torch.randn(5, 10),
             'm_seq':    torch.randn(5, 8),
-            'theme':    torch.randn(16),
+            'theme':    torch.randn(18),
             'snap_num': torch.randn(7),
             'snap_cat': torch.zeros(3, dtype=torch.long),
             'A': torch.tensor(0.5),
@@ -1780,7 +2178,7 @@ def test_collate_padding():
         {
             's_seq':    torch.randn(12, 10),
             'm_seq':    torch.randn(12, 8),
-            'theme':    torch.randn(16),
+            'theme':    torch.randn(18),
             'snap_num': torch.randn(7),
             'snap_cat': torch.zeros(3, dtype=torch.long),
             'A': torch.tensor(0.8),
@@ -1791,7 +2189,7 @@ def test_collate_padding():
     assert out['s_seq'].shape   == (2, 12, 10)
     assert out['s_lengths'][0]  == 5
     assert out['s_lengths'][1]  == 12
-    assert out['theme'].shape   == (2, 16)
+    assert out['theme'].shape   == (2, 18)
 
 
 # ── v5.4 신규 테스트 (tests/test_split.py) ───────────────────────────────────
@@ -1863,6 +2261,76 @@ def test_merge_themes_idempotent(tmp_path):
         content2 = yaml.safe_load(f)
     assert content1['meta']['n_tickers_total'] == content2['meta']['n_tickers_total']
     assert content1['meta']['n_themes'] == content2['meta']['n_themes']
+
+
+# tests/test_theme_context.py (추가 테스트)
+
+def test_mktcap_weight_sums_to_one():
+    """시총 비중의 합이 1인지 확인."""
+    import pandas as pd
+    import numpy as np
+    from src.theme.context import compute_theme_vector
+
+    peers = pd.DataFrame({
+        'ticker':     ['A', 'B', 'C'],
+        'market_cap': [300.0, 500.0, 200.0],
+        'F_VAL_003':  [1.0, 2.0, 0.8],   # PBR
+    })
+    vA = compute_theme_vector('A', peers[peers['ticker']=='A'].iloc[0], peers)
+    vB = compute_theme_vector('B', peers[peers['ticker']=='B'].iloc[0], peers)
+    vC = compute_theme_vector('C', peers[peers['ticker']=='C'].iloc[0], peers)
+
+    # 시총 비중 합산 = 1
+    total_w = vA[0] + vB[0] + vC[0]
+    assert abs(total_w - 1.0) < 1e-5, f"mktcap weight sum = {total_w}"
+
+    # 개별 비중 = 기대값
+    assert abs(vA[0] - 0.30) < 1e-4   # 300/1000
+    assert abs(vB[0] - 0.50) < 1e-4   # 500/1000
+    assert abs(vC[0] - 0.20) < 1e-4   # 200/1000
+
+
+def test_relative_pbr():
+    """상대 PBR: 테마 평균 PBR = 2.0일 때 PBR=1.0 종목의 상대값 = 0.5."""
+    import pandas as pd
+    from src.theme.context import compute_theme_vector
+
+    peers = pd.DataFrame({
+        'ticker':    ['A', 'B', 'C'],
+        'market_cap':[100.0, 100.0, 100.0],
+        'F_VAL_003': [1.0, 2.0, 3.0],   # 평균 = 2.0
+    })
+    vA = compute_theme_vector('A', peers[peers['ticker']=='A'].iloc[0], peers)
+    assert abs(vA[6] - 0.5) < 1e-4, f"rel_pbr = {vA[6]}, expected 0.5"
+
+
+def test_hhi_monopoly():
+    """한 종목이 시총 100% 점유 시 HHI = 1.0."""
+    import pandas as pd
+    from src.theme.context import compute_theme_vector
+
+    peers = pd.DataFrame({
+        'ticker':    ['A', 'B'],
+        'market_cap':[999.0, 1.0],
+    })
+    vA = compute_theme_vector('A', peers[peers['ticker']=='A'].iloc[0], peers)
+    assert vA[16] > 0.99 - 1e-3, f"HHI expected ~1.0, got {vA[16]}"
+
+
+def test_negative_ebitda_weight():
+    """음수 EBITDA 기업의 비중이 음수로 정확히 표현되는지."""
+    import pandas as pd
+    from src.theme.context import compute_theme_vector
+
+    peers = pd.DataFrame({
+        'ticker':          ['A', 'B', 'C'],
+        'market_cap':      [200.0, 200.0, 200.0],
+        'F_PRF_ebitda_abs':[100.0, 200.0, -50.0],  # C는 적자
+    })
+    vC = compute_theme_vector('C', peers[peers['ticker']=='C'].iloc[0], peers)
+    # C의 EBITDA 비중 = -50 / (100+200) = -0.1667
+    assert vC[2] < 0, f"Negative EBITDA should give negative weight, got {vC[2]}"
+    assert abs(vC[2] - (-50.0/300.0)) < 1e-3
 '''
 
 # =============================================================================
@@ -1914,56 +2382,24 @@ TROUBLESHOOTING = """
 # =============================================================================
 
 CHECKLIST = """
-# v5.3 → v5.4 변경 체크리스트
+# v5.4 → v5.5 변경 체크리스트
 
-## 신규 파일
-□ scripts/00_merge_themes.py
-    - raw YAML → processed/themes.yaml 병합
-    - --force 옵션으로 강제 재생성 가능
-    - 최초 1회 실행 or raw 변경 시에만 실행
-
-□ src/utils/split.py
-    - stratified_ticker_split() : market × tier3(fallback tier2/1) 기반 분할
-    - print_split_report()      : 분할 결과 요약 출력
-
-□ data/themes/raw/kospi/        ← 기존 kospi_mapping_part*.yaml 이동
-□ data/themes/raw/sp500/        ← 기존 sp500_mapping_part*.yaml 이동
-□ data/themes/raw/global_themes.yaml ← 이동
-□ data/themes/processed/        ← 자동 생성 디렉토리 (git ignore 가능)
-
-□ tests/test_split.py
-
-## 수정 파일
-□ config/settings.yaml
-    - train_split 섹션 제거
-    - split 섹션 추가 (method, ratios, stratify, time_holdout)
-    - themes 섹션 추가 (raw_dir, processed_path)
-
-□ src/theme/loader.py
-    - raw 파일 직접 로드 제거
-    - processed/themes.yaml 단독 로드로 교체
-    - load_themes() 시그니처 변경
-
+## 변경 파일
 □ src/theme/context.py
-    - compute_theme_context() 파라미터 추가:
-        processed_path (mapping_dir 대체)
-        peer_tickers (None = 전체, set = 지정 종목만)
+    - compute_theme_vector(): 백분위 → 실질 비중 + 상대 배수 (18차원)
+    - _safe_weight(), _signed_weight(), _safe_relative() 헬퍼 추가
 
-□ scripts/02b_build_theme_context.py
-    - processed_path 참조로 변경
+□ src/models/predictor.py
+    - THEME_VEC_DIM: 16 → 18 업데이트
 
-□ scripts/04_train.py
-    - 날짜 기반 분할 → stratified_ticker_split() 호출로 교체
-    - Train theme_ctx와 Val theme_ctx 분리 계산 (peer 오염 방지)
-    - data/splits/ticker_split.json 저장 (재현성)
+□ src/features/fundamental/abs_values.py (신규)
+    - 비중 계산용 절대값 컬럼 생성 (매출, EBITDA, 순이익, 총자산)
+    - KRW → USD 환산 포함
 
-□ scripts/06_evaluate.py
-    - ticker-split 기반 평가 메인
-    - time_holdout 보조 평가 추가
-
-## 삭제
-□ config/settings.yaml 의 train_split 섹션
-□ config/theme_mapping/ 디렉토리 (data/themes/raw/ 로 이동)
+## 추가 없음 (구조 유지)
+□ theme_context.parquet 스키마 변경 (theme_ctx_0~17, 16→18차원)
+□ dataset.py: THEME_VEC_DIM 상수 18로 업데이트
+□ tests/test_theme_context.py: 비중 합산=1 검증 테스트 추가
 """
 
 # =============================================================================

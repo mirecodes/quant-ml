@@ -174,7 +174,7 @@ with tab_portfolio:
             yaxis=dict(gridcolor='#2d3748'),
             hoverlabel=dict(bgcolor='#1f2937', font_size=13)
         )
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width='stretch')
      
     with col_rank:
         st.subheader("🏆 매력도 Top 종목")
@@ -189,7 +189,7 @@ with tab_portfolio:
                 "A": st.column_config.NumberColumn("매력도 (A)", format="%.2f"),
                 "R": st.column_config.NumberColumn("위험도 (R)", format="%.1%"),
             },
-            use_container_width=True,
+            width='stretch',
             hide_index=True
         )
 
@@ -254,14 +254,14 @@ with tab_data:
                     template="plotly_dark",
                     title=f"{selected_raw_ticker} 분기별 종가 및 거래량 추이",
                     xaxis_title="날짜",
-                    yaxis=dict(title="종가 (Close)", titlefont=dict(color="#3b82f6"), tickfont=dict(color="#3b82f6")),
-                    yaxis2=dict(title="거래량 (Volume)", titlefont=dict(color="#9333ea"), tickfont=dict(color="#9333ea"), overlaying="y", side="right"),
+                    yaxis=dict(title="종가 (Close)", title_font=dict(color="#3b82f6"), tickfont=dict(color="#3b82f6")),
+                    yaxis2=dict(title="거래량 (Volume)", title_font=dict(color="#9333ea"), tickfont=dict(color="#9333ea"), overlaying="y", side="right"),
                     plot_bgcolor='rgba(0,0,0,0)',
                     paper_bgcolor='rgba(0,0,0,0)',
                     xaxis=dict(gridcolor='#2d3748'),
                     legend=dict(x=0.01, y=0.99)
                 )
-                st.plotly_chart(fig_raw, use_container_width=True)
+                st.plotly_chart(fig_raw, width='stretch')
             with col_raw_table:
                 st.markdown("<br>", unsafe_allow_html=True)
                 st.dataframe(
@@ -271,7 +271,7 @@ with tab_data:
                         "close": st.column_config.NumberColumn("종가", format="%.2f"),
                         "volume": st.column_config.NumberColumn("거래량", format="%,d"),
                     },
-                    use_container_width=True,
+                    width='stretch',
                     hide_index=True
                 )
         else:
@@ -311,12 +311,12 @@ with tab_data:
                         xaxis=dict(gridcolor='#2d3748'),
                         yaxis=dict(gridcolor='#2d3748')
                     )
-                    st.plotly_chart(fig_feat, use_container_width=True)
+                    st.plotly_chart(fig_feat, width='stretch')
                 with col_feat_table:
                     st.markdown("<br>", unsafe_allow_html=True)
                     st.dataframe(
                         feat_stock_df[['date'] + selected_features].sort_values('date', ascending=False),
-                        use_container_width=True,
+                        width='stretch',
                         hide_index=True
                     )
             else:
@@ -372,7 +372,7 @@ with tab_macro:
             width=1000,
             height=600
         )
-        st.plotly_chart(fig_heat, use_container_width=True)
+        st.plotly_chart(fig_heat, width='stretch')
         
         # 2. 매크로 지표 시계열 추이
         st.markdown("### 📉 2. 매크로 지표 역사적 추이 (Macro Indicators Over Time)")
@@ -413,12 +413,12 @@ with tab_macro:
                     xaxis=dict(gridcolor='#2d3748'),
                     yaxis=dict(gridcolor='#2d3748')
                 )
-                st.plotly_chart(fig_macro_line, use_container_width=True)
+                st.plotly_chart(fig_macro_line, width='stretch')
             with col_macro_table:
                 st.markdown("<br>", unsafe_allow_html=True)
                 st.dataframe(
                     macro_plot_df[['date'] + selected_macro_cols].sort_values('date', ascending=False),
-                    use_container_width=True,
+                    width='stretch',
                     hide_index=True
                 )
         else:

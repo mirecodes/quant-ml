@@ -106,7 +106,7 @@ def test_ft_transformer_output_shape():
     """FT-Transformer 출력 차원 확인."""
     from src.models.ft_transformer import FTTransformer
     model = FTTransformer(
-        context_dims=[64, 32, 16],
+        context_dims=[64, 32, 18],
         n_num_features=5,
         cat_cardinalities=[10, 5, 3],
         d_token=64,
@@ -115,7 +115,7 @@ def test_ft_transformer_output_shape():
     )
     model.eval()
     B = 8
-    contexts = [torch.randn(B, 64), torch.randn(B, 32), torch.randn(B, 16)]
+    contexts = [torch.randn(B, 64), torch.randn(B, 32), torch.randn(B, 18)]
     x_num = torch.randn(B, 5)
     x_cat = torch.randint(0, 3, (B, 3))
 
@@ -134,7 +134,7 @@ def test_collate_padding():
         {
             's_seq':    torch.randn(5, 10),
             'm_seq':    torch.randn(5, 8),
-            'theme':    torch.randn(16),
+            'theme':    torch.randn(18),
             'snap_num': torch.randn(7),
             'snap_cat': torch.zeros(3, dtype=torch.long),
             'A': torch.tensor(0.5),
@@ -143,7 +143,7 @@ def test_collate_padding():
         {
             's_seq':    torch.randn(12, 10),
             'm_seq':    torch.randn(12, 8),
-            'theme':    torch.randn(16),
+            'theme':    torch.randn(18),
             'snap_num': torch.randn(7),
             'snap_cat': torch.zeros(3, dtype=torch.long),
             'A': torch.tensor(0.8),
@@ -154,4 +154,4 @@ def test_collate_padding():
     assert out['s_seq'].shape   == (2, 12, 10)
     assert out['s_lengths'][0]  == 5
     assert out['s_lengths'][1]  == 12
-    assert out['theme'].shape   == (2, 16)
+    assert out['theme'].shape   == (2, 18)
