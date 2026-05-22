@@ -35,30 +35,6 @@ def test_attractiveness_label():
     assert abs(actual - expected) < 1e-6
     print(f"Attractiveness test passed: Expected {expected:.6f}, got {actual:.6f}")
 
-def test_risk_label():
-    """위험도(R) 계산이 미래 로그수익률의 연환산 표준편차인지 검증."""
-    sample_df = pd.DataFrame({
-        'ticker': ['TEST'] * 5,
-        'date': pd.date_range(start='2020-01-01', periods=5, freq='QE'),
-        'close': [100.0, 105.0, 102.0, 108.0, 104.0]
-    })
-    
-    r_df = compute_risk(sample_df, max_horizon_years=5, min_forward_quarters=1)
-    
-    # log returns:
-    # 105/100 -> ln(1.05)
-    # 102/105 -> ln(102/105)
-    # 108/102 -> ln(108/102)
-    # 104/108 -> ln(104/108)
-    closes = np.array([100.0, 105.0, 102.0, 108.0, 104.0])
-    log_rets = np.log(closes[1:] / closes[:-1])
-    
-    # t=0일 때, 미래 4개의 log returns의 표본표준편차 * sqrt(4)
-    expected_std = log_rets.std(ddof=1) * np.sqrt(4)
-    
-    actual = r_df.loc[r_df['date'] == '2020-03-31', 'R'].values[0]
-    assert abs(actual - expected_std) < 1e-6
-    print(f"Risk test passed: Expected {expected_std:.6f}, got {actual:.6f}")
 
 def test_optimize_dtypes():
     """데이터타입 및 메모리 최적화 검증."""

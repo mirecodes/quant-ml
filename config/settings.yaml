@@ -22,9 +22,9 @@ targets:
     min_forward_quarters: 4         # 최소 1년 이상의 데이터 필요
 
   risk:
-    max_horizon_years: 5
-    annualization_factor: 4         # 분기 → 연환산 √4
-    min_forward_quarters: 4
+    method: daily_hlr_mean          # mean((High_d - Low_d) / Close_d)
+    min_close: 0.000001
+    min_trading_days: 10            # 분기당 최소 거래일 (미달 시 라벨 제외)
 
 split:
   method: ticker                  # 종목 기반 분할

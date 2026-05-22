@@ -93,3 +93,65 @@ class USPriceFetcher(BaseFetcher):
         
         self.save(quarterly, "prices_us_raw")
         return quarterly
+
+    def fetch_daily(self, tickers: list, start_date: str, end_date: str) -> pd.DataFrame:
+        """미국 종목 일별 종가 및 OHLCV 수집 (yf.download 벌크 쿼리 + Stacking 최적화 + 로컬 캐시)."""
+        cached = self.load("prices_us_daily_raw")
+        if cached is not None:
+            print("Loaded US daily prices from cache.")
+            return cached
+            
+        print(f"Downloading US daily prices in bulk for {len(tickers)} S&P 500 tickers...")
+        
+        chunk_size = 100
+        chunks = [tickers[i:i + chunk_size] for i in range(0, len(tickers), chunk_size)]
+        
+        all_dfs = []
+        for i, chunk in enumerate(chunks):
+            try:
+                print(f"Downloading US daily chunk {i+1}/{len(chunks)} ({len(chunk)} tickers)...")
+                df = yf.download(chunk, start=start_date, end=end_date, progress=False, auto_adjust=True)
+                if df.empty:
+                    continue
+                
+                if isinstance(df.columns, pd.MultiIndex):
+                    df_stacked = df.stack(level=1, future_stack=True)
+                    df_stacked.index.names = ['date', 'ticker']
+                    df_stacked = df_stacked.reset_index()
+                else:
+                    ticker = chunk[0]
+                    df_stacked = df.reset_index()
+                    df_stacked['ticker'] = ticker
+                    df_stacked.columns = [c.lower() for c in df_stacked.columns]
+                
+                all_dfs.append(df_stacked)
+            except Exception as e:
+                print(f"Error downloading US daily chunk {i+1}: {e}")
+                continue
+                
+        if not all_dfs:
+            print("Warning: No US daily price data fetched.")
+            return pd.DataFrame()
+            
+        full = pd.concat(all_dfs, ignore_index=True)
+        full.columns = [c.lower() for c in full.columns]
+        
+        full['country'] = 'US'
+        full['currency'] = 'USD'
+        full['date'] = pd.to_datetime(full['date'])
+        
+        # 0값 및 결측치 필터링
+        full = full.dropna(subset=['close'])
+        full = full[full['close'] > 0]
+        
+        # 필요한 컬럼만 추출
+        full = full[['ticker', 'country', 'currency', 'date', 'open', 'high', 'low', 'close', 'volume']]
+        
+        for col in ['open', 'high', 'low', 'close', 'volume']:
+            if col in full.columns:
+                full[col] = full[col].astype('float32')
+                
+        full = optimize_dtypes(full)
+        self.save(full, "prices_us_daily_raw")
+        return full
+

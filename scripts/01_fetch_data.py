@@ -41,6 +41,8 @@ def main(args):
         cache_paths = [
             Path('data/raw/prices/prices_kr_raw.parquet'),
             Path('data/raw/prices/prices_us_raw.parquet'),
+            Path('data/raw/prices/prices_kr_daily_raw.parquet'),
+            Path('data/raw/prices/prices_us_daily_raw.parquet'),
             Path('data/raw/prices/prices_quarterly.parquet'),
             Path('data/raw/prices/themes_naver_raw.parquet'),
             Path('data/processed/themes_naver.parquet')
@@ -55,6 +57,13 @@ def main(args):
     kr_prices = kr_fetcher.fetch(args.start, args.end, limit=args.limit)
     if not kr_prices.empty:
         report_memory(kr_prices, "KR prices")
+        
+    # KR 일별 OHLCV 수집 (위험도 라벨 계산용)
+    print("=== Step 1b: Fetching Korean Daily Prices ===")
+    kr_daily = kr_fetcher.fetch_daily(args.start, args.end, limit=args.limit)
+    if not kr_daily.empty:
+        save_parquet(kr_daily, 'data/processed/prices_daily_kr.parquet')
+        report_memory(kr_daily, "KR daily prices")
     
     # US: S&P 500만 벌크 수집
     print("\n=== Step 2: Fetching US Prices ===")
@@ -65,6 +74,13 @@ def main(args):
     us_prices = us_fetcher.fetch(us_tickers, args.start, args.end)
     if not us_prices.empty:
         report_memory(us_prices, "US prices")
+        
+    # US 일별 OHLCV 수집 (위험도 라벨 계산용)
+    print("=== Step 2b: Fetching US Daily Prices ===")
+    us_daily = us_fetcher.fetch_daily(us_tickers, args.start, args.end)
+    if not us_daily.empty:
+        save_parquet(us_daily, 'data/processed/prices_daily_us.parquet')
+        report_memory(us_daily, "US daily prices")
     
     # 통합 저장
     print("\n=== Step 3: Merging & Saving Price Data ===")

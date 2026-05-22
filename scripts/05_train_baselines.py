@@ -159,7 +159,7 @@ def main():
         print(f"Error loading processed themes: {e}")
 
     if ticker_names:
-        predictions['name'] = predictions['ticker'].map(ticker_names).fillna(predictions['ticker'])
+        predictions['name'] = predictions['ticker'].astype(str).map(ticker_names).fillna(predictions['ticker'].astype(str))
 
     predictions['themes'] = predictions.apply(lambda r: themes_map.get(r['ticker'], ['기타 및 미분류']), axis=1)
 
