@@ -64,7 +64,7 @@ def main():
         try:
             import re
             def get_loss(p):
-                m = re.search(r'loss[=_]([\d\.]+)', p)
+                m = re.search(r'loss[=_](-?\d+(?:\.\d+)?)', p)
                 if m:
                     return float(m.group(1))
                 return 999.0

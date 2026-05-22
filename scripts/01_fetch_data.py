@@ -120,9 +120,19 @@ def main(args):
     print("\nData fetch complete.")
 
 if __name__ == '__main__':
+    import yaml
+    try:
+        with open('config/settings.yaml') as f:
+            config = yaml.safe_load(f)
+        default_start = config.get('prices', {}).get('start_date', '2010-01-01')
+        default_end = config.get('prices', {}).get('end_date', '2026-05-01')
+    except Exception:
+        default_start = '2010-01-01'
+        default_end = '2026-05-01'
+
     parser = argparse.ArgumentParser()
-    parser.add_argument('--start', default='2010-01-01')
-    parser.add_argument('--end', default='2026-05-01')
+    parser.add_argument('--start', default=default_start)
+    parser.add_argument('--end', default=default_end)
     parser.add_argument('--no-cache', action='store_true', help='Ignore cached data and fetch fresh data')
     parser.add_argument('--limit', type=int, default=None, help='Limit the number of tickers to fetch per market')
     args = parser.parse_args()

@@ -13,16 +13,18 @@ prices:
   frequency: quarterly              # 분기말 종가
   source_kr: pykrx
   source_us: yfinance
+  start_date: '2010-01-01'
+  end_date: '2026-05-01'
 
 targets:
   attractiveness:
     max_horizon_years: 5            # 최대 5년 윈도우
     log_base: 5                     # log_5 고정
     use_max_in_window: true
-    min_forward_quarters: 4         # 최소 1년 이상의 데이터 필요
+    min_forward_quarters: 8         # 최소 2년 이상의 데이터 필요
 
   risk:
-    method: daily_hlr_mean          # mean((High_d - Low_d) / Close_d)
+    method: robust_ipr_vol          # (Percentile_90(High) - Percentile_10(Low)) / Close
     min_close: 0.000001
     min_trading_days: 10            # 분기당 최소 거래일 (미달 시 라벨 제외)
 

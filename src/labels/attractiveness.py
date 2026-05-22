@@ -5,7 +5,7 @@ import numpy as np
 def compute_attractiveness(
     prices_quarterly: pd.DataFrame,
     max_horizon_years: int = 5,
-    min_forward_quarters: int = 4,
+    min_forward_quarters: int = 8,
 ) -> pd.DataFrame:
     """매력도 라벨 (단일 값)."""
     max_quarters = max_horizon_years * 4
@@ -41,8 +41,8 @@ def compute_attractiveness(
             
             # 최대 horizon_years(5년) 이내에서, N년 기간을 기준으로 log base 설정
             base_years = min(n_years, max_horizon_years)
-            # log(1)=0 이므로 수학적 안정성을 위해 최소 1.1 적용
-            base_years = max(base_years, 1.1)
+            # log(1)=0 이므로 수학적 안정성을 위해 최소 2.0 적용 (하한값 상향)
+            base_years = max(base_years, 2.0)
             
             log_base_value = np.log(base_years)
             

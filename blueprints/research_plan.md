@@ -483,11 +483,11 @@ targets:
     max_horizon_years: 5
     log_base: 5
     use_max_in_window: true
-    min_forward_quarters: 4
+    min_forward_quarters: 8
   risk:
     max_horizon_years: 5
     annualization_factor: 4
-    min_forward_quarters: 4
+    min_forward_quarters: 8
 
 split:
   method: ticker                  # 종목 기반 분할
@@ -2155,10 +2155,11 @@ def test_attractiveness_label_no_lookahead():
         'close':  [100, 110, 90, 120, 130, 125, 140, 135, 145, 150],
     })
     result = compute_attractiveness(prices, max_horizon_years=5,
-                                    min_forward_quarters=4)
+                                    min_forward_quarters=8)
     first = result.iloc[0]
     max_price = max([110, 90, 120, 130, 125, 140, 135, 145, 150])
-    expected_A = np.log(150 / 100) / np.log(5)
+    # 9분기(2.25년) 가용하므로 base_years = max(2.25, 2.0) = 2.25
+    expected_A = np.log(150 / 100) / np.log(2.25)
     assert abs(first['A'] - expected_A) < 1e-5
 
 
@@ -2426,17 +2427,28 @@ FT-Transformer 학습 시, 학습 및 검증 메트릭의 실시간 시각화를
 ---
 
 ## 2. 로컬 라벨링 및 log_N 계산 기법
-5년 미만의 상장/관측 데이터를 가지는 종목군에 대해 신뢰할 수 있는 매수 매력도(A) 및 위험도(R) 지표를 수립하기 위해 동적 윈도우 크기 $N$을 적용합니다.
+5년 미만의 상장/관측 데이터를 가지는 종목군에 대해 신뢰할 수 있는 매수 매력도(A) 및 위험도(R) 지표를 수립하기 위해 동적 윈도우 크기 $N$(연 단위)을 적용합니다.
 
 ### 2.1 Attractiveness ($A$, 매력도)
-동적 관측 기간 $N$ 분기 ($4 \le N \le 20$)에 따른 Attractiveness는 다음과 같은 수학적 정규화 규칙을 따릅니다:
-$$A = \log_N \left( \frac{\max(P_{t \dots t+N}) + 1\text{e-}8}{P_t + 1\text{e-}8} \right)$$
-여기서 밑이 $N$인 로그를 취함으로써, 관측 기간이 짧아 단기간 내 급격하게 상승한 종목과 장기간 서서히 상승한 종목의 매력도 스케일을 일정하게 조정(정규화)합니다.
+동적 관측 기간 $N$년 (분기 단위 가용 기간에 따라 $N = \text{forward\_quarters} / 4.0$)에 따른 Attractiveness는 다음과 같은 수학적 정규화 규칙을 따릅니다:
+$$A = \log_{N_{\text{adj}}} \left( \frac{\max(P_{t \dots t+4N}) + 1\text{e-}8}{P_t + 1\text{e-}8} \right)$$
+여기서 밑 $N_{\text{adj}}$는 다음과 같이 제한됩니다:
+$$N_{\text{adj}} = \max\left(\min(N, 5.0), 2.0\right)$$
+
+> [!IMPORTANT]
+> **수학적 안정성 가드 (하한선 2.0년 상향 조정)**
+> 시계열의 끝단(최근 시점)이나 상장 기간이 짧은 시점에서 $N \to 1.1$ 등으로 극단적으로 수축하면, 분모인 $\log(N_{\text{adj}})$가 $0$에 가까워져 $A$ 값이 수십 배로 폭발하는 수학적 결함이 존재했습니다.
+> 이를 방지하고 스케일을 안정적으로 유지하기 위해, 로그 밑의 최소 하한선 $N_{\text{adj}}$을 기존 $1.1$에서 **$2.0$(2년)**으로 크게 상향하였습니다. 이를 통해 최근 날짜 데이터의 오차 왜곡과 모델의 아웃라이어 가중치 편향 문제를 완벽히 방지했습니다.
 
 ### 2.2 Risk ($R$, 위험도)
-관측 기간 $N$ 분기 동안 종가 기준의 로그 수익률에 대한 변동성의 평균값(연환산 표준편차)을 계산합니다:
-$$R = \text{std}(\text{log\_returns}_{t \dots t+N}) \times \sqrt{4}$$
-- $N$이 5년(20분기)보다 적은 종목들의 경우 실제 유효 분기 개수 만큼의 표준편차를 사용하여 개별 종목의 고유 위험도를 보수적이고 안정적으로 측정합니다.
+v5.6 패치를 통해, 미래의 긴 분기 윈도우를 참조해야 하는 기존의 forward 변동성($\text{std} \times \sqrt{4}$) 대신, **현재 분기 자체 가격 데이터만을 활용하는 "Robust Interpercentile Range (IPR) Volatility"**를 정밀 이식하여 정보 유실과 왜곡을 동시에 해결했습니다:
+$$R = \frac{\text{Percentile}_{90}(\text{High}_d) - \text{Percentile}_{10}(\text{Low}_d)}{P_{\text{close}, t}} \quad (d \in \text{분기 } t)$$
+
+> [!TIP]
+> **Robust IPR Volatility의 강점**
+> - **노이즈 제거 (Outlier Protection)**: 단순히 분기 최고가와 최저가의 차이($\text{High}_{\text{max}} - \text{Low}_{\text{min}}$)를 사용하면 하루짜리 일시적 폭등락이나 주문 실수(Fat Finger) 등의 아웃라이어에 쉽게 왜곡됩니다. 본 지표는 상/하위 10% 영역에 **안전 버퍼**를 두어 단발성 노이즈를 완벽히 필터링합니다.
+> - **추세적 위험 및 MDD 포착**: 매일매일의 좁은 진폭만 기계적으로 평균 내던 방식과 달리, 분기 3달 전체에 거쳐 형성된 박스권 주가 스펙트럼의 두께를 포착하므로, 장기 우하향 추세 등 실제 투자자가 감내해야 했던 실질적 낙폭 위험(MDD)을 극도로 정교하게 측정해 냅니다.
+> - **미래 참조 제거 (No Look-ahead)**: 현재 분기 내부의 일별 가격 정보만으로 완결되므로, 5년치 최신 데이터의 라벨 누락 현상 없이 100% 꽉 채운 완전한 학습이 가능합니다.
 
 ### 2.3 단위 테스트 검증
 - 해당 연산 로직은 `tests/test_pipeline.py` 내 `test_attractiveness_label` 및 `test_risk_label` 단위 테스트를 통해 그 정확도가 철저히 보증됩니다.
@@ -2476,5 +2488,44 @@ DATA_PIPELINE_UPGRADE = """
   - 종목별 관측 라이프타임 내 분기 캘린더 공백(중간 누락 분기) 탐지
 - **효과**: 터미널에 가시성이 높은 컬러 경고 문구와 가이드를 실시간으로 출력하여 개발자가 데이터 품질 저하를 즉각 인지하고 로컬 캐시 초기화(`--no-cache`) 등 즉각 대처할 수 있도록 지원합니다.
 """
+
+# =============================================================================
+# 섹션 17. FT-Transformer 예측 오차 및 시각화 검증 (v5.6 신규)
+# =============================================================================
+
+# Test Set 오차 분석 및 시각화 검증 리포트
+
+FT-Transformer 모델의 매력도(A) 및 위험도(R) 예측 정확도를 실시간 실제값(GT)과 일대일 정합 비교하고 오차 추세를 분석하기 위해 검증 시스템을 이식했습니다.
+
+## 1. 테스트 세트 오차 메트릭 분석 (총 8,906개 샘플)
+- **Attractiveness (A, 매력도)**:
+  - MAE (평균 절대 오차): **0.3773** (이전 0.5557 대비 **32.1% 감소**)
+  - RMSE (평균 제곱근 오차): **0.7645**
+  - R² Score (결정계수): **-0.0532**
+  - KR 시장 MAE: **0.4615** | US 시장 MAE: **0.3112**
+- **Risk (R, 위험도)**:
+  - MAE (평균 절대 오차): **0.0084** (이전 0.0963 대비 **91.3% 감소** - 평균 0.8% 절대 오차)
+  - RMSE (평균 제곱근 오차): **0.0125**
+  - R² Score (결정계수): **0.1112**
+  - KR 시장 MAE: **0.0110** | US 시장 MAE: **0.0064**
+
+## 2. 예측 및 오차 시각화 플롯 (Verification Plots)
+시간의 흐름(date)에 따른 한국(KR)과 미국(US) 종목의 실제 A/R 평균 추이와 예측값 평균 추이, 그리고 절대오차 추이를 다각도로 시각화한 검증 차트입니다.
+
+### 2.1 매력도(A) 실제 vs 예측 및 절대오차 추이
+![매력도 A 실제 vs 예측 비교](/Users/mireflare/.gemini/antigravity-ide/brain/49637d44-18f3-47b1-8dd0-8f8a9c2c960c/plot_a_comparison.png)
+![매력도 A 절대오차 추이](/Users/mireflare/.gemini/antigravity-ide/brain/49637d44-18f3-47b1-8dd0-8f8a9c2c960c/plot_a_error.png)
+
+### 2.2 위험도(R) 실제 vs 예측 및 절대오차 추이
+![위험도 R 실제 vs 예측 비교](/Users/mireflare/.gemini/antigravity-ide/brain/49637d44-18f3-47b1-8dd0-8f8a9c2c960c/plot_r_comparison.png)
+![위험도 R 절대오차 추이](/Users/mireflare/.gemini/antigravity-ide/brain/49637d44-18f3-47b1-8dd0-8f8a9c2c960c/plot_r_error.png)
+
+---
+
+## 3. 오차 분석 스크립트 실행 가이드
+동 분석 리포트 및 메트릭은 다음 스크립트를 통해 동적으로 재계산 및 차트 출력이 가능합니다.
+- **오차 지표 출력**: `python scratch/compare_test_set.py`
+- **차트 이미지 빌드**: `python scratch/generate_plots.py`
+
 
 

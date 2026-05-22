@@ -24,11 +24,10 @@ def test_attractiveness_label():
     a_df = compute_attractiveness(sample_df, max_horizon_years=5, min_forward_quarters=1)
     
     # t=0 (price=100) 일 때, 미래 5분기의 max price는 130
-    # forward quarters = 5 -> base = 1.25
-    # expected = log_1.25(130/100) = log_1.25(1.3)
+    # forward quarters = 5 -> base = 1.25 -> 하한 2.0 적용으로 2.0이 됨
     p_t = 100.0
     max_price = 130.0
-    base_years = 1.25
+    base_years = max(1.25, 2.0)
     expected = np.log(max_price / p_t) / np.log(base_years)
     
     actual = a_df.loc[a_df['date'] == '2020-03-31', 'A'].values[0]
