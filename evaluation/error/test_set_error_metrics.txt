@@ -1,0 +1,70 @@
+=========================================================================
+       QUANT-ML MODEL STRICT EVALUATION METRICS (TEST SET)
+=========================================================================
+
+This report presents mathematically rigorous performance metrics
+of the FT-Transformer predictor model on the isolated test set.
+
+▶ [KR Market] Target: Attractiveness A (A)
+  - Total Observation Points (N)    : 3632
+  - Mean Squared Error (MSE)        : 0.25740018
+  - Root Mean Squared Error (RMSE)  : 0.50734622
+  - Mean Absolute Error (MAE)       : 0.35512856
+  - R^2 Score (Determination Coeff) : -0.39769387
+  - Pearson Correlation Coeff (r)   : 0.09987390
+  - Correlation P-value (p-val)     : 1.61920044e-09 (Significant if < 0.05)
+  [Mathematical Verification Details]
+    * True Mean (y_bar)             : 0.38939562
+    * Residual Sum of Squares (SS_res): 934.87750244
+    * Total Sum of Squares (SS_tot)   : 668.87145996
+    * SS_res / SS_tot Ratio          : 1.39769387
+    * 1 - (SS_res / SS_tot)          : -0.39769387
+-------------------------------------------------------------------------
+
+▶ [KR Market] Target: Robust IPR Risk R (R)
+  - Total Observation Points (N)    : 3632
+  - Mean Squared Error (MSE)        : 0.04903625
+  - Root Mean Squared Error (RMSE)  : 0.22144131
+  - Mean Absolute Error (MAE)       : 0.09611202
+  - R^2 Score (Determination Coeff) : 0.05648094
+  - Pearson Correlation Coeff (r)   : 0.25973606
+  - Correlation P-value (p-val)     : 0.00000000e+00 (Significant if < 0.05)
+  [Mathematical Verification Details]
+    * True Mean (y_bar)             : 0.22700799
+    * Residual Sum of Squares (SS_res): 178.09967041
+    * Total Sum of Squares (SS_tot)   : 188.76107788
+    * SS_res / SS_tot Ratio          : 0.94351906
+    * 1 - (SS_res / SS_tot)          : 0.05648094
+-------------------------------------------------------------------------
+
+▶ [US Market] Target: Attractiveness A (A)
+  - Total Observation Points (N)    : 4654
+  - Mean Squared Error (MSE)        : 0.12816152
+  - Root Mean Squared Error (RMSE)  : 0.35799654
+  - Mean Absolute Error (MAE)       : 0.26178977
+  - R^2 Score (Determination Coeff) : -0.09785032
+  - Pearson Correlation Coeff (r)   : 0.18613370
+  - Correlation P-value (p-val)     : 1.50308217e-37 (Significant if < 0.05)
+  [Mathematical Verification Details]
+    * True Mean (y_bar)             : 0.50849277
+    * Residual Sum of Squares (SS_res): 596.46374512
+    * Total Sum of Squares (SS_tot)   : 543.30151367
+    * SS_res / SS_tot Ratio          : 1.09785032
+    * 1 - (SS_res / SS_tot)          : -0.09785032
+-------------------------------------------------------------------------
+
+▶ [US Market] Target: Robust IPR Risk R (R)
+  - Total Observation Points (N)    : 4654
+  - Mean Squared Error (MSE)        : 0.01304369
+  - Root Mean Squared Error (RMSE)  : 0.11420896
+  - Mean Absolute Error (MAE)       : 0.06119826
+  - R^2 Score (Determination Coeff) : 0.35126019
+  - Pearson Correlation Coeff (r)   : 0.62640923
+  - Correlation P-value (p-val)     : 0.00000000e+00 (Significant if < 0.05)
+  [Mathematical Verification Details]
+    * True Mean (y_bar)             : 0.16063429
+    * Residual Sum of Squares (SS_res): 60.70532227
+    * Total Sum of Squares (SS_tot)   : 93.57421875
+    * SS_res / SS_tot Ratio          : 0.64873981
+    * 1 - (SS_res / SS_tot)          : 0.35126019
+-------------------------------------------------------------------------

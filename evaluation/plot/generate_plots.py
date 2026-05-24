@@ -1,4 +1,4 @@
-# scratch/generate_plots.py
+# evaluation/plot/generate_plots.py
 import os
 import json
 import pandas as pd
@@ -29,10 +29,10 @@ def main():
     test_df['error_R'] = test_df['FTT_R'] - test_df['R']
     test_df['abs_error_R'] = test_df['error_R'].abs()
 
-    # 저장 디렉토리 생성
+    # 마이그레이션 저장 디렉토리 정의 및 생성 (프로젝트 내부 + 아티팩트 백업)
     save_dirs = [
-        '/Users/mireflare/.gemini/antigravity-ide/brain/49637d44-18f3-47b1-8dd0-8f8a9c2c960c',
-        'scratch/plots'
+        '/Users/mireflare/.gemini/antigravity-ide/brain/49637d44-18f3-47b1-8dd0-8f8a9c2c960c/evaluation/plot',
+        'evaluation/plot'
     ]
     for d in save_dirs:
         os.makedirs(d, exist_ok=True)

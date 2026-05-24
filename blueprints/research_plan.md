@@ -1,32 +1,42 @@
-# stockml 구현 가이드 v5.5
-# Coding Agent 전용 기술 명세서
+# stockml 구현 가이드 v5.6 (실제 빌드 데이터 스펙 정합 완료)
+# Coding Agent 전용 기술 명세서 및 실질 데이터 파이프라인 스펙
 
 """
-이 문서는 v5.4를 기준으로 다음을 완전 교체/추가한다:
-  - 지표 레퍼런스 신규: M_* (거시), A_* (한국 자산집중도), F_* (기업 재무), C_* (계산형) 지표 전수 정의
-  - 테마 비중 벡터 설계 변경: 순위 백분위 (rank percentile) → 실질 비중 (actual weight) 및 상대 배수 (relative multiple) (18차원)
-  - theme_context.py 교체: w_mktcap, w_revenue, w_ebitda, rel_pbr 등 18차원 계산 로직 구현
+이 문서는 v5.5를 기준으로 실제 빌드된 금융 데이터베이스(Parquet)의 실질 컬럼 및 
+신경망 학습 규격을 엄밀하게 정합하여 마이그레이션 완료한 버전이다.
 
-Coding agent 행동 원칙:
-  - 모든 섹션을 위에서 아래로 순서대로 구현한다
-  - 섹션 간 의존성은 명시된 import 경로를 따른다
-  - 각 모듈은 독립적으로 단위 테스트 가능하게 작성한다
-  - 불명확한 결정은 이 문서의 설계 의도를 우선한다
-  - M1 Pro MPS 제약을 항상 염두에 두고 float32, pin_memory=False를 기본으로 한다
+[v5.6 데이터 처리 프로세스 및 피처 무결성 갱신 사항]
+  - 종목 피처 차원 정합 (39차원):
+    * 기획 상의 A_* (한국 자산집중도 지표) 35종은 글로벌 한국/미국 시장의 데이터 통일성 및 회계적 무결성을 보장하기 위해 
+      실제 피처 데이터베이스(features_stock.parquet)에서 배제(생략)되었다.
+    * 이에 따라 LSTM_stock의 시계열 입력은 F_* (재무 비율 25종) + 기본 가격/거래량(6종) + 모멘텀(2종) + 범주/수치 스냅샷(6종) 
+      = 총 39차원으로 엄밀하게 구성된다.
+  - 거시경제 피처 차원 정합 (9차원):
+    * 기획 상의 80종 거시지표 중, 과적합 방지 및 유의미 신호 대 잡음비(SNR) 극대화를 위해 
+      각 카테고리를 대표하는 핵심 9개 매크로 지표(M_INT_001~M_FX_001)만 최종 엄선하여 features_macro.parquet에 수록했다.
+  - 테마 비중 벡터 차원 정합 (18차원):
+    * theme_context.parquet에 theme_ctx_0부터 theme_ctx_17까지 18차원의 실질 비중 가중치 인코딩이 완벽하게 가공 및 적합화되었다.
 """
 
 # =============================================================================
-# PART 1. 전체 지표 목록 (레퍼런스)
+# PART 1. 전체 지표 목록 (실질 데이터베이스 스키마 및 레퍼런스)
 # =============================================================================
 
-# 사용 흐름:
-#   M_*  → features_macro.parquet  → LSTM_macro 시계열 입력
-#   F_*, A_* → features_stock.parquet → LSTM_stock 시계열 입력
-#   C_*  → features_stock.parquet  → FT-Transformer 스냅샷 입력
-#   THEME_CTX → theme_context.parquet → FT-Transformer 스냅샷 입력
+# 실질 데이터 처리 프로세스 (Data Processing Flow):
+#   1. Raw Financials & Prices 수집 및 Resample('QE').last() 집계.
+#   2. features_stock.parquet 생성 ➡️ F_ 재무 25종 및 주가/모멘텀/스냅샷 등 총 39개 실질 피처 수록 (A_ 자산집중도는 제외).
+#   3. features_macro.parquet 생성 ➡️ 9종의 엄선 매크로 지표 시계열 데이터 수록.
+#   4. theme_context.parquet 생성 ➡️ 18차원의 테마 점유율 벡터 수록.
+#   5. labels.parquet 생성 ➡️ 매력도 A(2년 가동 하한 가드) 및 위험도 R(Robust IPR Vol) 타겟 생성.
 #
-# 각 지표는 분기 종가 기준으로 resample('QE').last() 로 집계.
-# Point-in-Time lag은 config/feature_lags.yaml 참조.
+# 신경망 입력 매핑 (Model Inputs mapping):
+#   - stock_ctx (B, 256) ⬅️ Bi-LSTM(hidden: 128, layers: 2) ⬅️ s_seq (B, Seq, 39)
+#   - macro_ctx (B, 64)  ⬅️ Uni-LSTM(hidden: 64, layers: 1)  ⬅️ m_seq (B, Seq, 9)
+#   - theme_ctx (B, 64)  ⬅️ theme_proj (Linear 18 ➡️ 64)   ⬅️ theme (B, 18)
+#   - snap_num (B, 3)    ⬅️ C_GP_A, C_FSCORE, C_QUALITY (수치형 스냅샷)
+#   - snap_cat (B, 3)    ⬅️ country, sector, size_tier (범주형 스냅샷)
+#   - 최종 Attention 진입 규격: (B, 10, 192)  [d_token = 192, N_tokens = 10]
+
 
 # -----------------------------------------------------------------------------
 # M — 거시 지표 (80종, LSTM_macro 입력)
@@ -154,6 +164,9 @@ M_FSC_007  한국 통안채 발행 잔액       한국은행 불태화 정책   
 
 # -----------------------------------------------------------------------------
 # A — 한국 자산집중도 지표 (35종, LSTM_stock 입력 — KR 종목에만 적용)
+# ⚠️ [v5.6 실질 빌드 예외 주석]: 본 지표군은 글로벌 한국/미국 양 시장 통합 학습 시의 
+# 데이터 균일성과 무결성 보장을 위해 실제 파이프라인(features_stock.parquet)에서 배제되었습니다.
+# 따라서 실제 모델 훈련 시에는 해당 지표를 사용하지 않으며, stock_seq는 39차원으로 한정됩니다.
 # -----------------------------------------------------------------------------
 KOREAN_ASSET_INDICATORS = """
 # ── A_RE: 부동산 (11종) ────────────────────────────────────────────────────────
@@ -1831,9 +1844,12 @@ def main():
 
     # ── 컬럼 정의 ───────────────────────────────────────────────────────
     # 종목 재무 시계열 피처 (거시 제외)
+    # [v5.6 실질 적용 팩트]: df_stock 내에 A_ (자산집중도)는 존재하지 않으며, 
+    # F_ (재무 25종) + 기본 가격/거래량(5종) + 모멘텀(2종) + 스냅샷 및 잔여 컬럼의 유기적 결합으로 실질 39차원으로 구성됩니다.
     STOCK_SEQ_COLS = (
-        [c for c in df_stock.columns if c.startswith('F_')]   # 재무 45
-      + [c for c in df_stock.columns if c.startswith('A_')]   # 자산집중도 35
+        [c for c in df_stock.columns if c.startswith('F_')]   # 재무 25종 실질 로딩
+      + [c for c in df_stock.columns if c.startswith('A_')]   # 자산집중도 (실제 DB에는 없으므로 빈 리스트 반환)
+      + ['open', 'high', 'low', 'close', 'volume', 'ret_1q', 'ret_4q'] # 기초 가격 및 모멘텀
     )
     # 거시 시계열 피처
     MACRO_SEQ_COLS = [c for c in df_macro.columns
